@@ -1,98 +1,101 @@
 import { useState } from "react";
-import axios from "axios";
+import logo from "../assets/login.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e) {
+  function handleLogin(e) {
     e.preventDefault();
-    setLoading(true);
-    setErro("");
-
-    try {
-      const response = await axios.post("http://localhost:8000/api/login", {
-        email,
-        password: senha,
-      });
-
-      console.log(response.data);
-
-      // salvar token
-      localStorage.setItem("token", response.data.token);
-
-      alert("Login realizado com sucesso!");
-    } catch (err) {
-      setErro("Email ou senha inválidos");
-    } finally {
-      setLoading(false);
-    }
+    alert("Login clicado");
   }
 
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
-        <h2>Login</h2>
+      {/* LOGO */}
+      <img src={logo} alt="logo" style={styles.logo} />
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="E-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-          />
+      {/* FORM */}
+      <form onSubmit={handleLogin} style={styles.form}>
+        <input
+          type="email"
+          placeholder="E-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={styles.input}
+        />
 
-          <input
-            type="password"
-            placeholder="Senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            style={styles.input}
-          />
+        <input
+          type="password"
+          placeholder="Senha"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          style={styles.input}
+        />
 
-          {erro && <p style={{ color: "red" }}>{erro}</p>}
-
-          <button style={styles.button} disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
-      </div>
+        {/* BOTÃO COM BORDA DUPLA */}
+        <div style={styles.buttonWrapper}>
+       <button type="submit" style={styles.button}>Entrar</button>
+       </div>
+      </form>
     </div>
   );
 }
 
 const styles = {
+
+
   container: {
     height: "100vh",
+    backgroundColor: "#eaeaea",
     display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0f0f0f",
   },
-  card: {
-    backgroundColor: "#1a1a1a",
-    padding: "30px",
-    borderRadius: "10px",
-    width: "300px",
-    color: "#fff",
+
+  logo: {
+    width: "240px",
+    marginBottom: "20px",
   },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+
   input: {
-    width: "100%",
-    padding: "10px",
-    marginBottom: "10px",
-    borderRadius: "5px",
+    width: "350px",
+    padding: "18px",
+    marginBottom: "20px",
+    borderRadius: "9px",
     border: "none",
+    backgroundColor: "#d9d9d9",
+    boxShadow: "2px 2px 0 #999",
+    outline: "none",
   },
+
   button: {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "#ff4d8d",
-    color: "#fff",
+    width: "280px",
+    padding: "13px",
+    borderRadius: "25px",
     border: "none",
-    borderRadius: "5px",
+    backgroundColor: "#e85c8b",
+    color: "#fff",
+    fontWeight: "bold",
     cursor: "pointer",
+  
+
   },
+
+
+  buttonWrapper: {
+    
+    borderRadius: "25px",
+    padding: "2px",
+    background: "linear-gradient(90deg, #5dade2, #85c1e9)", 
+  },
+
+
 };

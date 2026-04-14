@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./page/Login";
+import Cadastro from "./page/Cadastro";
 
 function App() {
   const [msg, setMsg] = useState("");
@@ -10,10 +13,12 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <h1>Frontend React</h1>
-      <p>{msg}</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
