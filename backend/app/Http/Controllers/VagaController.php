@@ -7,59 +7,36 @@ use Illuminate\Http\Request;
 
 class VagaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return Vaga::all();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'titulo' => 'required',
+            'descricao' => 'required'
+        ]);
+
+        return Vaga::create($request->all());
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Vaga $vaga)
+    public function show($id)
     {
-        //
+        return Vaga::findOrFail($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Vaga $vaga)
+    public function update(Request $request, $id)
     {
-        //
+        $vaga = Vaga::findOrFail($id);
+        $vaga->update($request->all());
+        return $vaga;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Vaga $vaga)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Vaga $vaga)
-    {
-        //
+        Vaga::destroy($id);
+        return response()->json(['mensagem' => 'Deletado com sucesso']);
     }
 }

@@ -7,59 +7,99 @@ use Illuminate\Http\Request;
 
 class CurriculoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->user()->role === 'recrutador') {
+            return Curriculo::with('user')->get();
+        }
+
+        return Curriculo::where('user_id', $request->user()->id)->get();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $curriculo = Curriculo::create([
+            'user_id' => $request->user()->id,
+            'nome_completo' => $request->nome_completo,
+            'area_atuacao' => $request->area_atuacao,
+            'telefone' => $request->telefone,
+            'email' => $request->email,
+            'cidade_estado' => $request->cidade_estado,
+            'links' => $request->links,
+            'resumo' => $request->resumo,
+            'foto' => $request->foto,
+        ]);
+    
+        // EXPERIENCIAS
+        if ($request->experiencias) {
+            foreach ($request->experiencias as $exp) {
+                $curriculo->experiencias()->create($exp);
+            }
+        }
+    
+        // FORMAÇÕES
+        if ($request->formacoes) {
+            foreach ($request->formacoes as $form) {
+                $curriculo->formacoes()->create($form);
+            }
+        }
+    
+        // CURSOS
+        if ($request->cursos) {
+            foreach ($request->cursos as $curso) {
+                $curriculo->cursos()->create($curso);
+            }
+        }
+    
+        // HABILIDADES
+        if ($request->habilidades) {
+            foreach ($request->habilidades as $hab) {
+                $curriculo->habilidades()->create($hab);
+            }
+        }
+    
+        // IDIOMAS
+        if ($request->idiomas) {
+            foreach ($request->idiomas as $idioma) {
+                $curriculo->idiomas()->create($idioma);
+            }
+        }
+    
+        return $curriculo->load([
+            'experiencias',
+            'formacoes',
+            'cursos',
+            'habilidades',
+            'idiomas'
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Curriculo $curriculo)
+    public function show($id)
     {
-        //
+        return Curriculo::with('user')->findOrFail($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Curriculo $curriculo)
+    public function update(Request $request, $id)
     {
-        //
+        $curriculo = Curriculo::findOrFail($id);
+
+        if ($curriculo->user_id !== $request->user()->id) {
+            return response()->json(['erro' => 'Não autorizado'], 403);
+        }
+
+        $curriculo->update($request->all());
+        return $curriculo;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Curriculo $curriculo)
+    public function destroy(Request $request, $id)
     {
-        //
-    }
+        $curriculo = Curriculo::findOrFail($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Curriculo $curriculo)
-    {
-        //
+        if ($curriculo->user_id !== $request->user()->id) {
+            return response()->json(['erro' => 'Não autorizado'], 403);
+        }
+
+        $curriculo->delete();
+        return response()->json(['mensagem' => 'Deletado com sucesso']);
     }
 }

@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('vagas', function (Blueprint $table) {
             $table->id();
+            $table->string('titulo');
+            $table->text('descricao');
+            $table->text('requisitos')->nullable();
             $table->timestamps();
         });
     }
