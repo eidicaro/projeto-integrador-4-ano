@@ -34,9 +34,13 @@ export default function Login() {
         />
 
         {/* BOTÃO COM BORDA DUPLA */}
-        <div style={styles.buttonWrapper}>
-       <button type="submit" style={styles.button}>Entrar</button>
-       </div>
+       <div style={styles.buttonContainer}>
+  <div style={styles.buttonBack}></div>
+
+  <button type="submit" style={styles.buttonFront}>
+    Entrar
+  </button>
+</div>
       </form>
     </div>
   );
@@ -76,26 +80,37 @@ const styles = {
     outline: "none",
   },
 
-  button: {
-    width: "280px",
-    padding: "13px",
-    borderRadius: "25px",
-    border: "none",
-    backgroundColor: "#e85c8b",
-    color: "#fff",
-    fontWeight: "bold",
-    cursor: "pointer",
-  
+ buttonContainer: {
+  position: "relative",
+  width: "280px",
+  height: "50px",
+  marginTop: "10px",
+},
 
-  },
+// 🔵 FUNDO AZUL (DESLOCADO)
+buttonBack: {
+  position: "absolute",
+  width: "100%",
+  height: "100%",
+  borderRadius: "30px",
+  border: "2px solid #5dade2",
+  top: "6px",   // deslocamento vertical
+  left: "-18px", // deslocamento horizontal
+},
 
-
-  buttonWrapper: {
-    
-    borderRadius: "25px",
-    padding: "2px",
-    background: "linear-gradient(90deg, #5dade2, #85c1e9)", 
-  },
+// 🔴 BOTÃO PRINCIPAL
+buttonFront: {
+  position: "relative",
+  width: "100%",
+  height: "100%",
+  borderRadius: "30px",
+  border: "none",
+  backgroundColor: "#e85c8b",
+  color: "#fff",
+  fontWeight: "bold",
+  cursor: "pointer",
+  fontSize: "15px",
+},
 
 
 };

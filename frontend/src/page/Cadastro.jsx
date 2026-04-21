@@ -12,8 +12,29 @@ export default function Cadastro() {
     alert("Cadastro realizado!");
   }
 
+  // bolinha correta (figma)
+  const Dot = () => (
+    <div style={styles.dot}>
+      <div style={styles.dotInner}></div>
+    </div>
+  );
+
   return (
     <div style={styles.container}>
+
+      {/* LADO ESQUERDO */}
+      <div style={styles.dotGridLeft}>
+        {[...Array(35)].map((_, i) => (
+          <Dot key={"l" + i} />
+        ))}
+      </div>
+
+      {/* LADO DIREITO */}
+      <div style={styles.dotGridRight}>
+        {[...Array(35)].map((_, i) => (
+          <Dot key={"r" + i} />
+        ))}
+      </div>
 
       {/* LOGO */}
       <img src={logo} alt="logo" style={styles.logo} />
@@ -62,9 +83,14 @@ export default function Cadastro() {
           style={styles.input}
         />
 
-        <button type="submit" style={styles.button}>
-          Cadastrar
-        </button>
+        {/* BOTÃO*/}
+        <div style={styles.buttonContainer}>
+          <div style={styles.buttonBack}></div>
+
+          <button type="submit" style={styles.buttonFront}>
+            Cadastrar
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -106,17 +132,74 @@ const styles = {
     outline: "none",
   },
 
-  button: {
+  // BOTÃO
+  buttonContainer: {
+    position: "relative",
     width: "280px",
-    padding: "13px",
-    borderRadius: "25px",
+    height: "50px",
+    marginTop: "10px",
+  },
+
+  buttonBack: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    borderRadius: "30px",
+    border: "2px solid #5dade2",
+    top: "6px",
+    left: "-8px",
+  },
+
+  buttonFront: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    borderRadius: "30px",
     border: "none",
     backgroundColor: "#e85c8b",
     color: "#fff",
     fontWeight: "bold",
     cursor: "pointer",
-    boxShadow: "0 0 0 2px #5dade2",
+    fontSize: "15px",
   },
 
+  // 🔵 bolinha estilo figma
+  dot: {
+    width: "14px",
+    height: "14px",
+    borderRadius: "50%",
+    background: "conic-gradient(#5dade2 0deg 180deg, #e85c8b 180deg 360deg)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
+  dotInner: {
+    width: "6px",
+    height: "6px",
+    backgroundColor: "#ffffff",
+    borderRadius: "50%",
+  },
+
+  // 🔵 esquerda
+  dotGridLeft: {
+    position: "absolute",
+    left: "-40px",
+    top: "10%",
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 20px)",
+    gap: "14px",
+    opacity: 0.8,
+  },
+
+  // 🔵 direita
+  dotGridRight: {
+    position: "absolute",
+    right: "-40px",
+    bottom: "10%",
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 20px)",
+    gap: "14px",
+    opacity: 0.8,
+  },
 };
