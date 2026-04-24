@@ -1,5 +1,7 @@
 import { useState } from "react";
 import logo from "../assets/cadastro.png";
+import dotsLeft from "../assets/dots-left.png";   // horizontal
+import dotsRight from "../assets/dots-right.png"; // vertical
 
 export default function Cadastro() {
   const [nome, setNome] = useState("");
@@ -12,29 +14,25 @@ export default function Cadastro() {
     alert("Cadastro realizado!");
   }
 
-  // bolinha correta (figma)
-  const Dot = () => (
-    <div style={styles.dot}>
-      <div style={styles.dotInner}></div>
-    </div>
-  );
-
   return (
     <div style={styles.container}>
 
-      {/* LADO ESQUERDO */}
-      <div style={styles.dotGridLeft}>
-        {[...Array(35)].map((_, i) => (
-          <Dot key={"l" + i} />
-        ))}
-      </div>
+      {/* 🔵 ESQUERDA (imagem deitada Superio) */}
+      <img src={dotsLeft} alt="dots" style={styles.dotsLeftTop} />
+      <img src={dotsLeft} alt="dots" style={styles.dotsLeftRightTop} />
 
-      {/* LADO DIREITO */}
-      <div style={styles.dotGridRight}>
-        {[...Array(35)].map((_, i) => (
-          <Dot key={"r" + i} />
-        ))}
-      </div>
+         {/* 🔵 ESQUERDA (imagem deitada Meio) */}
+       <img src={dotsLeft} alt="dots" style={styles.dotsLeftQuite} />
+
+      
+      {/* 🔵 ESQUERDA (imagem deitada Inferior) */}
+      <img src={dotsLeft} alt="dots" style={styles.dotsLeftBottom} />
+      <img src={dotsLeft} alt="dots" style={styles.dotsLeftRightBottom} />
+
+
+      {/* 🔵 DIREITA (duas colunas separadas) */}
+      <img src={dotsRight} alt="dots" style={styles.dotsRightTop} />
+      <img src={dotsRight} alt="dots" style={styles.dotsRightBottom} />
 
       {/* LOGO */}
       <img src={logo} alt="logo" style={styles.logo} />
@@ -63,13 +61,11 @@ export default function Cadastro() {
           value={telefone}
           onChange={(e) => {
             let value = e.target.value;
-
             value = value
               .replace(/\D/g, "")
               .replace(/^(\d{2})(\d)/g, "($1) $2")
               .replace(/(\d{5})(\d)/, "$1-$2")
               .slice(0, 15);
-
             setTelefone(value);
           }}
           style={styles.input}
@@ -83,10 +79,9 @@ export default function Cadastro() {
           style={styles.input}
         />
 
-        {/* BOTÃO*/}
+        {/* BOTÃO */}
         <div style={styles.buttonContainer}>
           <div style={styles.buttonBack}></div>
-
           <button type="submit" style={styles.buttonFront}>
             Cadastrar
           </button>
@@ -111,14 +106,14 @@ const styles = {
   logo: {
     width: "200px",
     marginBottom: "20px",
-    zIndex: 1,
+    zIndex: 2,
   },
 
   form: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    zIndex: 1,
+    zIndex: 2,
   },
 
   input: {
@@ -147,7 +142,7 @@ const styles = {
     borderRadius: "30px",
     border: "2px solid #5dade2",
     top: "6px",
-    left: "-8px",
+    left: "-6px",
   },
 
   buttonFront: {
@@ -160,46 +155,74 @@ const styles = {
     color: "#fff",
     fontWeight: "bold",
     cursor: "pointer",
-    fontSize: "15px",
   },
 
-  // 🔵 bolinha estilo figma
-  dot: {
-    width: "14px",
-    height: "14px",
-    borderRadius: "50%",
-    background: "conic-gradient(#5dade2 0deg 180deg, #e85c8b 180deg 360deg)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  // 🔵 IMAGENS
 
-  dotInner: {
-    width: "6px",
-    height: "6px",
-    backgroundColor: "#ffffff",
-    borderRadius: "50%",
-  },
-
-  // 🔵 esquerda
-  dotGridLeft: {
+  // DOTS ESQUERDO PRIMEIRO SUPERIO (horizontal)
+  dotsLeftTop: {
     position: "absolute",
-    left: "-40px",
-    top: "10%",
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 20px)",
-    gap: "14px",
-    opacity: 0.8,
+    left: "-60px",
+    top: "20%",
+    transform: "translateY(-50%)",
+    width: "380px",
+    opacity: 0.9,
+  },
+  // DOTS ESQUERDO SEGUNDO SUPERIO
+   dotsLeftRightTop: {
+    position: "absolute",
+    left: "215px",
+    top: "20%",
+    transform: "translateY(-50%)",
+    width: "380px",
+    opacity: 0.9,
   },
 
-  // 🔵 direita
-  dotGridRight: {
+  //DOTS ESQUERDO MEIO
+   dotsLeftQuite: {
     position: "absolute",
-    right: "-40px",
-    bottom: "10%",
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 20px)",
-    gap: "14px",
-    opacity: 0.8,
+    left: "-60px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    width: "380px",
+    opacity: 0.9,
+  },
+
+
+    // DOTS ESQUERDO PRIMEIRO INFERIOR (horizontal)
+    dotsLeftBottom: {
+    position: "absolute",
+    left: "-60px",
+    top: "80%",
+    transform: "translateY(-50%)",
+    width: "380px",
+    opacity: 0.9,
+  },
+  //DOTS ESQUERDO SEGUNDO INFERIOR
+    dotsLeftRightBottom: {
+    position: "absolute",
+    left: "215px",
+    top: "80%",
+    transform: "translateY(-50%)",
+    width: "380px",
+    opacity: 0.9,
+  },
+
+  //PRIMEIRA COLUNA 
+  dotsRightTop: {
+    position: "absolute",
+    right: "98px",
+    top: "20%",
+    width: "120px",
+    opacity: 0.9,
+  },
+
+  // SEGUNDA COLUNA
+  dotsRightBottom: {
+    position: "absolute",
+    right: "0px",
+    top: "20%",
+    width: "120px",
+    opacity: 0.9,
   },
 };
