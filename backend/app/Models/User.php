@@ -23,10 +23,15 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'user_id'
     ];
 
     public function curriculo()
     {
         return $this->hasOne(Curriculo::class);
+    }
+    public function candidaturas()
+    {
+        return $this->hasMany(Candidatura::class);
     }
 }

@@ -11,4 +11,8 @@ class Vaga extends Model
         'descricao',
         'requisitos'
     ];
+    public function candidaturas()
+    {
+        return $this->hasMany(Candidatura::class);
+    }
 }
