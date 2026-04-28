@@ -42,4 +42,8 @@ class Curriculo extends Model
     {
         return $this->hasMany(Idioma::class);
     }
+    public function candidaturas()
+    {
+        return $this->hasMany(Candidatura::class);
+    }
 }
