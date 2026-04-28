@@ -21,8 +21,6 @@ export default function Cadastro() {
       <img src={dotsLeft} alt="dots" style={styles.dotsLeftTop} />
       <img src={dotsLeft} alt="dots" style={styles.dotsLeftRightTop} />
 
-         {/* 🔵 ESQUERDA (imagem deitada Meio) */}
-       <img src={dotsLeft} alt="dots" style={styles.dotsLeftQuite} />
 
       
       {/* 🔵 ESQUERDA (imagem deitada Inferior) */}
@@ -163,7 +161,7 @@ const styles = {
   dotsLeftTop: {
     position: "absolute",
     left: "-60px",
-    top: "20%",
+    top: "60%",
     transform: "translateY(-50%)",
     width: "380px",
     opacity: 0.9,
@@ -172,21 +170,13 @@ const styles = {
    dotsLeftRightTop: {
     position: "absolute",
     left: "215px",
-    top: "20%",
+    top: "60%",
     transform: "translateY(-50%)",
     width: "380px",
     opacity: 0.9,
   },
 
-  //DOTS ESQUERDO MEIO
-   dotsLeftQuite: {
-    position: "absolute",
-    left: "-60px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    width: "380px",
-    opacity: 0.9,
-  },
+  
 
 
     // DOTS ESQUERDO PRIMEIRO INFERIOR (horizontal)

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import logo from "../assets/login.png";
+import dotsLeft from "../assets/dots-left.png";   // horizontal
+import dotsRight from "../assets/dots-right.png"; // vertical
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,6 +14,22 @@ export default function Login() {
 
   return (
     <div style={styles.container}>
+    
+          {/* 🔵 ESQUERDA (imagem deitada Superio) */}
+          <img src={dotsLeft} alt="dots" style={styles.dotsLeftTop} />
+          <img src={dotsLeft} alt="dots" style={styles.dotsLeftRightTop} />
+    
+    
+          
+          {/* 🔵 ESQUERDA (imagem deitada Inferior) */}
+          <img src={dotsLeft} alt="dots" style={styles.dotsLeftBottom} />
+          <img src={dotsLeft} alt="dots" style={styles.dotsLeftRightBottom} />
+    
+    
+          {/* 🔵 DIREITA (duas colunas separadas) */}
+          <img src={dotsRight} alt="dots" style={styles.dotsRightTop} />
+          <img src={dotsRight} alt="dots" style={styles.dotsRightBottom} />
+
       {/* LOGO */}
       <img src={logo} alt="logo" style={styles.logo} />
 
@@ -111,6 +129,67 @@ buttonFront: {
   cursor: "pointer",
   fontSize: "15px",
 },
+
+ // 🔵 IMAGENS
+
+  // DOTS ESQUERDO PRIMEIRO SUPERIO (horizontal)
+  dotsLeftTop: {
+    position: "absolute",
+    left: "-3px",
+    top: "36%",
+    transform: "translateY(-50%)",
+    width: "400px",
+    opacity: 0.9,
+  },
+  // DOTS ESQUERDO SEGUNDO SUPERIO
+   dotsLeftRightTop: {
+    position: "absolute",
+    left: "215px",
+    top: "36%",
+    transform: "translateY(-50%)",
+    width: "400px",
+    opacity: 0.9,
+  },
+
+  
+
+
+    // DOTS ESQUERDO PRIMEIRO INFERIOR (horizontal)
+    dotsLeftBottom: {
+    position: "absolute",
+    left: "-3px",
+    top: "70%",
+    transform: "translateY(-50%)",
+    width: "400px",
+    opacity: 0.9,
+  },
+  //DOTS ESQUERDO SEGUNDO INFERIOR
+    dotsLeftRightBottom: {
+    position: "absolute",
+    left: "215px",
+    top: "70%",
+    transform: "translateY(-50%)",
+    width: "400px",
+    opacity: 0.9,
+  },
+
+  //PRIMEIRA COLUNA 
+  dotsRightTop: {
+    position: "absolute",
+    right: "109px",
+    top: "20%",
+    width: "130px",
+    opacity: 0.9,
+  },
+
+  // SEGUNDA COLUNA
+  dotsRightBottom: {
+    position: "absolute",
+    right: "0px",
+    top: "20%",
+    width: "130px",
+    opacity: 0.9,
+  },
 
 
 };
