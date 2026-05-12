@@ -1,20 +1,35 @@
-import React from "react";
-import dotsleft from "../assets/dots-left.png";
-import dotsright from "../assets/dots-right.png";
+import { useState } from "react";
+import logo from "../assets/logo.svg";
+import dotsLeft from "../assets/dots-left.png";
+import dotsRight from "../assets/dots-right.png";
 import play from "../assets/playzao.svg";
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div style={styles.page}>
       {/* ================= HEADER ================= */}
       <header style={styles.header}>
-        <div style={styles.logo}>point</div>
+        <img src={logo} alt="Point Midia" style={styles.logo} />
 
-        <div style={styles.hamburger}>
+        <div
+          style={styles.hamburger}
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
           <span style={styles.hamburgerLine}></span>
           <span style={styles.hamburgerLine}></span>
           <span style={styles.hamburgerLine}></span>
         </div>
+
+        {menuOpen && (
+          <nav style={styles.menu}>
+            <a style={styles.menuItem}>Home</a>
+            <a style={styles.menuItem}>Vagas</a>
+            <a style={styles.menuItem}>Perfil</a>
+            <a style={styles.menuItem}>Login</a>
+          </nav>
+        )}
       </header>
 
       {/* ================= HERO ================= */}
@@ -30,17 +45,29 @@ export default function Home() {
 
           <h2 style={styles.subtitle}>Quem Somos?</h2>
 
-          <p style={styles.text}>
-            Um banco de talentos é um espaço criado para reunir e organizar
-            informações de profissionais interessados em fazer parte de uma
-            empresa, mesmo quando não há uma vaga específica aberta no momento.
-          </p>
+          <div style={styles.quemSomos}>
+            <div style={styles.bar}></div>
+            <p style={styles.text}>
+              Um banco de talentos é um espaço criado para reunir e organizar
+              informações de profissionais interessados em fazer parte de uma
+              empresa, mesmo quando não há uma vaga específica aberta no momento.
+            </p>
+          </div>
         </div>
 
         <div style={styles.heroVisual}>
           <img src={play} alt="Play" style={styles.play} />
-          <img src={dotsleft} alt="Bolinhas" style={styles.dots-left} />
-          <img src={dotsright} alt="Bolinhas" style={styles.dots-right} />
+
+          <img
+            src={dotsLeft}
+            alt=""
+            style={{ ...styles.dots, left: "-40px", bottom: "40px" }}
+          />
+          <img
+            src={dotsRight}
+            alt=""
+            style={{ ...styles.dots, right: "-30px", top: "120px" }}
+          />
         </div>
       </section>
 
@@ -57,14 +84,10 @@ export default function Home() {
           ))}
         </div>
 
-        {/* BOTÃO COM BORDA DUPLA */}
         <div style={styles.buttonWrapper}>
           <div style={styles.buttonContainer}>
             <div style={styles.buttonBack}></div>
-
-            <button style={styles.buttonFront}>
-              Todas as Vagas
-            </button>
+            <button style={styles.buttonFront}>Todas as Vagas</button>
           </div>
         </div>
       </section>
@@ -76,7 +99,7 @@ export default function Home() {
         </div>
 
         <div style={styles.footerCenter}>
-          <p>Páginas</p>
+          <strong>Páginas</strong>
           <span>Meu Perfil</span>
           <span>Vagas</span>
           <span>Meu Portfólio</span>
@@ -98,27 +121,26 @@ const styles = {
   page: {
     fontFamily: "Arial, sans-serif",
     backgroundColor: "#fff",
-    color: "#000",
   },
 
+  /* HEADER */
   header: {
-    height: "70px",
+    height: 70,
     padding: "0 40px",
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
+    position: "relative",
     borderBottom: "1px solid #ddd",
   },
 
   logo: {
-    fontWeight: "bold",
-    fontSize: "20px",
-    color: "#000",
+    height: 28,
   },
 
   hamburger: {
-    width: "30px",
-    height: "20px",
+    width: 30,
+    height: 22,
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -126,132 +148,165 @@ const styles = {
   },
 
   hamburgerLine: {
-    height: "3px",
+    height: 3,
     backgroundColor: "#000",
-    borderRadius: "2px",
+    borderRadius: 2,
   },
 
+  menu: {
+    position: "absolute",
+    top: 70,
+    right: 40,
+    backgroundColor: "#fff",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+    borderRadius: 10,
+    padding: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    zIndex: 10,
+  },
+
+  menuItem: {
+    cursor: "pointer",
+    fontSize: 14,
+  },
+
+  /* HERO */
   hero: {
     display: "flex",
     padding: "60px 40px",
-    justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    gap: 40,
   },
 
   heroText: {
-    width: "50%",
+    width: "45%",
   },
 
   title: {
-    fontSize: "32px",
-    marginBottom: "20px",
+    fontSize: 32,
+    marginBottom: 20,
   },
 
   subtitle: {
-    fontSize: "22px",
-    marginTop: "30px",
-    marginBottom: "10px",
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: 20,
   },
 
   text: {
-    fontSize: "14px",
-    lineHeight: "1.6",
+    fontSize: 14,
+    lineHeight: 1.6,
+  },
+
+  quemSomos: {
+    display: "flex",
+    gap: 12,
+    alignItems: "flex-start",
+  },
+
+  bar: {
+    width: 3,
+    height: 60,
+    backgroundColor: "#000",
+    marginTop: 5,
   },
 
   heroVisual: {
+    width: "55%",
     position: "relative",
-    width: "40%",
     display: "flex",
     justifyContent: "center",
   },
 
   play: {
-    width: "200px",
+    width: 220,
     zIndex: 2,
   },
 
-  bolinhas: {
+  dots: {
     position: "absolute",
-    right: "-40px",
-    bottom: "-40px",
-    width: "120px",
+    width: 110,
+    pointerEvents: "none",
   },
 
+  /* VAGAS */
   vagas: {
     backgroundColor: "#000",
-    padding: "60px 40px",
     color: "#fff",
+    padding: "60px 40px",
     textAlign: "center",
   },
 
   vagasTitle: {
-    fontSize: "24px",
-    marginBottom: "40px",
+    fontSize: 22,
+    marginBottom: 40,
   },
 
   cards: {
     display: "flex",
     justifyContent: "center",
-    gap: "30px",
+    gap: 30,
   },
 
   card: {
-    width: "200px",
+    width: 200,
     backgroundColor: "#111",
-    borderRadius: "20px",
+    borderRadius: 20,
     overflow: "hidden",
   },
 
   cardImage: {
-    height: "180px",
+    height: 180,
     backgroundColor: "#333",
   },
 
   cardText: {
-    display: "block",
-    padding: "15px",
-    fontSize: "13px",
+    padding: 15,
+    fontSize: 12,
   },
 
+  /* BOTÃO */
   buttonWrapper: {
-    marginTop: "40px",
+    marginTop: 40,
     display: "flex",
     justifyContent: "center",
   },
 
   buttonContainer: {
     position: "relative",
-    width: "200px",
-    height: "50px",
+    width: 200,
+    height: 50,
   },
 
   buttonBack: {
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: "30px",
+    borderRadius: 30,
     border: "2px solid #5dade2",
-    top: "6px",
-    left: "-18px",
+    top: 6,
+    left: -18,
   },
 
   buttonFront: {
     position: "relative",
     width: "100%",
     height: "100%",
-    borderRadius: "30px",
+    borderRadius: 30,
     border: "none",
     backgroundColor: "#e85c8b",
     color: "#fff",
     fontWeight: "bold",
     cursor: "pointer",
-    fontSize: "15px",
   },
 
+  /* FOOTER */
   footer: {
     backgroundColor: "#000",
     color: "#fff",
-    padding: "40px",
+    padding: 40,
     display: "flex",
     justifyContent: "space-between",
   },
@@ -262,8 +317,8 @@ const styles = {
   },
 
   footerPlay: {
-    width: "40px",
-    height: "40px",
+    width: 40,
+    height: 40,
     borderRadius: "50%",
     backgroundColor: "#e85c8b",
     display: "flex",
@@ -274,18 +329,18 @@ const styles = {
   footerCenter: {
     display: "flex",
     flexDirection: "column",
-    gap: "6px",
-    fontSize: "13px",
+    gap: 6,
+    fontSize: 13,
   },
 
   footerRight: {
     display: "flex",
-    gap: "10px",
+    gap: 10,
   },
 
   social: {
-    width: "30px",
-    height: "30px",
+    width: 30,
+    height: 30,
     borderRadius: "50%",
     backgroundColor: "#444",
   },
