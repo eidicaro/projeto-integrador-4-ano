@@ -1,6 +1,7 @@
 import React from "react";
-import bolinhas from "../assets/bolinhas.svg";
-import playzao from "../assets/playzao.svg";
+import dotsleft from "../assets/dots-left.png";
+import dotsright from "../assets/dots-right.png";
+import play from "../assets/playzao.svg";
 
 export default function Home() {
   return (
@@ -37,8 +38,9 @@ export default function Home() {
         </div>
 
         <div style={styles.heroVisual}>
-          <img src={playzao} alt="Play" style={styles.play} />
-          <img src={bolinhas} alt="Bolinhas" style={styles.bolinhas} />
+          <img src={play} alt="Play" style={styles.play} />
+          <img src={dotsleft} alt="Bolinhas" style={styles.dots-left} />
+          <img src={dotsright} alt="Bolinhas" style={styles.dots-right} />
         </div>
       </section>
 
