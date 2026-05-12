@@ -9,30 +9,26 @@ export default function Home() {
 
   return (
     <div style={styles.page}>
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <header style={styles.header}>
         <img src={logo} alt="Point Midia" style={styles.logo} />
 
-        <div
-          style={styles.hamburger}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <span style={styles.hamburgerLine}></span>
-          <span style={styles.hamburgerLine}></span>
-          <span style={styles.hamburgerLine}></span>
+        <div style={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
+          <span style={styles.hLine} />
+          <span style={styles.hLine} />
+          <span style={styles.hLine} />
         </div>
 
         {menuOpen && (
           <nav style={styles.menu}>
-            <a style={styles.menuItem}>Home</a>
-            <a style={styles.menuItem}>Vagas</a>
-            <a style={styles.menuItem}>Perfil</a>
-            <a style={styles.menuItem}>Login</a>
+            {["Home", "Vagas", "Perfil", "Login"].map((item) => (
+              <span key={item} style={styles.menuItem}>{item}</span>
+            ))}
           </nav>
         )}
       </header>
 
-      {/* ================= HERO ================= */}
+      {/* HERO */}
       <section style={styles.hero}>
         <div style={styles.heroText}>
           <h1 style={styles.title}>Banco de Talentos</h1>
@@ -40,63 +36,46 @@ export default function Home() {
           <p style={styles.text}>
             Um banco de talentos é um espaço criado para reunir e organizar
             informações de profissionais interessados em fazer parte de uma
-            empresa, mesmo quando não há uma vaga específica aberta no momento.
+            empresa.
           </p>
 
           <h2 style={styles.subtitle}>Quem Somos?</h2>
 
           <div style={styles.quemSomos}>
-            <div style={styles.bar}></div>
+            <div style={styles.bar} />
             <p style={styles.text}>
-              Um banco de talentos é um espaço criado para reunir e organizar
-              informações de profissionais interessados em fazer parte de uma
-              empresa, mesmo quando não há uma vaga específica aberta no momento.
+              Um banco de talentos reúne profissionais mesmo quando não há uma
+              vaga específica aberta.
             </p>
           </div>
         </div>
 
         <div style={styles.heroVisual}>
           <img src={play} alt="Play" style={styles.play} />
-
-          <img
-            src={dotsLeft}
-            alt=""
-            style={{ ...styles.dots, left: "-40px", bottom: "40px" }}
-          />
-          <img
-            src={dotsRight}
-            alt=""
-            style={{ ...styles.dots, right: "-30px", top: "120px" }}
-          />
+          <img src={dotsLeft} alt="" style={{ ...styles.dots, left: 0, bottom: 20 }} />
+          <img src={dotsRight} alt="" style={{ ...styles.dots, right: 0, top: 80 }} />
         </div>
       </section>
 
-      {/* ================= VAGAS ================= */}
+      {/* VAGAS */}
       <section style={styles.vagas}>
         <h2 style={styles.vagasTitle}>Vagas Disponíveis</h2>
 
         <div style={styles.cards}>
-          {[1, 2, 3].map((item) => (
-            <div key={item} style={styles.card}>
-              <div style={styles.cardImage}></div>
+          {[1, 2, 3].map((i) => (
+            <div key={i} style={styles.card}>
+              <div style={styles.cardImg} />
               <span style={styles.cardText}>DESENVOLVEDOR DEV</span>
             </div>
           ))}
         </div>
 
-        <div style={styles.buttonWrapper}>
-          <div style={styles.buttonContainer}>
-            <div style={styles.buttonBack}></div>
-            <button style={styles.buttonFront}>Todas as Vagas</button>
-          </div>
-        </div>
+        <button style={styles.cta}>Todas as Vagas</button>
       </section>
 
-      {/* ================= FOOTER ================= */}
+      {/* FOOTER */}
       <footer style={styles.footer}>
-        <div style={styles.footerLeft}>
-          <div style={styles.footerPlay}>▶</div>
-        </div>
+        <div style={styles.footerPlay}>▶</div>
 
         <div style={styles.footerCenter}>
           <strong>Páginas</strong>
@@ -106,16 +85,16 @@ export default function Home() {
         </div>
 
         <div style={styles.footerRight}>
-          <div style={styles.social}></div>
-          <div style={styles.social}></div>
-          <div style={styles.social}></div>
+          <div style={styles.social} />
+          <div style={styles.social} />
+          <div style={styles.social} />
         </div>
       </footer>
     </div>
   );
 }
 
-/* ================= STYLES ================= */
+/* ===================== STYLES ===================== */
 
 const styles = {
   page: {
@@ -123,31 +102,27 @@ const styles = {
     backgroundColor: "#fff",
   },
 
-  /* HEADER */
   header: {
     height: 70,
     padding: "0 40px",
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
     position: "relative",
     borderBottom: "1px solid #ddd",
   },
 
-  logo: {
-    height: 28,
-  },
+  logo: { height: 28 },
 
   hamburger: {
     width: 30,
-    height: 22,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
+    gap: 6,
     cursor: "pointer",
   },
 
-  hamburgerLine: {
+  hLine: {
     height: 3,
     backgroundColor: "#000",
     borderRadius: 2,
@@ -157,13 +132,13 @@ const styles = {
     position: "absolute",
     top: 70,
     right: 40,
-    backgroundColor: "#fff",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-    borderRadius: 10,
+    background: "#fff",
     padding: 20,
+    borderRadius: 10,
     display: "flex",
     flexDirection: "column",
     gap: 10,
+    boxShadow: "0 10px 30px rgba(0,0,0,.15)",
     zIndex: 10,
   },
 
@@ -172,52 +147,36 @@ const styles = {
     fontSize: 14,
   },
 
-  /* HERO */
   hero: {
     display: "flex",
-    padding: "60px 40px",
-    alignItems: "flex-start",
-    gap: 40,
+    alignItems: "center",
+    padding: "80px 40px",
   },
 
-  heroText: {
-    width: "45%",
-  },
-
-  title: {
-    fontSize: 32,
-    marginBottom: 20,
-  },
-
-  subtitle: {
-    marginTop: 30,
-    marginBottom: 10,
-    fontSize: 20,
-  },
-
-  text: {
-    fontSize: 14,
-    lineHeight: 1.6,
-  },
-
-  quemSomos: {
-    display: "flex",
-    gap: 12,
-    alignItems: "flex-start",
-  },
-
-  bar: {
-    width: 3,
-    height: 60,
-    backgroundColor: "#000",
-    marginTop: 5,
-  },
+  heroText: { width: "45%" },
 
   heroVisual: {
     width: "55%",
     position: "relative",
     display: "flex",
     justifyContent: "center",
+  },
+
+  title: { fontSize: 32, marginBottom: 20 },
+
+  subtitle: { marginTop: 30, fontSize: 20 },
+
+  text: { fontSize: 14, lineHeight: 1.6 },
+
+  quemSomos: {
+    display: "flex",
+    gap: 12,
+    marginTop: 10,
+  },
+
+  bar: {
+    width: 3,
+    backgroundColor: "#000",
   },
 
   play: {
@@ -231,7 +190,6 @@ const styles = {
     pointerEvents: "none",
   },
 
-  /* VAGAS */
   vagas: {
     backgroundColor: "#000",
     color: "#fff",
@@ -257,7 +215,7 @@ const styles = {
     overflow: "hidden",
   },
 
-  cardImage: {
+  cardImg: {
     height: 180,
     backgroundColor: "#333",
   },
@@ -267,33 +225,9 @@ const styles = {
     fontSize: 12,
   },
 
-  /* BOTÃO */
-  buttonWrapper: {
+  cta: {
     marginTop: 40,
-    display: "flex",
-    justifyContent: "center",
-  },
-
-  buttonContainer: {
-    position: "relative",
-    width: 200,
-    height: 50,
-  },
-
-  buttonBack: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: 30,
-    border: "2px solid #5dade2",
-    top: 6,
-    left: -18,
-  },
-
-  buttonFront: {
-    position: "relative",
-    width: "100%",
-    height: "100%",
+    padding: "14px 40px",
     borderRadius: 30,
     border: "none",
     backgroundColor: "#e85c8b",
@@ -302,17 +236,12 @@ const styles = {
     cursor: "pointer",
   },
 
-  /* FOOTER */
   footer: {
     backgroundColor: "#000",
     color: "#fff",
     padding: 40,
     display: "flex",
     justifyContent: "space-between",
-  },
-
-  footerLeft: {
-    display: "flex",
     alignItems: "center",
   },
 

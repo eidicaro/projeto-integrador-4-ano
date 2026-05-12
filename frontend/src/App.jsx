@@ -13,11 +13,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Home */}
         <Route path="/" element={<Home />} />
 
         {/* Autenticação */}
-
         <Route path="/login" element={<Login />} />
 
         <Route path="/cadastro" element={<Cadastro />} />
