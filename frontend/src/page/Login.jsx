@@ -397,83 +397,52 @@ const styles = {
   // INPUTS
   input: {
     width: "350px",
-
     padding: "18px",
-
     marginBottom: "15px",
-
     borderRadius: "12px",
-
     border: "1px solid rgba(255,255,255,0.1)",
-
     backgroundColor: "rgba(255,255,255,0.08)",
-
     backdropFilter: "blur(5px)",
-
     color: "#fff",
-
     fontSize: "15px",
-
     letterSpacing: "0.5px",
-
     outline: "none",
-
     transition: "all 0.25s ease",
-
     boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
   },
 
   // BOTÃO
   buttonContainer: {
     position: "relative",
-
     width: "280px",
     height: "50px",
-
     marginTop: "10px",
   },
 
   buttonBack: {
     position: "absolute",
-
     width: "100%",
     height: "100%",
-
     borderRadius: "30px",
-
     border: "2px solid #5dade2",
-
     top: "6px",
     left: "-9px",
-
     transition: "all 0.25s ease",
-
     opacity: 0.9,
   },
 
   buttonFront: {
     position: "relative",
-
     width: "100%",
     height: "100%",
-
     borderRadius: "30px",
-
     border: "none",
-
-    background:
-      "linear-gradient(135deg, #e85c8b 0%, #d94f82 100%)",
-
+    background:"linear-gradient(135deg, #e85c8b 0%, #d94f82 100%)",
     color: "#fff",
-
     fontWeight: "bold",
-
     fontSize: "15px",
-
     cursor: "pointer",
-
     transition: "all 0.25s ease",
-
     boxShadow:
       "0 4px 15px rgba(232,92,139,0.25)",
   },
