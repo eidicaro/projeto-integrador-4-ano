@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Footer from "./../components/Footer"
 
 export default function HomeUser() {
 
@@ -72,30 +73,13 @@ export default function HomeUser() {
 
                     <div style={styles.userContainer}>
 
-                        <img
-                            src={usuario.foto}
-                            alt="Usuário"
-                            style={styles.userImage}
-                        />
+                        <img   src={usuario.foto}  alt="Usuário"  style={styles.userImage}/>
 
                         <div>
-
-                            <h1 style={styles.userName}>
-                                {usuario.nome}
-                            </h1>
-
-                            <p style={styles.userText}>
-                                {usuario.email}
-                            </p>
-
-                            <p style={styles.userText}>
-                                {usuario.telefone}
-                            </p>
-
-                            <button style={styles.curriculoButton}>
-                                Criar/Editar currículo
-                            </button>
-
+                            <h1 style={styles.userName}>{usuario.nome}</h1>
+                            <p style={styles.userText}>{usuario.email}</p>
+                            <p style={styles.userText}>{usuario.telefone}</p>
+                            <button style={styles.curriculoButton}>Criar/Editar currículo</button>
                         </div>
 
                     </div>
@@ -115,9 +99,7 @@ export default function HomeUser() {
 
                     <section key={categoria} style={styles.section}>
 
-                        <h2 style={styles.sectionTitle}>
-                            {categoria}
-                        </h2>
+                        <h2 style={styles.sectionTitle}>{categoria}</h2>
 
                         <div style={styles.cardsContainer}>
 
@@ -125,25 +107,14 @@ export default function HomeUser() {
 
                                 <div key={vaga.id} style={styles.card}>
 
-                                    <h3 style={styles.cardTitle}>
-                                        {vaga.titulo}
-                                    </h3>
+                                    <h3 style={styles.cardTitle}>{vaga.titulo}</h3>
 
-                                    <img
-                                        src={vaga.imagem}
-                                        alt={vaga.titulo}
-                                        style={styles.cardImage}
-                                    />
+                                    <img  src={vaga.imagem} alt={vaga.titulo}   style={styles.cardImage}/>
 
-                                    <p style={styles.cardDescription}>
-                                        {vaga.descricao}
-                                    </p>
+                                    <p style={styles.cardDescription}>{vaga.descricao}</p>
 
-                                                  {/* BOTÃO */}
-                                    <div
-                                        style={styles.buttonContainer}
-                                        className="login-button-container"
-                                    >
+                                    {/* BOTÃO */}
+                                    <div style={styles.buttonContainer}  className="login-button-container">
 
                                         {/* BORDA AZUL */}
                                         <div style={styles.buttonBack}></div>
@@ -151,10 +122,8 @@ export default function HomeUser() {
                                         {/* BOTÃO ROSA */}
                                         <button
                                         type="submit"
-
                                         style={styles.buttonFront}
                                         className="login-button-front"
-
                                         onMouseEnter={(e) => {
                                             e.target.style.transform = "translateY(-3px)";
                                             e.target.style.boxShadow =
@@ -195,14 +164,7 @@ export default function HomeUser() {
 
 
             {/* FOOTER */}
-
-            <footer style={styles.footer}>
-
-                <div>
-                    FOOTER
-                </div>
-
-            </footer>
+            <Footer></Footer>
 
         </div>
     );

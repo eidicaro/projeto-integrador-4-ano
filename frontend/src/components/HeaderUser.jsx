@@ -4,23 +4,13 @@ export default function JobCard({ vaga }) {
 
         <div style={styles.card}>
 
-            <h3 style={styles.title}>
-                {vaga.titulo}
-            </h3>
+            <h3 style={styles.title}>{vaga.titulo}</h3>
 
-            <img
-                src={vaga.imagem}
-                alt={vaga.titulo}
-                style={styles.image}
-            />
+            <img src={vaga.imagem} alt={vaga.titulo}  style={styles.image}/>
 
-            <p style={styles.description}>
-                {vaga.descricao}
-            </p>
+            <p style={styles.description}>{vaga.descricao}</p>
 
-            <button style={styles.button}>
-                Detalhes
-            </button>
+            <button style={styles.button}>Detalhes</button>
 
         </div>
 

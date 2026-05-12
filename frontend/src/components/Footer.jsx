@@ -1,72 +1,52 @@
+import linkedin from "./../assets/linkedin.png"
+import insta from "./../assets/insta.png"
+import face from "./../assets/face.png"
+import point from "./../assets/point.png"
+import fatecPoint from "./../assets/fatecPoint.png"
+
 export default function Footer() {
 
     return (
 
         <footer style={styles.footer}>
 
-            <div style={styles.leftContainer}>
+            <div style={styles.left}>
 
-                <div style={styles.logoBox}>
-                    LOGO
+                <div style={styles.leftContainer}>
+
+                    <div style={styles.logoBox}>
+                        <img src={point} alt="Point Midia" style={styles.logoMajor} />
+                    </div>
+
+                    <div style={styles.logoBox}>
+                        <img src={fatecPoint} alt="Point Midia" style={styles.logoMajor2} />
+                    </div>
+
                 </div>
 
-                <div style={styles.logoBox}>
-                    FATEC
+                <div style={styles.centerContainer}>
+
+                    <h3 style={styles.title}>Páginas</h3>
+
+                    <p style={styles.link}>Perfil</p>
+                    <p style={styles.link}>Vagas</p>
+                    <p style={styles.link}>Portfólio</p>
+
                 </div>
-
             </div>
-
-
-
-
-            <div style={styles.centerContainer}>
-
-                <h3 style={styles.title}>
-                    Páginas
-                </h3>
-
-                <p style={styles.link}>
-                    Meu Perfil
-                </p>
-
-                <p style={styles.link}>
-                    Vagas
-                </p>
-
-                <p style={styles.link}>
-                    Meu Portfólio
-                </p>
-
-            </div>
-
-
-
 
             <div style={styles.rightContainer}>
 
                 <div style={styles.socials}>
 
-                    <div style={styles.socialIcon}>
-                        in
-                    </div>
-
-                    <div style={styles.socialIcon}>
-                        ig
-                    </div>
-
-                    <div style={styles.socialIcon}>
-                        f
-                    </div>
+                  <img src={linkedin} alt="Point Midia" style={styles.logo} />
+                  <img src={insta} alt="Point Midia" style={styles.logo} />
+                  <img src={face} alt="Point Midia" style={styles.logo} />
 
                 </div>
 
-                <p style={styles.location}>
-                    Vila Madalena - São Paulo - SP
-                </p>
-
-                <p style={styles.copyright}>
-                    © pointmedia 2026
-                </p>
+                <p style={styles.location}>Vila Madalena - São Paulo - SP</p>
+                <p style={styles.copyright}>© pointmedia 2026</p>
 
             </div>
 
@@ -91,6 +71,10 @@ const styles = {
         gap: "30px"
     },
 
+    left:{
+        display: "flex",
+    }, 
+
     leftContainer: {
         display: "flex",
         gap: "20px",
@@ -112,7 +96,10 @@ const styles = {
     centerContainer: {
         display: "flex",
         flexDirection: "column",
-        gap: "8px"
+        textAling: "left",
+        marginLeft: "30%",
+        width: "00%",
+        gap: "8px",
     },
 
     title: {
@@ -159,6 +146,17 @@ const styles = {
         margin: 0,
         color: "#ff4fa3",
         fontSize: "14px"
+    },
+
+    logo: {
+        width: "50px"
+    },
+
+    logoMajor:{
+        width: "100px"
+    },
+    logoMajor2:{
+        width: "70px"
     }
 
 };

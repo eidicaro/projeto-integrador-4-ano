@@ -146,18 +146,10 @@ export default function Login() {
         <div style={styles.content}>
 
           {/* LOGO */}
-          <img
-            src={logo}
-            alt="logo"
-            style={styles.logo}
-            className="login-logo"
-          />
+          <img  src={logo}   alt="logo" style={styles.logo}  className="login-logo"/>
 
           {/* GLASS BOX */}
-          <div
-            style={styles.loginBox}
-            className="login-box"
-          >
+          <div style={styles.loginBox}  className="login-box">
 
             <form onSubmit={handleLogin} style={styles.form}>
 
@@ -165,19 +157,15 @@ export default function Login() {
               <input
                 type="email"
                 placeholder="E-mail"
-
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-
                 style={styles.input}
                 className="login-input"
-
                 onFocus={(e) => {
                   e.target.style.border = "1px solid #e85c8b";
                   e.target.style.boxShadow =
                     "0 0 15px rgba(232,92,139,0.4)";
                 }}
-
                 onBlur={(e) => {
                   e.target.style.border =
                     "1px solid rgba(255,255,255,0.1)";
@@ -189,19 +177,15 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="Senha"
-
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-
                 style={styles.input}
                 className="login-input"
-
                 onFocus={(e) => {
                   e.target.style.border = "1px solid #e85c8b";
                   e.target.style.boxShadow =
                     "0 0 15px rgba(232,92,139,0.4)";
                 }}
-
                 onBlur={(e) => {
                   e.target.style.border =
                     "1px solid rgba(255,255,255,0.1)";
@@ -210,10 +194,7 @@ export default function Login() {
               />
 
               {/* BOTÃO */}
-              <div
-                style={styles.buttonContainer}
-                className="login-button-container"
-              >
+              <div style={styles.buttonContainer} className="login-button-container">
 
                 {/* BORDA AZUL */}
                 <div style={styles.buttonBack}></div>
@@ -221,31 +202,24 @@ export default function Login() {
                 {/* BOTÃO ROSA */}
                 <button
                   type="submit"
-
                   style={styles.buttonFront}
                   className="login-button-front"
-
                   onMouseEnter={(e) => {
                     e.target.style.transform = "translateY(-3px)";
                     e.target.style.boxShadow =
                       "0 10px 25px rgba(232,92,139,0.45)";
                   }}
-
                   onMouseLeave={(e) => {
                     e.target.style.transform = "translateY(0)";
                     e.target.style.boxShadow = "none";
                   }}
-
                   onMouseDown={(e) => {
                     e.target.style.transform = "translateY(2px)";
                   }}
-
                   onMouseUp={(e) => {
                     e.target.style.transform = "translateY(-3px)";
                   }}
-                >
-                  Entrar
-                </button>
+                >Entrar</button>
 
               </div>
 
@@ -270,120 +244,80 @@ const styles = {
   // 🎥 VIDEO
   video: {
     position: "fixed",
-
     top: 0,
     left: 0,
-
     width: "100%",
     height: "100%",
-
     objectFit: "cover",
-
     filter: "blur(12px)",
-
     zIndex: 0,
-
     transform: "scale(1.1)",
   },
 
   // 🧊 OVERLAY
   overlay: {
     position: "fixed",
-
     top: 0,
     left: 0,
-
     width: "100%",
     height: "100%",
-
-    background:
-      "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55))",
-
+    background:"linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55))",
     zIndex: 1,
   },
 
   // 🔘 BOTÃO CADASTRO
   registerButton: {
     position: "absolute",
-
     top: "30px",
     right: "35px",
-
     padding: "12px 22px",
-
     borderRadius: "14px",
-
     border: "1px solid rgba(255,255,255,0.08)",
-
     background: "rgba(255,255,255,0.08)",
-
     backdropFilter: "blur(10px)",
     WebkitBackdropFilter: "blur(10px)",
-
     color: "#fff",
-
     fontSize: "14px",
     fontWeight: "600",
-
     letterSpacing: "0.4px",
-
     cursor: "pointer",
-
     transition: "all 0.25s ease",
-
     zIndex: 5,
-
     boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
-
     animation: "fade 1s ease",
   },
 
   // CONTEÚDO
   content: {
     position: "relative",
-
     height: "100%",
-
     display: "flex",
     flexDirection: "column",
-
     justifyContent: "center",
     alignItems: "center",
-
     zIndex: 2,
   },
 
   // LOGO
   logo: {
     width: "220px",
-
     marginBottom: "20px",
-
-    animation:
-      "float 4s ease-in-out infinite, fadeUp 1s ease",
-
-    filter:
-      "drop-shadow(0 0 12px rgba(232,92,139,0.35))",
+    animation:"float 4s ease-in-out infinite, fadeUp 1s ease",
+    filter:"drop-shadow(0 0 12px rgba(232,92,139,0.35))",
   },
 
   // 🧊 GLASS BOX
   loginBox: {
     padding: "40px",
-
     borderRadius: "30px",
-
     background: "rgba(255,255,255,0.05)",
-
     backdropFilter: "blur(14px)",
     WebkitBackdropFilter: "blur(14px)",
-
     border: "1px solid rgba(255,255,255,0.08)",
-
     boxShadow: `
       0 8px 32px rgba(0,0,0,0.35),
       inset 0 1px 1px rgba(255,255,255,0.05)
     `,
-
     animation: "fadeUp 1.2s ease",
   },
 

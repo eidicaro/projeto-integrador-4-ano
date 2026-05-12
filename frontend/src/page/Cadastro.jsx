@@ -150,27 +150,16 @@ export default function Cadastro() {
         <div style={styles.content}>
 
           {/* LOGO */}
-          <img
-            src={logo}
-            alt="logo"
-            style={styles.logo}
-            className="register-logo"
-          />
+          <img src={logo} alt="logo" style={styles.logo} className="register-logo" />
 
           {/* BOX */}
-          <div
-            style={styles.registerBox}
-            className="register-box"
+          <div style={styles.registerBox} className="register-box"
           >
 
             {/* TÍTULO */}
-            <h2 style={styles.title}>
-              Criar conta
-            </h2>
+            <h2 style={styles.title}>Criar conta</h2>
 
-            <p style={styles.subtitle}>
-              Entre para o banco de talentos
-            </p>
+            <p style={styles.subtitle}>Entre para o banco de talentos</p>
 
             {/* FORM */}
             <form onSubmit={handleCadastro} style={styles.form}>
@@ -272,10 +261,7 @@ export default function Cadastro() {
               />
 
               {/* BOTÃO */}
-              <div
-                style={styles.buttonContainer}
-                className="register-button-container"
-              >
+              <div style={styles.buttonContainer} className="register-button-container">
 
                 {/* BORDA AZUL */}
                 <div style={styles.buttonBack}></div>
@@ -331,135 +317,89 @@ const styles = {
 
   video: {
     position: "fixed",
-
     top: 0,
     left: 0,
-
     width: "100%",
     height: "100%",
-
     objectFit: "cover",
-
     filter: "blur(12px)",
-
     zIndex: 0,
-
     transform: "scale(1.1)",
   },
 
   overlay: {
     position: "fixed",
-
     top: 0,
     left: 0,
-
     width: "100%",
     height: "100%",
-
-    background:
-      "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55))",
-
+    background: "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55))",
     zIndex: 1,
   },
 
   loginTopButton: {
     position: "absolute",
-
     top: "30px",
     right: "35px",
-
     padding: "12px 22px",
-
     borderRadius: "14px",
-
     border: "1px solid rgba(255,255,255,0.08)",
-
     background: "rgba(255,255,255,0.08)",
-
     backdropFilter: "blur(10px)",
     WebkitBackdropFilter: "blur(10px)",
-
     color: "#fff",
-
     fontSize: "14px",
     fontWeight: "600",
-
     letterSpacing: "0.4px",
-
     cursor: "pointer",
-
     transition: "all 0.25s ease",
-
     zIndex: 5,
-
     boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
-
     animation: "fade 1s ease",
   },
 
   content: {
     position: "relative",
-
     height: "100%",
-
     display: "flex",
     flexDirection: "column",
-
     justifyContent: "center",
     alignItems: "center",
-
     zIndex: 2,
   },
 
   logo: {
     width: "200px",
-
     marginBottom: "20px",
-
-    animation:
-      "float 4s ease-in-out infinite, fadeUp 1s ease",
-
-    filter:
-      "drop-shadow(0 0 12px rgba(232,92,139,0.35))",
+    animation:"float 4s ease-in-out infinite, fadeUp 1s ease",
+    filter:"drop-shadow(0 0 12px rgba(232,92,139,0.35))",
   },
 
   registerBox: {
     padding: "40px",
-
     borderRadius: "30px",
-
     background: "rgba(255,255,255,0.05)",
-
     backdropFilter: "blur(14px)",
     WebkitBackdropFilter: "blur(14px)",
-
     border: "1px solid rgba(255,255,255,0.08)",
-
     boxShadow: `
       0 8px 32px rgba(0,0,0,0.35),
       inset 0 1px 1px rgba(255,255,255,0.05)
     `,
-
     animation: "fadeUp 1.2s ease",
   },
 
   title: {
     color: "#fff",
-
     textAlign: "center",
-
     fontSize: "28px",
-
     marginBottom: "8px",
   },
 
   subtitle: {
     color: "rgba(255,255,255,0.65)",
-
     textAlign: "center",
-
     marginBottom: "30px",
-
     fontSize: "14px",
   },
 
@@ -471,83 +411,51 @@ const styles = {
 
   input: {
     width: "350px",
-
     padding: "18px",
-
     marginBottom: "15px",
-
     borderRadius: "12px",
-
     border: "1px solid rgba(255,255,255,0.1)",
-
     backgroundColor: "rgba(255,255,255,0.08)",
-
     backdropFilter: "blur(5px)",
-
     color: "#fff",
-
     fontSize: "15px",
-
     letterSpacing: "0.5px",
-
     outline: "none",
-
     transition: "all 0.25s ease",
-
     boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
   },
 
   buttonContainer: {
     position: "relative",
-
     width: "280px",
     height: "50px",
-
     marginTop: "10px",
   },
 
   buttonBack: {
     position: "absolute",
-
     width: "100%",
     height: "100%",
-
     borderRadius: "30px",
-
     border: "2px solid #5dade2",
-
     top: "6px",
     left: "-9px",
-
     transition: "all 0.25s ease",
-
     opacity: 0.9,
   },
 
   buttonFront: {
     position: "relative",
-
     width: "100%",
     height: "100%",
-
     borderRadius: "30px",
-
     border: "none",
-
-    background:
-      "linear-gradient(135deg, #e85c8b 0%, #d94f82 100%)",
-
+    background:"linear-gradient(135deg, #e85c8b 0%, #d94f82 100%)",
     color: "#fff",
-
     fontWeight: "bold",
-
     fontSize: "15px",
-
     cursor: "pointer",
-
     transition: "all 0.25s ease",
-
-    boxShadow:
-      "0 4px 15px rgba(232,92,139,0.25)",
+    boxShadow:"0 4px 15px rgba(232,92,139,0.25)",
   },
 };
