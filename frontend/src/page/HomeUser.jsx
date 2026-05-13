@@ -204,7 +204,14 @@ export default function HomeUser() {
                             <h1 style={styles.userName}>{usuario.nome}</h1>
                             <p style={styles.userText}>{usuario.email}</p>
                             <p style={styles.userText}>{usuario.telefone}</p>
-                            <button style={styles.curriculoButton}>Criar/Editar currículo</button>
+                            <button style={styles.curriculoButton}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = "#ff2f8b";
+                                }}
+                            
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = "#ff4fa3";
+                                }}>Criar/Editar currículo</button>
                         </div>
                     </div>
 
@@ -219,27 +226,19 @@ export default function HomeUser() {
                 {Object.entries(vagasAgrupadas).map(([categoria, vagas]) => (
 
                     <section key={categoria} style={styles.section}>
-
                         <h2 style={styles.sectionTitle}>{categoria}</h2>
-
                         <div style={styles.cardsContainer}>
-
                             {vagas.map((vaga) => (
 
                                 <div key={vaga.id} style={styles.card}>
-
                                     <h3 style={styles.cardTitle}>{vaga.titulo}</h3>
-
                                     <img  src={vaga.imagem} alt={vaga.titulo}   style={styles.cardImage}/>
-
                                     <p style={styles.cardDescription}>{vaga.descricao}</p>
 
                                     {/* BOTÃO */}
                                     <div style={styles.buttonContainer}  className="login-button-container">
-
                                         {/* BORDA AZUL */}
                                         <div style={styles.buttonBack}></div>
-
                                         {/* BOTÃO ROSA */}
                                         <button
                                         type="submit"
@@ -348,6 +347,7 @@ const styles = {
         fontWeight: "bold",
         cursor: "pointer",
         fontSize: "16px",
+        transition: "0.3s",
     },
 
     main: {

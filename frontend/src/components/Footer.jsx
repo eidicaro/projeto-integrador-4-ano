@@ -17,7 +17,6 @@ export default function Footer() {
                     <div style={styles.logoBox}>
                         <img src={point} alt="Point Midia" style={styles.logoMajor} />
                     </div>
-
                     <div style={styles.logoBox}>
                         <img src={fatecPoint} alt="Point Midia" style={styles.logoMajor2} />
                     </div>
@@ -25,12 +24,11 @@ export default function Footer() {
                 </div>
 
                 <div style={styles.centerContainer}>
-
                     <h3 style={styles.title}>Páginas</h3>
 
-                    <p style={styles.link}>Perfil</p>
-                    <p style={styles.link}>Vagas</p>
-                    <p style={styles.link}>Portfólio</p>
+                    <p style={styles.link} onMouseEnter={(e) => { e.currentTarget.style.color = "#ff4fa3";}} onMouseLeave={(e) => {e.currentTarget.style.color = "#fff";}} >Perfil</p>
+                    <p style={styles.link} onMouseEnter={(e) => { e.currentTarget.style.color = "#ff4fa3";}} onMouseLeave={(e) => {e.currentTarget.style.color = "#fff";}}>Vagas</p>
+                    <p style={styles.link} onMouseEnter={(e) => { e.currentTarget.style.color = "#ff4fa3";}} onMouseLeave={(e) => {e.currentTarget.style.color = "#fff";}}>Portfólio</p>
 
                 </div>
             </div>
@@ -39,7 +37,7 @@ export default function Footer() {
 
                 <div style={styles.socials}>
 
-                  <img src={linkedin} alt="Point Midia" style={styles.logo} />
+                  <img src={linkedin} alt="Point Midia" style={styles.logo}  />
                   <img src={insta} alt="Point Midia" style={styles.logo} />
                   <img src={face} alt="Point Midia" style={styles.logo} />
 
@@ -109,7 +107,8 @@ const styles = {
 
     link: {
         margin: 0,
-        cursor: "pointer"
+        cursor: "pointer",
+        transition: "0.2s"
     },
 
     rightContainer: {
