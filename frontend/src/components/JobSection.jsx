@@ -13,12 +13,10 @@ export default function JobSection({ titulo, vagas }) {
             <div style={styles.cardsContainer}>
 
                 {vagas.map((vaga) => (
-
                     <JobCard
                         key={vaga.id}
                         vaga={vaga}
                     />
-
                 ))}
 
             </div>

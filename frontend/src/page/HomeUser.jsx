@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import Footer from "./../components/Footer"
+import Footer from "./../components/Footer";
+import JobModal from "./../components/JobModal";
 
 export default function HomeUser() {
 
     const [usuario, setUsuario] = useState(null);
     const [vagas, setVagas] = useState([]);
+    const [vagaSelecionada, setVagaSelecionada] = useState(null);
+    const [modalAberto, setModalAberto] = useState(false);
 
     useEffect(() => {
 
@@ -20,22 +23,147 @@ export default function HomeUser() {
                 id: 1,
                 titulo: "Dev FullStack",
                 descricao: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
                 imagem: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
-                categoria: "Programação"
+                categoria: "Programação",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
+            },
+            {
+                id: 1,
+                titulo: "Dev FullStack",
+                descricao: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                imagem: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+                categoria: "Programação",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
+            },
+            {
+                id: 1,
+                titulo: "Dev FullStack",
+                descricao: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                imagem: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+                categoria: "Programação",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
+            },
+            {
+                id: 1,
+                titulo: "Dev FullStack",
+                descricao: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                imagem: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+                categoria: "Programação",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
+            },
+            {
+                id: 1,
+                titulo: "Dev FullStack",
+                descricao: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
+                imagem: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+                categoria: "Programação",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
             },
             {
                 id: 2,
                 titulo: "Social Media",
                 descricao: "Responsável pelas redes sociais da empresa.",
+                descricaoCompleta: `Sobre a vaga
+                Quando você pensa em carreira, o que vem à sua mente? Propósito? Colaboração? Ser protagonista para fazer a diferença? No PagBank temos tudo isso e muito mais. 💛
+
+
+                Estamos em busca de pessoas que vistam a camisa com orgulho. Gente com vontade de facilitar a vida financeira das pessoas e impulsionar negócios!
+
+
+                Tá a fim de uma carreira que rende mais? Confira essa oportunidade e #VemProPags!
+
+
+
+                Responsabilidades e atribuições
+
+                Experiência com linguagem de programação Java.
+                Experiência com desenvolvimento para ambiente Unix e Linux.
+                Conhecimento em estrutura de dados, algoritmos e depuração de código
+
+
+                Requisitos e qualificações
+
+                Conhecimento em Docker e Kubernetes
+                Experiência com bancos de dados relacionais
+                Experiência com Spring Boot.
+                Experiência com testes unitários e integrados
+                Experiência com Kafka
+                Experiência com ferramentas e práticas de monitoração de sistemas como Grafana ou New Relic.
+                Conhecimento em plataforma de automação continua, como Jenkins.
+
+
+                Informações adicionais
+
+                Diferencial:
+                Conhecimento em AWS
+                Conhecimento em Spring Batch
+                Conhecimento em Quartz Scheduler`,
                 imagem: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-                categoria: "Marketing"
+                categoria: "Marketing",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
             },
             {
                 id: 3,
                 titulo: "UI/UX Designer",
                 descricao: "Criação de interfaces modernas e intuitivas.",
+                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
                 imagem: "https://images.unsplash.com/photo-1559028012-481c04fa702d",
-                categoria: "Design"
+                categoria: "Design",
+
+                tags: [
+                    "Remoto",
+                    "Tempo Integral",
+                    "Full Stack",
+                    "React",
+                    "Laravel"
+                ],
             }
         ];
 
@@ -68,28 +196,21 @@ export default function HomeUser() {
             {/* HEADER */}
 
             {usuario && (
-
                 <header style={styles.header}>
-
                     <div style={styles.userContainer}>
-
                         <img   src={usuario.foto}  alt="Usuário"  style={styles.userImage}/>
 
-                        <div>
+                        <div style={styles.headerInfos}>
                             <h1 style={styles.userName}>{usuario.nome}</h1>
                             <p style={styles.userText}>{usuario.email}</p>
                             <p style={styles.userText}>{usuario.telefone}</p>
                             <button style={styles.curriculoButton}>Criar/Editar currículo</button>
                         </div>
-
                     </div>
 
                 </header>
 
             )}
-
-
-
 
             {/* VAGAS */}
 
@@ -142,14 +263,16 @@ export default function HomeUser() {
                                         onMouseUp={(e) => {
                                             e.target.style.transform = "translateY(-3px)";
                                         }}
+
+                                        onClick={() => {
+                                            setVagaSelecionada(vaga);
+                                            setModalAberto(true);
+                                        }}
                                         >
                                         Descrição
                                         </button>
-
                                     </div>
-
                                 </div>
-
                             ))}
 
                         </div>
@@ -158,10 +281,13 @@ export default function HomeUser() {
 
                 ))}
 
+            <JobModal
+                vaga={vagaSelecionada}
+                aberto={modalAberto}
+                fechar={() => setModalAberto(false)}
+            />
+
             </main>
-
-
-
 
             {/* FOOTER */}
             <Footer></Footer>
@@ -203,12 +329,13 @@ const styles = {
     userName: {
         color: "white",
         margin: 0,
-        fontSize: "32px"
+        fontSize: "32px",
+        fontWeight: "600",
     },
 
     userText: {
         color: "white",
-        margin: "5px 0"
+        margin: "5px 0",
     },
 
     curriculoButton: {
@@ -219,7 +346,8 @@ const styles = {
         backgroundColor: "#ff4fa3",
         color: "white",
         fontWeight: "bold",
-        cursor: "pointer"
+        cursor: "pointer",
+        fontSize: "16px",
     },
 
     main: {
@@ -234,15 +362,21 @@ const styles = {
         fontSize: "32px",
         marginBottom: "2%",
         marginLeft: "3%",
-        color: '#000',
-        display: "flex",
+        color: "#000",
         fontWeight: "700",
+        width: "fit-content",
+        borderBottom: "4px solid #000",
+        paddingBottom: "5px",
+        borderRadius: "4px",
+        
     },
 
     cardsContainer: {
         display: "flex",
-        gap: "25px",
-        flexWrap: "wrap"
+        gap: "70px",
+        flexWrap: "wrap",
+        justifyContent: "left",
+        margin: "0 0 0 15%",
     },
 
     card: {
@@ -251,7 +385,6 @@ const styles = {
         borderRadius: "15px",
         padding: "15px",
         boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-        marginLeft: "5%",
     },
 
     cardTitle: {
@@ -326,4 +459,11 @@ const styles = {
         boxShadow:
         "0 4px 15px rgba(232,92,139,0.25)",
   },
+
+  headerInfos:{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+
+  }
 };

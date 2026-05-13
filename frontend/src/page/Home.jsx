@@ -3,6 +3,7 @@ import logo from "../assets/logo.svg";
 import dotsLeft from "../assets/dots-left.png";
 import dotsRight from "../assets/dots-right.png";
 import play from "../assets/playzao.svg";
+import Footer from "./../components/Footer"
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -74,22 +75,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={styles.footer}>
-        <div style={styles.footerPlay}>▶</div>
-
-        <div style={styles.footerCenter}>
-          <strong>Páginas</strong>
-          <span>Meu Perfil</span>
-          <span>Vagas</span>
-          <span>Meu Portfólio</span>
-        </div>
-
-        <div style={styles.footerRight}>
-          <div style={styles.social} />
-          <div style={styles.social} />
-          <div style={styles.social} />
-        </div>
-      </footer>
+          <Footer></Footer>
     </div>
   );
 }
