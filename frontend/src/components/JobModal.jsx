@@ -7,6 +7,10 @@ export default function JobModal({
     if (!aberto || !vaga) return null;
 
     return (
+        <>
+    <style>{animationStyles}</style>
+
+    <div style={styles.overlay}></div>
 
         <div style={styles.overlay}>
 
@@ -32,6 +36,17 @@ export default function JobModal({
                                     <span
                                         key={index}
                                         style={styles.tag}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = "#5dade2";
+                                            e.target.style.color = "#000";
+                                            e.target.style.transition = "0.3s";
+                                            e.target.style.transform = "scale(1.15)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = "#000";
+                                            e.target.style.color = "#fff";
+                                            e.target.style.transform = "scale(1)";
+                                        }}
                                     >
                                         {tag}
                                     </span>
@@ -56,7 +71,7 @@ export default function JobModal({
             </div>
 
         </div>
-
+        </>
     );
 }
 
@@ -75,7 +90,9 @@ const styles = {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 999
+        zIndex: 999,
+    
+        animation: "fadeIn 0.8s ease"
     },
 
     modal: {
@@ -86,7 +103,9 @@ const styles = {
         padding: "30px",
         position: "relative",
         maxHeight: "90vh",
-        overflowY: "auto"
+        overflowY: "auto",
+    
+        animation: "modalOpen 0.8s ease"
     },
 
     closeButton: {
@@ -178,3 +197,27 @@ const styles = {
     }
 
 };
+
+const animationStyles = `
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalOpen {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+`;

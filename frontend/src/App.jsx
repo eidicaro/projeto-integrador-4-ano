@@ -6,6 +6,7 @@ import Home from "./page/Home";
 import Login from "./page/Login";
 import Cadastro from "./page/Cadastro";
 import HomeUser from "./page/HomeUser";
+import CreateResume from "./page/CreateResume.jsx";
 
 function App() {
 
@@ -21,6 +22,8 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />} />
 
         <Route path="/homeUser" element={<HomeUser />} />
+
+        <Route path="/createResume" element={<CreateResume />} />
 
       </Routes>
 
