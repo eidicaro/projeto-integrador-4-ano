@@ -1,86 +1,91 @@
-import { useState } from "react";
-import logo from "../assets/logo.svg";
-import dotsLeft from "../assets/dots-left.png";
-import dotsRight from "../assets/dots-right.png";
-import play from "../assets/playzao.svg";
-import Footer from "./../components/Footer"
+import React from "react";
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
     <div style={styles.page}>
       {/* HEADER */}
       <header style={styles.header}>
-        <img src={logo} alt="Point Midia" style={styles.logo} />
-
-        <div style={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
-          <span style={styles.hLine} />
-          <span style={styles.hLine} />
-          <span style={styles.hLine} />
-        </div>
-
-        {menuOpen && (
-          <nav style={styles.menu}>
-            {["Home", "Vagas", "Perfil", "Login"].map((item) => (
-              <span key={item} style={styles.menuItem}>{item}</span>
-            ))}
-          </nav>
-        )}
+        <div style={styles.logo}>point</div>
+        <div style={styles.menu}>☰</div>
       </header>
 
       {/* HERO */}
       <section style={styles.hero}>
-        <div style={styles.heroText}>
-          <h1 style={styles.title}>Banco de Talentos</h1>
+        <h1 style={styles.title}>Banco de Talentos</h1>
+        <p style={styles.text}>
+          Um banco de talentos é um espaço criado para reunir e organizar
+          informações de profissionais interessados em fazer parte de uma
+          empresa, mesmo quando não há uma vaga específica aberta no momento.
+        </p>
+      </section>
 
+      {/* QUEM SOMOS */}
+      <section style={styles.about}>
+        <h2 style={styles.subtitle}>Quem Somos?</h2>
+
+        <div style={styles.aboutGrid}>
           <p style={styles.text}>
             Um banco de talentos é um espaço criado para reunir e organizar
             informações de profissionais interessados em fazer parte de uma
             empresa.
           </p>
-
-          <h2 style={styles.subtitle}>Quem Somos?</h2>
-
-          <div style={styles.quemSomos}>
-            <div style={styles.bar} />
-            <p style={styles.text}>
-              Um banco de talentos reúne profissionais mesmo quando não há uma
-              vaga específica aberta.
-            </p>
-          </div>
-        </div>
-
-        <div style={styles.heroVisual}>
-          <img src={play} alt="Play" style={styles.play} />
-          <img src={dotsLeft} alt="" style={{ ...styles.dots, left: 0, bottom: 20 }} />
-          <img src={dotsRight} alt="" style={{ ...styles.dots, right: 0, top: 80 }} />
+          <p style={styles.text}>
+            Um banco de talentos é um espaço criado para reunir e organizar
+            informações de profissionais interessados em fazer parte de uma
+            empresa.
+          </p>
         </div>
       </section>
 
       {/* VAGAS */}
-      <section style={styles.vagas}>
-        <h2 style={styles.vagasTitle}>Vagas Disponíveis</h2>
+      <section style={styles.jobs}>
+        <h2 style={styles.jobsTitle}>Vagas Disponíveis</h2>
 
         <div style={styles.cards}>
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3].map((_, i) => (
             <div key={i} style={styles.card}>
-              <div style={styles.cardImg} />
-              <span style={styles.cardText}>DESENVOLVEDOR DEV</span>
+              <img
+                src="https://images.unsplash.com/photo-1607746882042-944635dfe10e"
+                alt="Dev"
+                style={styles.cardImage}
+              />
+              <span style={styles.cardLabel}>DESENVOLVEDOR DEV</span>
             </div>
           ))}
         </div>
-
-        <button style={styles.cta}>Todas as Vagas</button>
       </section>
 
+      {/* BOTÃO */}
+      <div style={styles.buttonArea}>
+        <button style={styles.button}>Todas as Vagas</button>
+      </div>
+
       {/* FOOTER */}
-          <Footer></Footer>
+      <footer style={styles.footer}>
+        <div style={styles.footerLeft}>
+          <div style={{ ...styles.circle, background: "#ec4899" }} />
+          <div style={{ ...styles.circle, background: "#3b82f6" }} />
+        </div>
+
+        <div style={styles.footerCenter}>
+          <p>Páginas</p>
+          <p>Meu Perfil</p>
+          <p>Vagas</p>
+          <p>Meu Portfólio</p>
+        </div>
+
+        <div style={styles.footerRight}>
+          <p>Vila Madalena - São Paulo - SP</p>
+          <p>© pointmidia 2024</p>
+        </div>
+      </footer>
     </div>
   );
 }
 
-/* ===================== STYLES ===================== */
+/* =======================
+   STYLE SHEET
+======================= */
 
 const styles = {
   page: {
@@ -89,103 +94,64 @@ const styles = {
   },
 
   header: {
-    height: 70,
-    padding: "0 40px",
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    position: "relative",
+    padding: "20px 40px",
     borderBottom: "1px solid #ddd",
+    alignItems: "center",
   },
 
-  logo: { height: 28 },
-
-  hamburger: {
-    width: 30,
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-    cursor: "pointer",
-  },
-
-  hLine: {
-    height: 3,
-    backgroundColor: "#000",
-    borderRadius: 2,
+  logo: {
+    fontWeight: "bold",
+    fontSize: 18,
   },
 
   menu: {
-    position: "absolute",
-    top: 70,
-    right: 40,
-    background: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    boxShadow: "0 10px 30px rgba(0,0,0,.15)",
-    zIndex: 10,
-  },
-
-  menuItem: {
+    fontSize: 22,
     cursor: "pointer",
-    fontSize: 14,
   },
 
   hero: {
-    display: "flex",
-    alignItems: "center",
-    padding: "80px 40px",
+    padding: 40,
+    maxWidth: 900,
   },
 
-  heroText: { width: "45%" },
-
-  heroVisual: {
-    width: "55%",
-    position: "relative",
-    display: "flex",
-    justifyContent: "center",
+  title: {
+    borderLeft: "4px solid #3b82f6",
+    paddingLeft: 12,
+    marginBottom: 16,
   },
 
-  title: { fontSize: 32, marginBottom: 20 },
-
-  subtitle: { marginTop: 30, fontSize: 20 },
-
-  text: { fontSize: 14, lineHeight: 1.6 },
-
-  quemSomos: {
-    display: "flex",
-    gap: 12,
-    marginTop: 10,
+  subtitle: {
+    borderLeft: "4px solid #ec4899",
+    paddingLeft: 12,
+    marginBottom: 20,
   },
 
-  bar: {
-    width: 3,
+  text: {
+    lineHeight: 1.6,
+    color: "#333",
+  },
+
+  about: {
+    padding: 40,
+    maxWidth: 900,
+  },
+
+  aboutGrid: {
+    display: "flex",
+    gap: 30,
+  },
+
+  jobs: {
     backgroundColor: "#000",
-  },
-
-  play: {
-    width: 220,
-    zIndex: 2,
-  },
-
-  dots: {
-    position: "absolute",
-    width: 110,
-    pointerEvents: "none",
-  },
-
-  vagas: {
-    backgroundColor: "#000",
-    color: "#fff",
-    padding: "60px 40px",
+    padding: 40,
     textAlign: "center",
   },
 
-  vagasTitle: {
-    fontSize: 22,
-    marginBottom: 40,
+  jobsTitle: {
+    color: "#fff",
+    marginBottom: 30,
   },
 
   cards: {
@@ -195,68 +161,70 @@ const styles = {
   },
 
   card: {
-    width: 200,
-    backgroundColor: "#111",
+    width: 220,
+    border: "2px solid #3b82f6",
+    borderRadius: 12,
+    padding: 10,
+    backgroundColor: "#000",
+    textAlign: "center",
+  },
+
+  cardImage: {
+    width: "100%",
+    height: 200,
+    objectFit: "cover",
+    borderRadius: "50%",
+  },
+
+  cardLabel: {
+    display: "inline-block",
+    marginTop: 10,
+    backgroundColor: "#fff",
+    padding: "6px 12px",
     borderRadius: 20,
-    overflow: "hidden",
-  },
-
-  cardImg: {
-    height: 180,
-    backgroundColor: "#333",
-  },
-
-  cardText: {
-    padding: 15,
     fontSize: 12,
   },
 
-  cta: {
-    marginTop: 40,
-    padding: "14px 40px",
-    borderRadius: 30,
+  buttonArea: {
+    padding: 40,
+    textAlign: "center",
+  },
+
+  button: {
+    backgroundColor: "#ec4899",
     border: "none",
-    backgroundColor: "#e85c8b",
+    padding: "12px 32px",
     color: "#fff",
-    fontWeight: "bold",
+    borderRadius: 30,
     cursor: "pointer",
   },
 
   footer: {
     backgroundColor: "#000",
     color: "#fff",
-    padding: 40,
+    padding: "30px 40px",
     display: "flex",
     justifyContent: "space-between",
+  },
+
+  footerLeft: {
+    display: "flex",
+    gap: 10,
     alignItems: "center",
   },
 
-  footerPlay: {
-    width: 40,
-    height: 40,
+  circle: {
+    width: 36,
+    height: 36,
     borderRadius: "50%",
-    backgroundColor: "#e85c8b",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   footerCenter: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-    fontSize: 13,
+    fontSize: 12,
   },
 
   footerRight: {
-    display: "flex",
-    gap: 10,
-  },
-
-  social: {
-    width: 30,
-    height: 30,
-    borderRadius: "50%",
-    backgroundColor: "#444",
+    fontSize: 12,
+    textAlign: "right",
   },
 };
