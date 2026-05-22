@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,13 +28,66 @@ export default function Home() {
     },
   ];
 
+  const fadeUp = {
+    hidden: {
+      opacity: 0,
+      y: 60,
+    },
+
+    visible: {
+      opacity: 1,
+      y: 0,
+
+      transition: {
+        duration: 0.8,
+      },
+    },
+  };
+
+  const fadeLeft = {
+    hidden: {
+      opacity: 0,
+      x: -80,
+    },
+
+    visible: {
+      opacity: 1,
+      x: 0,
+
+      transition: {
+        duration: 0.8,
+      },
+    },
+  };
+
+  const fadeRight = {
+    hidden: {
+      opacity: 0,
+      x: 80,
+    },
+
+    visible: {
+      opacity: 1,
+      x: 0,
+
+      transition: {
+        duration: 0.8,
+      },
+    },
+  };
+
   return (
     <div style={styles.page}>
-      {/* BACKGROUND GLOW */}
-      <div style={styles.blurOne}></div>
-      <div style={styles.blurTwo}></div>
+      <style>{hoverStyles}</style>
 
-      {/* MENU */}
+      {/* BLURS */}
+      <div style={styles.blurPink}></div>
+      <div style={styles.blurBlue}></div>
+
+      {/* GRID */}
+      <div style={styles.grid}></div>
+
+      {/* SIDEBAR */}
       <div
         style={{
           ...styles.sidebar,
@@ -59,7 +113,7 @@ export default function Home() {
           </a>
 
           <a href="#" style={styles.sidebarLink}>
-            Meu Perfil
+            Perfil
           </a>
 
           <a href="#" style={styles.sidebarLink}>
@@ -77,6 +131,7 @@ export default function Home() {
         </div>
 
         <button
+          className="menu-btn"
           style={styles.menuButton}
           onClick={() => setMenuOpen(true)}
         >
@@ -86,14 +141,15 @@ export default function Home() {
 
       {/* HERO */}
       <section style={styles.hero}>
-        <div style={styles.heroLeft}>
-          <span style={styles.badge}>
-            Plataforma de Talentos
-          </span>
-
+        <motion.div
+          style={styles.heroLeft}
+          variants={fadeLeft}
+          initial="hidden"
+          animate="visible"
+        >
           <h1 style={styles.heroTitle}>
             Conectando
-            <span style={styles.gradientText}>
+            <span style={styles.gradient}>
               {" "}
               talentos
             </span>
@@ -102,73 +158,135 @@ export default function Home() {
           </h1>
 
           <p style={styles.heroText}>
-            Descubra vagas incríveis, conecte-se com
-            empresas e mostre seu potencial em uma
-            plataforma moderna feita para o futuro.
+            Descubra vagas incríveis, conecte-se
+            com empresas e mostre seu potencial em
+            uma plataforma moderna feita para o
+            futuro.
           </p>
 
           <div style={styles.heroButtons}>
-            <button style={styles.primaryButton}>
+            <button
+              className="primary-btn"
+              style={styles.primaryButton}
+            >
               Explorar Vagas
             </button>
 
-            <button style={styles.secondaryButton}>
+            <button
+              className="secondary-btn"
+              style={styles.secondaryButton}
+            >
               Criar Perfil
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        <div style={styles.heroRight}>
-          <div style={styles.heroCard}>
+        <motion.div
+          style={styles.heroRight}
+          variants={fadeRight}
+          initial="hidden"
+          animate="visible"
+        >
+          <div
+            className="hero-image-card"
+            style={styles.heroImageCard}
+          >
             <img
               src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1200&auto=format&fit=crop"
               alt="team"
               style={styles.heroImage}
             />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* STATS */}
-      <section style={styles.statsSection}>
+      <motion.section
+        style={styles.stats}
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         <div style={styles.statsGrid}>
-          <div style={styles.statCard}>
+          <div
+            className="stat-card"
+            style={styles.statCard}
+          >
             <h2 style={styles.statNumber}>+1200</h2>
             <p style={styles.statText}>Talentos</p>
           </div>
 
-          <div style={styles.statCard}>
+          <div
+            className="stat-card"
+            style={styles.statCard}
+          >
             <h2 style={styles.statNumber}>+300</h2>
             <p style={styles.statText}>Empresas</p>
           </div>
 
-          <div style={styles.statCard}>
+          <div
+            className="stat-card"
+            style={styles.statCard}
+          >
             <h2 style={styles.statNumber}>+850</h2>
             <p style={styles.statText}>Vagas</p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* VAGAS */}
-      <section style={styles.jobsSection}>
+      {/* JOBS */}
+      <motion.section
+        style={styles.jobsSection}
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>
             Vagas em destaque
           </h2>
 
-          <p style={styles.sectionSubtitle}>
-            Encontre oportunidades alinhadas ao seu perfil
+          <p style={styles.sectionText}>
+            Encontre oportunidades alinhadas ao seu
+            perfil.
           </p>
         </div>
 
         <div style={styles.jobsGrid}>
           {jobs.map((job, index) => (
-            <div key={index} style={styles.jobCard}>
-              <img
-                src={job.image}
-                alt={job.title}
-                style={styles.jobImage}
-              />
+            <motion.div
+              key={index}
+              className="job-card"
+              style={styles.jobCard}
+              initial={{
+                opacity: 0,
+                y: 50,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.6,
+                delay: index * 0.15,
+              }}
+              viewport={{ once: true }}
+            >
+              <div style={styles.imageWrapper}>
+                <img
+                  src={job.image}
+                  alt={job.title}
+                  className="job-image"
+                  style={styles.jobImage}
+                />
+
+                <div
+                  style={styles.jobOverlay}
+                  className="job-overlay"
+                ></div>
+              </div>
 
               <div style={styles.jobContent}>
                 <div style={styles.jobTag}>
@@ -187,13 +305,19 @@ export default function Home() {
                   Ver vaga
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA */}
-      <section style={styles.ctaSection}>
+      <motion.section
+        style={styles.ctaSection}
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         <div style={styles.ctaCard}>
           <h2 style={styles.ctaTitle}>
             Pronto para sua próxima oportunidade?
@@ -203,11 +327,14 @@ export default function Home() {
             Crie seu perfil e comece agora mesmo.
           </p>
 
-          <button style={styles.primaryButton}>
-            Começar Agora
+          <button
+            className="primary-btn"
+            style={styles.primaryButton}
+          >
+            Começar agora
           </button>
         </div>
-      </section>
+      </motion.section>
 
       {/* FOOTER */}
       <footer style={styles.footer}>
@@ -231,7 +358,7 @@ export default function Home() {
           </a>
         </div>
 
-        <p style={styles.copy}>
+        <p style={styles.footerCopy}>
           © 2026 Point. Todos os direitos reservados.
         </p>
       </footer>
@@ -239,40 +366,119 @@ export default function Home() {
   );
 }
 
+const hoverStyles = `
+  .job-card:hover {
+    transform: translateY(-14px) scale(1.02);
+    border: 1px solid rgba(255,255,255,.18);
+
+    box-shadow:
+      0 25px 60px rgba(0,0,0,.45),
+      0 0 30px rgba(77,166,255,.15);
+  }
+
+  .job-card:hover .job-image {
+    transform: scale(1.12);
+  }
+
+  .job-card:hover .job-overlay {
+    opacity: 1;
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-5px) scale(1.03);
+
+    box-shadow:
+      0 15px 40px rgba(255,79,163,.45),
+      0 0 25px rgba(255,79,163,.35);
+  }
+
+  .secondary-btn:hover {
+    background: rgba(255,255,255,.12);
+    transform: translateY(-4px);
+    border: 1px solid rgba(255,255,255,.18);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-10px);
+
+    border: 1px solid rgba(255,255,255,.18);
+
+    box-shadow:
+      0 20px 40px rgba(0,0,0,.3),
+      0 0 25px rgba(77,166,255,.12);
+  }
+
+  .menu-btn:hover {
+    transform: rotate(90deg) scale(1.05);
+    background: rgba(255,255,255,.12);
+  }
+
+  .hero-image-card {
+    animation: floating 5s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-15px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+`;
+
 const styles = {
   page: {
+    minHeight: "100vh",
     background:
       "linear-gradient(135deg,#050816,#0f172a)",
-    minHeight: "100vh",
     fontFamily: "Arial",
     color: "#fff",
     overflowX: "hidden",
     position: "relative",
   },
 
-  blurOne: {
+  grid: {
     position: "absolute",
-    width: "400px",
-    height: "400px",
+    inset: 0,
+
+    backgroundImage:
+      "linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px)",
+
+    backgroundSize: "50px 50px",
+
+    maskImage:
+      "radial-gradient(circle at center, black, transparent 80%)",
+
+    pointerEvents: "none",
+  },
+
+  blurPink: {
+    position: "absolute",
+    width: "350px",
+    height: "350px",
     background: "#ff4fa3",
-    filter: "blur(180px)",
-    opacity: 0.2,
+    filter: "blur(160px)",
+    opacity: 0.25,
     top: "-100px",
     left: "-100px",
   },
 
-  blurTwo: {
+  blurBlue: {
     position: "absolute",
-    width: "400px",
-    height: "400px",
+    width: "350px",
+    height: "350px",
     background: "#4da6ff",
-    filter: "blur(180px)",
-    opacity: 0.2,
+    filter: "blur(160px)",
+    opacity: 0.25,
     bottom: "0",
     right: "-100px",
   },
-
-  /* HEADER */
 
   header: {
     width: "100%",
@@ -280,68 +486,57 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "0 7%",
-    backdropFilter: "blur(10px)",
+    padding: "0 clamp(20px,6vw,100px)",
     position: "sticky",
     top: 0,
-    zIndex: 50,
+    zIndex: 99,
+    backdropFilter: "blur(12px)",
   },
 
   logo: {
-    fontSize: "32px",
+    fontSize: "clamp(1.8rem,4vw,2.4rem)",
     fontWeight: "bold",
-    zIndex: 5,
   },
 
   menuButton: {
-    border: "none",
-    background: "rgba(255,255,255,0.08)",
-    color: "#fff",
     width: "50px",
     height: "50px",
     borderRadius: "14px",
-    cursor: "pointer",
+    border: "1px solid rgba(255,255,255,.1)",
+    background: "rgba(255,255,255,.05)",
+    color: "#fff",
     fontSize: "24px",
-    backdropFilter: "blur(10px)",
+    cursor: "pointer",
+    transition: ".4s",
   },
-
-  /* HERO */
 
   hero: {
     minHeight: "90vh",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0 7%",
-    gap: "60px",
+    gap: "80px",
+    padding:
+      "40px clamp(20px,6vw,100px) 100px",
     flexWrap: "wrap",
+    position: "relative",
+    zIndex: 2,
   },
 
   heroLeft: {
     flex: 1,
-    minWidth: "320px",
+    minWidth: "300px",
     zIndex: 2,
   },
 
-  badge: {
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.15)",
-    padding: "10px 18px",
-    borderRadius: "30px",
-    fontSize: "14px",
-    display: "inline-block",
-    marginBottom: "30px",
-    backdropFilter: "blur(10px)",
-  },
-
   heroTitle: {
-    fontSize: "72px",
-    lineHeight: 1.1,
+    fontSize: "clamp(3rem,8vw,6rem)",
+    lineHeight: 1.05,
     marginBottom: "30px",
     fontWeight: "bold",
   },
 
-  gradientText: {
+  gradient: {
     background:
       "linear-gradient(90deg,#ff4fa3,#4da6ff)",
     WebkitBackgroundClip: "text",
@@ -349,9 +544,9 @@ const styles = {
   },
 
   heroText: {
-    fontSize: "20px",
+    fontSize: "clamp(1rem,2vw,1.25rem)",
+    lineHeight: 1.9,
     color: "#cbd5e1",
-    lineHeight: 1.8,
     maxWidth: "650px",
     marginBottom: "40px",
   },
@@ -364,45 +559,53 @@ const styles = {
 
   primaryButton: {
     border: "none",
+    padding: "1rem 2rem",
+    borderRadius: "18px",
     background:
       "linear-gradient(90deg,#ff4fa3,#ff6ab3)",
     color: "#fff",
-    padding: "18px 34px",
-    borderRadius: "18px",
-    fontSize: "16px",
     fontWeight: "bold",
+    fontSize: "1rem",
     cursor: "pointer",
-    boxShadow: "0 10px 30px rgba(255,79,163,.4)",
+    transition: ".3s",
+
+    boxShadow:
+      "0 10px 30px rgba(255,79,163,.35)",
   },
 
   secondaryButton: {
-    border: "1px solid rgba(255,255,255,.2)",
+    border: "1px solid rgba(255,255,255,.12)",
+    padding: "1rem 2rem",
+    borderRadius: "18px",
     background: "rgba(255,255,255,.05)",
     color: "#fff",
-    padding: "18px 34px",
-    borderRadius: "18px",
-    fontSize: "16px",
+    fontSize: "1rem",
     cursor: "pointer",
     backdropFilter: "blur(10px)",
+    transition: ".3s",
   },
 
   heroRight: {
     flex: 1,
     display: "flex",
     justifyContent: "center",
-    minWidth: "320px",
+    minWidth: "300px",
   },
 
-  heroCard: {
+  heroImageCard: {
     width: "100%",
     maxWidth: "550px",
-    height: "500px",
-    borderRadius: "30px",
+    height: "clamp(320px,45vw,520px)",
+    borderRadius: "32px",
     overflow: "hidden",
-    border: "1px solid rgba(255,255,255,.1)",
     background: "rgba(255,255,255,.05)",
+    border: "1px solid rgba(255,255,255,.08)",
     backdropFilter: "blur(20px)",
-    boxShadow: "0 20px 60px rgba(0,0,0,.5)",
+
+    boxShadow:
+      "0 20px 60px rgba(0,0,0,.5)",
+
+    position: "relative",
   },
 
   heroImage: {
@@ -411,42 +614,53 @@ const styles = {
     objectFit: "cover",
   },
 
-  /* STATS */
-
-  statsSection: {
-    padding: "40px 7% 120px",
+  stats: {
+    padding:
+      "0 clamp(20px,6vw,100px) 120px",
+    position: "relative",
+    zIndex: 2,
   },
 
   statsGrid: {
     display: "grid",
+
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(220px,1fr))",
-    gap: "30px",
+      "repeat(auto-fit,minmax(240px,1fr))",
+
+    gap: "24px",
   },
 
   statCard: {
-    background: "rgba(255,255,255,.05)",
-    border: "1px solid rgba(255,255,255,.1)",
     padding: "40px",
     borderRadius: "28px",
+
+    background: "rgba(255,255,255,.05)",
+
+    border: "1px solid rgba(255,255,255,.08)",
+
     textAlign: "center",
+
     backdropFilter: "blur(12px)",
+
+    transition: ".3s",
   },
 
   statNumber: {
-    fontSize: "48px",
+    fontSize: "clamp(2.5rem,6vw,4rem)",
     marginBottom: "10px",
   },
 
   statText: {
     color: "#cbd5e1",
-    fontSize: "18px",
+    fontSize: "1.1rem",
   },
 
-  /* JOBS */
-
   jobsSection: {
-    padding: "0 7% 120px",
+    padding:
+      "0 clamp(20px,6vw,100px) 120px",
+
+    position: "relative",
+    zIndex: 2,
   },
 
   sectionHeader: {
@@ -455,35 +669,61 @@ const styles = {
   },
 
   sectionTitle: {
-    fontSize: "52px",
+    fontSize: "clamp(2.5rem,6vw,4.5rem)",
     marginBottom: "20px",
   },
 
-  sectionSubtitle: {
+  sectionText: {
     color: "#cbd5e1",
-    fontSize: "18px",
+    fontSize: "1.1rem",
   },
 
   jobsGrid: {
     display: "grid",
+
     gridTemplateColumns:
       "repeat(auto-fit,minmax(320px,1fr))",
+
     gap: "30px",
   },
 
   jobCard: {
     background: "rgba(255,255,255,.05)",
-    border: "1px solid rgba(255,255,255,.1)",
+
+    border: "1px solid rgba(255,255,255,.08)",
+
     borderRadius: "28px",
+
     overflow: "hidden",
+
     backdropFilter: "blur(10px)",
-    transition: ".3s",
+
+    transition: ".35s",
+
+    cursor: "pointer",
+  },
+
+  imageWrapper: {
+    overflow: "hidden",
+    position: "relative",
   },
 
   jobImage: {
     width: "100%",
     height: "240px",
     objectFit: "cover",
+    transition: ".5s",
+  },
+
+  jobOverlay: {
+    position: "absolute",
+    inset: 0,
+
+    background:
+      "linear-gradient(to top, rgba(5,8,22,.95), transparent)",
+
+    opacity: 0,
+    transition: ".4s",
   },
 
   jobContent: {
@@ -491,17 +731,23 @@ const styles = {
   },
 
   jobTag: {
-    background: "rgba(77,166,255,.15)",
-    color: "#4da6ff",
     width: "fit-content",
+
     padding: "8px 16px",
-    borderRadius: "20px",
+
+    borderRadius: "999px",
+
+    background: "rgba(77,166,255,.12)",
+
+    color: "#4da6ff",
+
     marginBottom: "20px",
+
     fontSize: "14px",
   },
 
   jobTitle: {
-    fontSize: "28px",
+    fontSize: "1.8rem",
     marginBottom: "10px",
   },
 
@@ -512,62 +758,84 @@ const styles = {
 
   jobButton: {
     width: "100%",
-    border: "none",
-    background:
-      "linear-gradient(90deg,#ff4fa3,#ff6ab3)",
-    color: "#fff",
     padding: "16px",
     borderRadius: "16px",
-    cursor: "pointer",
+    border: "none",
+
+    background:
+      "linear-gradient(90deg,#ff4fa3,#ff6ab3)",
+
+    color: "#fff",
+
     fontWeight: "bold",
+
+    cursor: "pointer",
+
+    transition: ".3s",
   },
 
-  /* CTA */
-
   ctaSection: {
-    padding: "0 7% 120px",
+    padding:
+      "0 clamp(20px,6vw,100px) 120px",
+
+    position: "relative",
+    zIndex: 2,
   },
 
   ctaCard: {
-    background: "rgba(255,255,255,.05)",
-    border: "1px solid rgba(255,255,255,.1)",
+    padding: "clamp(40px,8vw,90px)",
+
     borderRadius: "40px",
-    padding: "80px 40px",
-    textAlign: "center",
+
+    background: "rgba(255,255,255,.05)",
+
+    border: "1px solid rgba(255,255,255,.08)",
+
     backdropFilter: "blur(14px)",
+
+    textAlign: "center",
   },
 
   ctaTitle: {
-    fontSize: "54px",
+    fontSize: "clamp(2.5rem,6vw,4.5rem)",
     marginBottom: "20px",
   },
 
   ctaText: {
     color: "#cbd5e1",
-    fontSize: "20px",
+    fontSize: "1.1rem",
     marginBottom: "40px",
   },
 
-  /* FOOTER */
-
   footer: {
-    borderTop: "1px solid rgba(255,255,255,.08)",
-    padding: "40px 7%",
+    borderTop:
+      "1px solid rgba(255,255,255,.08)",
+
+    padding:
+      "40px clamp(20px,6vw,100px)",
+
     display: "flex",
+
     justifyContent: "space-between",
+
     alignItems: "center",
+
     flexWrap: "wrap",
+
     gap: "30px",
+
+    position: "relative",
+    zIndex: 2,
   },
 
   footerLogo: {
-    fontSize: "28px",
+    fontSize: "2rem",
     fontWeight: "bold",
   },
 
   footerLinks: {
     display: "flex",
-    gap: "30px",
+    gap: "24px",
     flexWrap: "wrap",
   },
 
@@ -576,24 +844,30 @@ const styles = {
     textDecoration: "none",
   },
 
-  copy: {
+  footerCopy: {
     color: "#64748b",
   },
-
-  /* SIDEBAR */
 
   sidebar: {
     position: "fixed",
     top: 0,
     right: 0,
+
     width: "300px",
     height: "100vh",
-    background: "#020617",
-    borderLeft: "1px solid rgba(255,255,255,.08)",
-    zIndex: 999,
-    transition: ".4s",
-    padding: "30px",
+
+    background: "rgba(2,6,23,.95)",
+
+    borderLeft:
+      "1px solid rgba(255,255,255,.08)",
+
     backdropFilter: "blur(20px)",
+
+    zIndex: 999,
+
+    transition: ".4s",
+
+    padding: "30px",
   },
 
   closeButton: {
@@ -602,7 +876,7 @@ const styles = {
     color: "#fff",
     fontSize: "32px",
     cursor: "pointer",
-    marginBottom: "60px",
+    marginBottom: "70px",
   },
 
   sidebarLinks: {
@@ -614,7 +888,7 @@ const styles = {
   sidebarLink: {
     color: "#fff",
     textDecoration: "none",
-    fontSize: "20px",
+    fontSize: "1.2rem",
     fontWeight: "bold",
   },
 };
