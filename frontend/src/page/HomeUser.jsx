@@ -223,14 +223,43 @@ export default function HomeUser() {
 
             <main style={styles.main}>
 
+            <div style={styles.welcomeBox}>
+                <h2 style={styles.welcomeTitle}>
+                    Encontre sua próxima oportunidade 🚀
+                </h2>
+
+                <p style={styles.welcomeText}>
+                    Explore vagas disponíveis nas áreas de tecnologia,
+                    design, marketing e muito mais.
+                </p>
+            </div>
+
                 {Object.entries(vagasAgrupadas).map(([categoria, vagas]) => (
 
                     <section key={categoria} style={styles.section}>
-                        <h2 style={styles.sectionTitle}>{categoria}</h2>
+                        <div>
+                            <h2 style={styles.sectionTitle}>{categoria}</h2>
+                            <div style={styles.titleLine}></div>
+                        </div>
                         <div style={styles.cardsContainer}>
                             {vagas.map((vaga) => (
 
-                                <div key={vaga.id} style={styles.card}>
+                                    <div
+                                    key={vaga.id}
+                                    style={styles.card}
+
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = "translateY(-8px)";
+                                        e.currentTarget.style.boxShadow =
+                                        "0 20px 40px rgba(15,23,42,0.15)";
+                                    }}
+
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                        e.currentTarget.style.boxShadow =
+                                        "0 10px 30px rgba(15,23,42,0.08)";
+                                    }}
+                                    >
                                     <h3 style={styles.cardTitle}>{vaga.titulo}</h3>
                                     <img  src={vaga.imagem} alt={vaga.titulo}   style={styles.cardImage}/>
                                     <p style={styles.cardDescription}>{vaga.descricao}</p>
@@ -270,6 +299,15 @@ export default function HomeUser() {
                                         >
                                         Descrição
                                         </button>
+                                        <p style={styles.cardDescription}>{vaga.descricao}</p>
+
+                                        <div style={styles.tagsContainer}>
+                                            {vaga.tags.map((tag, index) => (
+                                                <span key={index} style={styles.tag}>
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>                  
                                     </div>
                                 </div>
                             ))}
@@ -302,144 +340,215 @@ const styles = {
 
     container: {
         minHeight: "100vh",
-        backgroundColor: "#d9d9d9",
-        fontFamily: "Arial"
+        background: "linear-gradient(to bottom, #f8fafc, #e2e8f0)",
+        fontFamily: "Arial, sans-serif",
     },
 
     header: {
-        backgroundColor: "black",
-        padding: "30px"
+        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        padding: "50px 8%",
+        borderBottomLeftRadius: "30px",
+        borderBottomRightRadius: "30px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
     },
 
     userContainer: {
         display: "flex",
         alignItems: "center",
-        gap: "20px"
+        gap: "25px",
+        flexWrap: "wrap",
     },
 
     userImage: {
-        width: "110px",
-        height: "110px",
+        width: "120px",
+        height: "120px",
         borderRadius: "50%",
         objectFit: "cover",
-        border: "3px solid #ff4fa3"
+        border: "4px solid rgba(255,255,255,0.2)",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
+    },
+
+    headerInfos: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
     },
 
     userName: {
         color: "white",
         margin: 0,
-        fontSize: "32px",
-        fontWeight: "600",
+        fontSize: "38px",
+        fontWeight: "700",
+        letterSpacing: "-1px",
     },
 
     userText: {
-        color: "white",
-        margin: "5px 0",
+        color: "#cbd5e1",
+        margin: "6px 0",
+        fontSize: "15px",
     },
 
     curriculoButton: {
-        marginTop: "10px",
-        padding: "12px 20px",
-        borderRadius: "30px",
-        border: "none",
-        backgroundColor: "#ff4fa3",
+        marginTop: "18px",
+        padding: "14px 24px",
+        borderRadius: "14px",
+        border: "1px solid rgba(255,255,255,0.15)",
+        background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
         color: "white",
-        fontWeight: "bold",
+        fontWeight: "600",
         cursor: "pointer",
-        fontSize: "16px",
-        transition: "0.3s",
+        fontSize: "15px",
+        transition: "all 0.25s ease",
+        boxShadow: "0 10px 20px rgba(236,72,153,0.35)",
     },
 
     main: {
-        padding: "20px"
+        padding: "60px 8%",
+    },
+
+    welcomeBox: {
+        marginBottom: "60px",
+    },
+
+    welcomeTitle: {
+        fontSize: "44px",
+        color: "#0f172a",
+        marginBottom: "12px",
+        fontWeight: "700",
+    },
+
+    welcomeText: {
+        color: "#64748b",
+        fontSize: "18px",
+        lineHeight: "1.6",
     },
 
     section: {
-        marginBottom: "40px"
+        marginBottom: "70px",
     },
 
     sectionTitle: {
-        fontSize: "32px",
-        marginBottom: "2%",
-        marginLeft: "3%",
-        color: "#000",
+        fontSize: "34px",
+        color: "#0f172a",
         fontWeight: "700",
-        width: "fit-content",
-        borderBottom: "4px solid #000",
-        paddingBottom: "5px",
-        borderRadius: "4px",
-        
+        marginBottom: "8px",
+    },
+
+    titleLine: {
+        width: "120px",
+        height: "5px",
+        borderRadius: "999px",
+        background: "linear-gradient(to right, #ec4899, #60a5fa)",
+        marginBottom: "35px",
     },
 
     cardsContainer: {
         display: "flex",
-        gap: "70px",
+        gap: "32px",
         flexWrap: "wrap",
-        justifyContent: "left",
-        margin: "0 0 0 15%",
+        justifyContent: "center",
+        alignItems: "stretch",
     },
 
     card: {
-        width: "280px",
-        backgroundColor: "white",
-        borderRadius: "15px",
-        padding: "15px",
-        boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+        width: "320px",
+        minHeight: "520px",
+    
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+    
+        background: "rgba(255,255,255,0.82)",
+        backdropFilter: "blur(10px)",
+    
+        borderRadius: "24px",
+        padding: "18px",
+    
+        border: "1px solid rgba(255,255,255,0.4)",
+    
+        boxShadow: "0 10px 30px rgba(15,23,42,0.08)",
+    
+        transition: "all 0.3s ease",
+        cursor: "pointer",
+    
+        overflow: "hidden",
     },
 
     cardTitle: {
-        marginBottom: "15px"
+        marginBottom: "16px",
+        fontSize: "22px",
+        color: "#0f172a",
+        fontWeight: "700",
+    
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
     },
 
     cardImage: {
         width: "100%",
-        height: "160px",
+        height: "190px",
+        minHeight: "190px",
         objectFit: "cover",
-        borderRadius: "10px"
+        borderRadius: "18px",
+    
+        display: "block",
     },
 
     cardDescription: {
-        marginTop: "15px",
+        marginTop: "16px",
+    
         fontSize: "14px",
-        textAling: "justify",
+        color: "#475569",
+    
+        lineHeight: "1.7",
+    
+        textAlign: "justify",
+    
+        overflow: "hidden",
+    
+        display: "-webkit-box",
+        WebkitLineClamp: 4,
+        WebkitBoxOrient: "vertical",
+    
+        minHeight: "95px",
     },
 
-    detailsButton: {
-        marginTop: "15px",
-        width: "100%",
-        padding: "12px",
-        border: "none",
-        borderRadius: "30px",
-        backgroundColor: "#ff4fa3",
-        color: "white",
-        fontWeight: "bold",
-        cursor: "pointer"
+    tagsContainer: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "8px",
+        marginTop: "18px",
+    
+        overflow: "hidden",
     },
 
-    footer: {
-        backgroundColor: "black",
-        color: "white",
-        padding: "40px",
-        marginTop: "40px"
+    tag: {
+        backgroundColor: "#e0f2fe",
+        color: "#0369a1",
+        padding: "7px 12px",
+        borderRadius: "999px",
+        fontSize: "12px",
+        fontWeight: "600",
     },
 
-      // BOTÃO
-      buttonContainer: {
+    buttonContainer: {
         position: "relative",
         width: "180px",
-        height: "40px",
-        marginTop: "10px",
-        margin: "10px auto 0 auto",
+        height: "44px",
+        marginTop: "25px",
+        marginLeft: "auto",
+        marginRight: "auto",
     },
 
     buttonBack: {
         position: "absolute",
         width: "100%",
         height: "100%",
-        borderRadius: "30px",
-        border: "3px solid #5dade2",
+        borderRadius: "16px",
+        border: "2px solid #60a5fa",
         top: "6px",
-        left: "-9px",
+        left: "-8px",
         transition: "all 0.25s ease",
         opacity: 0.9,
     },
@@ -448,22 +557,21 @@ const styles = {
         position: "relative",
         width: "100%",
         height: "100%",
-        borderRadius: "30px",
+        borderRadius: "16px",
         border: "none",
-        background:"linear-gradient(135deg, #e85c8b 0%, #d94f82 100%)",
+        background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
         color: "#fff",
-        fontWeight: "bold",
+        fontWeight: "700",
         fontSize: "15px",
         cursor: "pointer",
         transition: "all 0.25s ease",
-        boxShadow:
-        "0 4px 15px rgba(232,92,139,0.25)",
-  },
+        boxShadow: "0 4px 15px rgba(236,72,153,0.25)",
+    },
 
-  headerInfos:{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-
-  }
+    footer: {
+        background: "#0f172a",
+        color: "white",
+        padding: "50px",
+        marginTop: "50px",
+    },
 };
