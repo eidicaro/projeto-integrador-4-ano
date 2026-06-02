@@ -87,40 +87,73 @@ export default function Home() {
       {/* GRID */}
       <div style={styles.grid}></div>
 
-      {/* SIDEBAR */}
-      <div
-        style={{
-          ...styles.sidebar,
-          transform: menuOpen
-            ? "translateX(0)"
-            : "translateX(100%)",
-        }}
-      >
-        <button
-          style={styles.closeButton}
-          onClick={() => setMenuOpen(false)}
-        >
-          ✕
-        </button>
+     {/* SIDEBAR */}
+<div
+  style={{
+    ...styles.sidebar,
+    transform: menuOpen
+      ? "translateX(0)"
+      : "translateX(100%)",
+  }}
+>
+  <button
+    style={styles.closeButton}
+    onClick={() => setMenuOpen(false)}
+  >
+    ✕
+  </button>
 
-        <div style={styles.sidebarLinks}>
-          <a href="#" style={styles.sidebarLink}>
-            Home
-          </a>
+  <div style={styles.sidebarProfile}>
+    <div style={styles.profileAvatar}>
+      P
+    </div>
 
-          <a href="#" style={styles.sidebarLink}>
-            Vagas
-          </a>
+    <h3 style={styles.profileName}>
+      Point Talentos
+    </h3>
 
-          <a href="#" style={styles.sidebarLink}>
-            Perfil
-          </a>
+    <p style={styles.profileText}>
+      Plataforma de recrutamento
+    </p>
+  </div>
 
-          <a href="#" style={styles.sidebarLink}>
-            Portfólio
-          </a>
-        </div>
-      </div>
+  <div style={styles.sidebarLinks}>
+  <a
+  href="#"
+  className="sidebar-link"
+  style={styles.sidebarLink}
+  >🏠 Home</a>
+
+    <a
+  href="#"
+  className="sidebar-link"
+  style={styles.sidebarLink}
+  >💼 Vagas </a>
+
+    <a
+  href="#"
+  className="sidebar-link"
+  style={styles.sidebarLink}
+  >👤 Perfil</a>
+
+    <a
+  href="#"
+  className="sidebar-link"
+  style={styles.sidebarLink}
+  >📁 Portfólio</a>
+  </div>
+
+  <div style={styles.sidebarDivider}></div>
+
+  <button
+  className="admin-btn"
+  style={styles.adminButton}>
+    ⚙ Painel Admin</button>
+
+  <div style={styles.sidebarFooter}>
+    © Point 2026
+  </div>
+</div>
 
       {/* HEADER */}
       <header style={styles.header}>
@@ -430,6 +463,16 @@ const hoverStyles = `
       transform: translateY(0px);
     }
   }
+ .sidebar-link:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.admin-btn:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 15px 40px rgba(255,79,163,.5);
+}
 `;
 
 const styles = {
@@ -852,8 +895,9 @@ const styles = {
     position: "fixed",
     top: 0,
     right: 0,
+    
 
-    width: "300px",
+    width: "360px",
     height: "100vh",
 
     background: "rgba(2,6,23,.95)",
@@ -887,8 +931,103 @@ const styles = {
 
   sidebarLink: {
     color: "#fff",
+  
     textDecoration: "none",
-    fontSize: "1.2rem",
+  
+    fontSize: "1rem",
+  
+    fontWeight: "600",
+  
+    padding: "14px 18px",
+  
+    borderRadius: "14px",
+  
+    background: "rgba(255,255,255,.04)",
+  
+    transition: ".3s",
+  },
+  sidebarProfile: {
+    textAlign: "center",
+    marginBottom: "40px",
+  },
+  
+  profileAvatar: {
+    width: "90px",
+    height: "90px",
+  
+    margin: "0 auto 16px",
+  
+    borderRadius: "50%",
+  
+    background:
+      "linear-gradient(135deg,#ff4fa3,#4da6ff)",
+  
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  
+    fontSize: "2rem",
     fontWeight: "bold",
+  
+    boxShadow:
+      "0 0 30px rgba(255,79,163,.4)",
+  },
+  
+  profileName: {
+    fontSize: "1.3rem",
+    marginBottom: "6px",
+  },
+  
+  profileText: {
+    color: "#94a3b8",
+    fontSize: "14px",
+  },
+  
+  sidebarDivider: {
+    height: "1px",
+  
+    background:
+      "rgba(255,255,255,.08)",
+  
+    margin: "30px 0",
+  },
+  
+  adminButton: {
+    width: "100%",
+  
+    padding: "16px",
+  
+    borderRadius: "16px",
+  
+    border: "none",
+  
+    cursor: "pointer",
+  
+    fontWeight: "bold",
+  
+    color: "#fff",
+  
+    background:
+      "linear-gradient(90deg,#ff4fa3,#ff6ab3)",
+  
+    transition: ".3s",
+  
+    boxShadow:
+      "0 10px 30px rgba(255,79,163,.35)",
+  },
+  
+  sidebarFooter: {
+    position: "absolute",
+  
+    bottom: "30px",
+  
+    left: 0,
+    right: 0,
+  
+    textAlign: "center",
+  
+    color: "#64748b",
+  
+    fontSize: "13px",
   },
 };
