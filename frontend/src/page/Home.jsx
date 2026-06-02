@@ -104,43 +104,48 @@ export default function Home() {
   </button>
 
   <div style={styles.sidebarProfile}>
-    <div style={styles.profileAvatar}>
-      P
-    </div>
+  <div style={styles.sidebarLogo}>
+    <span style={{ color: "#ff4fa3" }}>
+      p
+    </span>
 
-    <h3 style={styles.profileName}>
-      Point Talentos
-    </h3>
+    <span style={{ color: "#4da6ff" }}>
+      o
+    </span>
 
-    <p style={styles.profileText}>
-      Plataforma de recrutamento
-    </p>
+    int
   </div>
+
+  <p style={styles.profileText}>
+    Plataforma de recrutamento
+  </p>
+</div>
+
 
   <div style={styles.sidebarLinks}>
   <a
   href="#"
   className="sidebar-link"
   style={styles.sidebarLink}
-  >🏠 Home</a>
+  >Home</a>
 
     <a
   href="#"
   className="sidebar-link"
   style={styles.sidebarLink}
-  >💼 Vagas </a>
+  >Vagas </a>
 
     <a
   href="#"
   className="sidebar-link"
   style={styles.sidebarLink}
-  >👤 Perfil</a>
+  >Perfil</a>
 
     <a
   href="#"
   className="sidebar-link"
   style={styles.sidebarLink}
-  >📁 Portfólio</a>
+  >Portfólio</a>
   </div>
 
   <div style={styles.sidebarDivider}></div>
@@ -948,7 +953,17 @@ const styles = {
   },
   sidebarProfile: {
     textAlign: "center",
+    paddingBottom: "30px",
     marginBottom: "40px",
+  
+    borderBottom:
+      "1px solid rgba(255,255,255,.08)",
+  },
+
+  sidebarLogo: {
+    fontSize: "3rem",
+    fontWeight: "bold",
+    marginBottom: "14px",
   },
   
   profileAvatar: {
