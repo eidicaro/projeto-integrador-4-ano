@@ -203,6 +203,7 @@ export default function Login() {
                 <button
                   type="submit"
                   style={styles.buttonFront}
+                  onClick={() => window.location.href = "/"}
                   className="login-button-front"
                   onMouseEnter={(e) => {
                     e.target.style.transform = "translateY(-3px)";

@@ -272,7 +272,7 @@ export default function Cadastro() {
 
                   style={styles.buttonFront}
                   className="register-button-front"
-
+                  onClick={() => window.location.href = "/login"}
                   onMouseEnter={(e) => {
                     e.target.style.transform = "translateY(-3px)";
                     e.target.style.boxShadow =
