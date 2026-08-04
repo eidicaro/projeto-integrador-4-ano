@@ -149,22 +149,7 @@ export default function HomeUser() {
                     "Laravel"
                 ],
             },
-            {
-                id: 3,
-                titulo: "UI/UX Designer",
-                descricao: "Criação de interfaces modernas e intuitivas.",
-                descricaoCompleta: "Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.Um desenvolvedor Full Stack é um profissional versátil que domina tanto o front-end quanto o back-end.",
-                imagem: "https://images.unsplash.com/photo-1559028012-481c04fa702d",
-                categoria: "Design",
-
-                tags: [
-                    "Remoto",
-                    "Tempo Integral",
-                    "Full Stack",
-                    "React",
-                    "Laravel"
-                ],
-            }
+           
         ];
 
         setUsuario(mockUsuario);
