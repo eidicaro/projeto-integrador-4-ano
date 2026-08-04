@@ -124,25 +124,25 @@ export default function Home() {
 
   <div style={styles.sidebarLinks}>
   <a
-  href="#"
+  href="/"
   className="sidebar-link"
   style={styles.sidebarLink}
   >Home</a>
 
     <a
-  href="#"
+  href="/login"
   className="sidebar-link"
   style={styles.sidebarLink}
   >Vagas </a>
 
     <a
-  href="#"
+  href="/login"
   className="sidebar-link"
   style={styles.sidebarLink}
   >Perfil</a>
 
     <a
-  href="#"
+  href="/login"
   className="sidebar-link"
   style={styles.sidebarLink}
   >Portfólio</a>
@@ -206,6 +206,7 @@ export default function Home() {
             <button
               className="primary-btn"
               style={styles.primaryButton}
+              onClick={() => window.location.href = "/login"}
             >
               Explorar Vagas
             </button>
@@ -213,6 +214,7 @@ export default function Home() {
             <button
               className="secondary-btn"
               style={styles.secondaryButton}
+              onClick={() => window.location.href = "/cadastro"}
             >
               Criar Perfil
             </button>
