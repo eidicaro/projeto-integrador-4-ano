@@ -7,13 +7,11 @@ import {
 
 import {
   AnimatePresence,
-  motion,
+  motion, // eslint-disable-line no-unused-vars -- usado como namespace JSX
   useReducedMotion,
 } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
-
-import bgVideo from "../assets/bg.mp4";
 
 const CATEGORIES = [
   "Todas",
@@ -22,6 +20,14 @@ const CATEGORIES = [
   "Dados",
   "Produto",
   "Qualidade",
+];
+
+const WORK_MODES = ["Todos", "Remoto", "Híbrido"];
+const EXPERIENCE_LEVELS = [
+  "Todos",
+  "Júnior",
+  "Pleno",
+  "Sênior",
 ];
 
 const JOBS = [
@@ -195,6 +201,9 @@ const JOBS = [
   },
 ];
 
+const FEATURED_JOB =
+  JOBS.find((job) => job.featured) ?? JOBS[0];
+
 const ACTIVITIES = [
   {
     title: "Nova vaga publicada",
@@ -244,24 +253,24 @@ const SHORTCUTS = [
     action: "profile",
   },
   {
-    title: "Meu portfólio",
+    title: "Criar currículo",
     description:
-      "Organize projetos, experiências e conquistas em um único espaço.",
-    tag: "Mostrar trabalho",
+      "Organize experiências, formação e habilidades em uma apresentação profissional.",
+    tag: "Montar agora",
     accent: "#ffd447",
     className: "shortcut-card--portfolio",
     icon: "folder",
-    action: "portfolio",
+    action: "resume",
   },
   {
-    title: "Candidaturas",
+    title: "Para empresas",
     description:
-      "Acompanhe cada processo seletivo sem perder nenhuma atualização.",
-    tag: "Ver progresso",
+      "Publique oportunidades e encontre talentos para fortalecer o seu time.",
+    tag: "Encontrar talentos",
     accent: "#baf26d",
     className: "shortcut-card--applications",
     icon: "route",
-    action: "applications",
+    action: "company",
   },
 ];
 
@@ -288,10 +297,10 @@ const COMMANDS = [
     icon: "user",
   },
   {
-    id: "portfolio",
-    label: "Abrir portfólio",
-    description: "Organizar projetos e experiências",
-    keywords: "portfolio projetos trabalho",
+    id: "resume",
+    label: "Criar currículo",
+    description: "Organizar experiências e habilidades",
+    keywords: "curriculo currículo experiências habilidades",
     icon: "folder",
   },
   {
@@ -324,7 +333,11 @@ export default function Home() {
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Todas");
+  const [workMode, setWorkMode] = useState("Todos");
+  const [experienceLevel, setExperienceLevel] =
+    useState("Todos");
   const [sortBy, setSortBy] = useState("match");
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
 
   const [selectedJob, setSelectedJob] = useState(null);
   const [savedJobs, setSavedJobs] = useState(new Set());
@@ -343,6 +356,16 @@ export default function Home() {
         activeCategory === "Todas" ||
         job.category === activeCategory;
 
+      const matchesWorkMode =
+        workMode === "Todos" || job.type === workMode;
+
+      const matchesExperienceLevel =
+        experienceLevel === "Todos" ||
+        job.level === experienceLevel;
+
+      const matchesSaved =
+        !showSavedOnly || savedJobs.has(job.id);
+
       const searchableContent = [
         job.title,
         job.company,
@@ -359,7 +382,13 @@ export default function Home() {
         !normalizedSearch ||
         searchableContent.includes(normalizedSearch);
 
-      return matchesCategory && matchesSearch;
+      return (
+        matchesCategory &&
+        matchesWorkMode &&
+        matchesExperienceLevel &&
+        matchesSaved &&
+        matchesSearch
+      );
     });
 
     return [...result].sort((a, b) => {
@@ -374,7 +403,42 @@ export default function Home() {
 
       return b.match - a.match;
     });
-  }, [activeCategory, search, sortBy]);
+  }, [
+    activeCategory,
+    experienceLevel,
+    savedJobs,
+    search,
+    showSavedOnly,
+    sortBy,
+    workMode,
+  ]);
+
+  const resultSummary = useMemo(() => {
+    if (filteredJobs.length === 0) {
+      return { averageMatch: 0, newJobs: 0, remoteJobs: 0 };
+    }
+
+    const matchTotal = filteredJobs.reduce(
+      (total, job) => total + job.match,
+      0,
+    );
+
+    return {
+      averageMatch: Math.round(matchTotal / filteredJobs.length),
+      newJobs: filteredJobs.filter((job) => job.isNew).length,
+      remoteJobs: filteredJobs.filter(
+        (job) => job.type === "Remoto",
+      ).length,
+    };
+  }, [filteredJobs]);
+
+  const hasActiveJobFilters = Boolean(
+    search ||
+      activeCategory !== "Todas" ||
+      workMode !== "Todos" ||
+      experienceLevel !== "Todos" ||
+      showSavedOnly,
+  );
 
   const filteredCommands = useMemo(() => {
     const normalized = commandQuery.trim().toLowerCase();
@@ -431,6 +495,11 @@ export default function Home() {
       );
     }
   }, [savedHydrated, savedJobs]);
+
+  useEffect(
+    () => () => window.clearTimeout(toastTimerRef.current),
+    [],
+  );
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -567,9 +636,32 @@ export default function Home() {
     });
   }
 
+  function resetJobFilters() {
+    setSearch("");
+    setActiveCategory("Todas");
+    setWorkMode("Todos");
+    setExperienceLevel("Todos");
+    setShowSavedOnly(false);
+  }
+
+  function viewSavedJobs() {
+    setShowSavedOnly(true);
+    window.setTimeout(scrollToJobs, 50);
+  }
+
   function handleHeroSearch(event) {
     event.preventDefault();
+    setShowSavedOnly(false);
     scrollToJobs();
+  }
+
+  function exploreCategory(category) {
+    setSearch("");
+    setActiveCategory(category);
+    setWorkMode("Todos");
+    setExperienceLevel("Todos");
+    setShowSavedOnly(false);
+    window.setTimeout(scrollToJobs, 50);
   }
 
   function handleShortcut(action) {
@@ -582,12 +674,12 @@ export default function Home() {
         navigate("/cadastro");
         break;
 
-      case "portfolio":
-        navigate("/portfolio");
+      case "resume":
+        navigate("/createResume");
         break;
 
-      case "applications":
-        navigate("/candidaturas");
+      case "company":
+        navigate("/admin/login");
         break;
 
       default:
@@ -647,12 +739,12 @@ export default function Home() {
         navigate("/cadastro");
         break;
 
-      case "portfolio":
-        navigate("/portfolio");
+      case "resume":
+        navigate("/createResume");
         break;
 
       case "saved":
-        navigate("/vagas-salvas");
+        window.setTimeout(viewSavedJobs, 100);
         break;
 
       case "login":
@@ -750,16 +842,16 @@ export default function Home() {
 
             <button
               type="button"
-              onClick={() => navigate("/empresas")}
+              onClick={() => navigate("/admin/login")}
             >
-              Empresas
+              Para empresas
             </button>
 
             <button
               type="button"
-              onClick={() => navigate("/portfolio")}
+              onClick={() => navigate("/createResume")}
             >
-              Portfólio
+              Currículo
             </button>
           </nav>
 
@@ -784,7 +876,7 @@ export default function Home() {
             <button
               type="button"
               className="saved-trigger"
-              onClick={() => navigate("/vagas-salvas")}
+              onClick={viewSavedJobs}
               aria-label={`${savedJobs.size} vagas salvas`}
             >
               <BookmarkIcon />
@@ -834,6 +926,11 @@ export default function Home() {
 
                 if (destination === "jobs") {
                   window.setTimeout(scrollToJobs, 100);
+                  return;
+                }
+
+                if (destination === "saved") {
+                  window.setTimeout(viewSavedJobs, 100);
                   return;
                 }
 
@@ -917,6 +1014,7 @@ export default function Home() {
                     type="button"
                     onClick={() => {
                       setSearch(trend);
+                      setShowSavedOnly(false);
                       window.setTimeout(scrollToJobs, 50);
                     }}
                   >
@@ -1024,61 +1122,94 @@ export default function Home() {
                 />
               </svg>
 
-              <div className="map-video-card">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
+              <button
+                type="button"
+                className="map-feature-card"
+                style={{
+                  "--feature-accent": FEATURED_JOB.accent,
+                  "--feature-soft-accent":
+                    FEATURED_JOB.softAccent,
+                }}
+                onClick={() => openJob(FEATURED_JOB)}
+                aria-label={`Ver vaga em destaque: ${FEATURED_JOB.title}`}
+              >
+                <span
+                  className="map-feature-pattern"
+                  aria-hidden="true"
+                />
+
+                <span
+                  className="map-feature-symbol"
                   aria-hidden="true"
                 >
-                  <source src={bgVideo} type="video/mp4" />
-                </video>
+                  {FEATURED_JOB.symbol}
+                </span>
 
-                <div className="map-video-overlay" />
+                <span className="map-feature-live">
+                  <i />
+                  Destaque do radar
+                </span>
 
-                <div className="map-video-live">
-                  <span />
-                  Explorando agora
-                </div>
+                <span className="map-feature-copy">
+                  <small>
+                    {FEATURED_JOB.type} · {FEATURED_JOB.match}% de
+                    combinação
+                  </small>
 
-                <div className="map-video-copy">
-                  <span>Seu próximo destino</span>
-                  <strong>Pode estar mais perto.</strong>
-                </div>
-              </div>
+                  <strong>{FEATURED_JOB.title}</strong>
+
+                  <span>
+                    {FEATURED_JOB.company} · {FEATURED_JOB.location}
+                  </span>
+                </span>
+
+                <span className="map-feature-footer">
+                  <span>
+                    <small>Faixa salarial</small>
+                    <strong>{FEATURED_JOB.salary}</strong>
+                  </span>
+
+                  <span className="map-feature-action">
+                    Ver detalhes
+                    <ArrowUpRightIcon />
+                  </span>
+                </span>
+              </button>
 
               <MapNode
                 className="map-node--development"
                 label="Desenvolvimento"
-                detail="342 vagas"
+                detail={formatJobCount("Desenvolvimento")}
                 accent="#ff4f8b"
                 icon={<CodeIcon />}
+                onClick={() => exploreCategory("Desenvolvimento")}
               />
 
               <MapNode
                 className="map-node--design"
                 label="Design"
-                detail="184 vagas"
+                detail={formatJobCount("Design")}
                 accent="#9183ff"
                 icon={<PenToolIcon />}
+                onClick={() => exploreCategory("Design")}
               />
 
               <MapNode
                 className="map-node--data"
                 label="Dados"
-                detail="126 vagas"
+                detail={formatJobCount("Dados")}
                 accent="#64c7ee"
                 icon={<ChartIcon />}
+                onClick={() => exploreCategory("Dados")}
               />
 
               <MapNode
                 className="map-node--product"
                 label="Produto"
-                detail="98 vagas"
+                detail={formatJobCount("Produto")}
                 accent="#baf26d"
                 icon={<TargetIcon />}
+                onClick={() => exploreCategory("Produto")}
               />
 
               <div
@@ -1202,7 +1333,7 @@ export default function Home() {
             title="Vagas que merecem sua atenção."
             description="Busque, filtre, salve e abra os detalhes sem sair da Home."
             actionLabel={`${savedJobs.size} salvas`}
-            onAction={() => navigate("/vagas-salvas")}
+            onAction={viewSavedJobs}
           />
 
           <div className="jobs-toolbar">
@@ -1229,6 +1360,44 @@ export default function Home() {
                 </button>
               )}
             </div>
+
+            <label className="jobs-sort jobs-filter jobs-filter--mode">
+              <span>Modelo</span>
+
+              <select
+                value={workMode}
+                onChange={(event) =>
+                  setWorkMode(event.target.value)
+                }
+              >
+                {WORK_MODES.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {mode}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDownIcon />
+            </label>
+
+            <label className="jobs-sort jobs-filter jobs-filter--level">
+              <span>Nível</span>
+
+              <select
+                value={experienceLevel}
+                onChange={(event) =>
+                  setExperienceLevel(event.target.value)
+                }
+              >
+                {EXPERIENCE_LEVELS.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDownIcon />
+            </label>
 
             <label className="jobs-sort">
               <span>Ordenar</span>
@@ -1276,23 +1445,55 @@ export default function Home() {
                 )}
               </button>
             ))}
+
+            <button
+              type="button"
+              className={
+                showSavedOnly
+                  ? "category-filter category-filter--saved category-filter--active"
+                  : "category-filter category-filter--saved"
+              }
+              onClick={() => setShowSavedOnly((current) => !current)}
+              aria-pressed={showSavedOnly}
+            >
+              <BookmarkIcon filled={showSavedOnly} />
+              Salvas
+              <span>{savedJobs.size}</span>
+            </button>
           </div>
 
           <div className="jobs-result-header">
-            <span>
-              <strong>{filteredJobs.length}</strong>{" "}
-              {filteredJobs.length === 1
-                ? "oportunidade encontrada"
-                : "oportunidades encontradas"}
-            </span>
+            <div className="jobs-result-copy" aria-live="polite">
+              <span>
+                <strong>{filteredJobs.length}</strong>{" "}
+                {filteredJobs.length === 1
+                  ? "oportunidade encontrada"
+                  : "oportunidades encontradas"}
+              </span>
 
-            {(search || activeCategory !== "Todas") && (
+              {filteredJobs.length > 0 && (
+                <span className="jobs-result-insights">
+                  <span>
+                    {resultSummary.remoteJobs}{" "}
+                    {resultSummary.remoteJobs === 1
+                      ? "remota"
+                      : "remotas"}
+                  </span>
+                  <span>
+                    {resultSummary.newJobs}{" "}
+                    {resultSummary.newJobs === 1 ? "nova" : "novas"}
+                  </span>
+                  <span>
+                    {resultSummary.averageMatch}% match médio
+                  </span>
+                </span>
+              )}
+            </div>
+
+            {hasActiveJobFilters && (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("");
-                  setActiveCategory("Todas");
-                }}
+                onClick={resetJobFilters}
               >
                 Limpar todos os filtros
               </button>
@@ -1318,10 +1519,8 @@ export default function Home() {
               </motion.div>
             ) : (
               <EmptyJobs
-                onReset={() => {
-                  setSearch("");
-                  setActiveCategory("Todas");
-                }}
+                savedOnly={showSavedOnly}
+                onReset={resetJobFilters}
               />
             )}
           </AnimatePresence>
@@ -1330,9 +1529,9 @@ export default function Home() {
             <button
               type="button"
               className="jobs-more-button"
-              onClick={() => navigate("/vagas")}
+              onClick={() => navigate("/cadastro")}
             >
-              Ver todas as oportunidades
+              Criar perfil e receber novos matches
               <ArrowRightIcon />
             </button>
           </div>
@@ -1386,7 +1585,7 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={() => navigate("/perfil")}
+                onClick={() => navigate("/cadastro")}
               >
                 Completar meu perfil
                 <ArrowUpRightIcon />
@@ -1660,16 +1859,16 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={() => navigate("/empresas")}
+                onClick={() => navigate("/admin/login")}
               >
-                Empresas
+                Para empresas
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate("/portfolio")}
+                onClick={() => navigate("/createResume")}
               >
-                Portfólio
+                Criar currículo
               </button>
             </div>
 
@@ -1692,27 +1891,27 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={() => navigate("/vagas-salvas")}
+                onClick={viewSavedJobs}
               >
                 Vagas salvas
               </button>
             </div>
 
             <div className="footer-column">
-              <strong>Institucional</strong>
+              <strong>Recursos</strong>
 
               <button
                 type="button"
-                onClick={() => navigate("/sobre")}
+                onClick={() => setCommandOpen(true)}
               >
-                Sobre a Point
+                Busca rápida
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate("/contato")}
+                onClick={() => navigate("/createResume")}
               >
-                Contato
+                Montar currículo
               </button>
 
               <button
@@ -1732,14 +1931,18 @@ export default function Home() {
             <div>
               <button
                 type="button"
-                onClick={() => navigate("/privacidade")}
+                onClick={() =>
+                  showToast("Política de privacidade em preparação.")
+                }
               >
                 Privacidade
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate("/termos")}
+                onClick={() =>
+                  showToast("Termos de uso em preparação.")
+                }
               >
                 Termos
               </button>
@@ -1777,7 +1980,7 @@ export default function Home() {
           <button
             type="button"
             className="mobile-nav-item"
-            onClick={() => navigate("/vagas-salvas")}
+            onClick={viewSavedJobs}
           >
             <span className="mobile-nav-icon-wrapper">
               <BookmarkIcon />
@@ -1793,7 +1996,7 @@ export default function Home() {
           <button
             type="button"
             className="mobile-nav-item"
-            onClick={() => navigate("/perfil")}
+            onClick={() => navigate("/cadastro")}
           >
             <UserIcon />
             <span>Perfil</span>
@@ -2144,6 +2347,41 @@ function CommandPalette({
   onExecute,
   onClose,
 }) {
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const safeHighlightedIndex = Math.min(
+    highlightedIndex,
+    Math.max(commands.length - 1, 0),
+  );
+  const highlightedCommand = commands[safeHighlightedIndex];
+
+  function handleCommandKeyDown(event) {
+    if (commands.length === 0) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setHighlightedIndex(
+        (current) =>
+          (Math.min(current, commands.length - 1) + 1) %
+          commands.length,
+      );
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setHighlightedIndex(
+        (current) =>
+          (Math.min(current, commands.length - 1) - 1 +
+            commands.length) %
+          commands.length,
+      );
+    }
+
+    if (event.key === "Enter" && highlightedCommand) {
+      event.preventDefault();
+      onExecute(highlightedCommand.id);
+    }
+  }
+
   return (
     <motion.div
       className="command-overlay"
@@ -2189,10 +2427,18 @@ function CommandPalette({
             autoFocus
             type="search"
             value={query}
+            onKeyDown={handleCommandKeyDown}
             onChange={(event) =>
               onQueryChange(event.target.value)
             }
             placeholder="Para onde você quer ir?"
+            aria-label="Buscar ação rápida"
+            aria-controls="command-results"
+            aria-activedescendant={
+              highlightedCommand
+                ? `command-${highlightedCommand.id}`
+                : undefined
+            }
           />
 
           <button type="button" onClick={onClose}>
@@ -2200,17 +2446,24 @@ function CommandPalette({
           </button>
         </div>
 
-        <div className="command-results">
+        <div id="command-results" className="command-results">
           <span className="command-results-label">
             Ações rápidas
           </span>
 
           {commands.length > 0 ? (
-            commands.map((command) => (
+            commands.map((command, index) => (
               <button
                 key={command.id}
+                id={`command-${command.id}`}
                 type="button"
+                className={
+                  index === safeHighlightedIndex
+                    ? "command-result--active"
+                    : ""
+                }
                 onClick={() => onExecute(command.id)}
+                onMouseEnter={() => setHighlightedIndex(index)}
               >
                 <span className="command-result-icon">
                   <DynamicIcon name={command.icon} />
@@ -2235,7 +2488,7 @@ function CommandPalette({
         <div className="command-footer">
           <span>
             <i>↵</i>
-            Selecionar
+            Abrir selecionado
           </span>
 
           <span>
@@ -2318,25 +2571,25 @@ function MobileMenu({
 
           <button
             type="button"
-            onClick={() => onNavigate("/empresas")}
+            onClick={() => onNavigate("/admin/login")}
           >
             <span>03</span>
-            Empresas
+            Para empresas
             <ArrowUpRightIcon />
           </button>
 
           <button
             type="button"
-            onClick={() => onNavigate("/portfolio")}
+            onClick={() => onNavigate("/createResume")}
           >
             <span>04</span>
-            Portfólio
+            Criar currículo
             <ArrowUpRightIcon />
           </button>
 
           <button
             type="button"
-            onClick={() => onNavigate("/vagas-salvas")}
+            onClick={() => onNavigate("saved")}
           >
             <span>05</span>
             Vagas salvas
@@ -2371,7 +2624,7 @@ function MobileMenu({
   );
 }
 
-function EmptyJobs({ onReset }) {
+function EmptyJobs({ savedOnly, onReset }) {
   return (
     <motion.div
       className="empty-jobs"
@@ -2382,15 +2635,20 @@ function EmptyJobs({ onReset }) {
         <SearchIcon />
       </div>
 
-      <h3>Nenhuma vaga passou por esse filtro.</h3>
+      <h3>
+        {savedOnly
+          ? "Seu radar de vagas salvas está vazio."
+          : "Nenhuma vaga passou por esse filtro."}
+      </h3>
 
       <p>
-        Tente buscar por outro termo ou visualizar todas as
-        categorias.
+        {savedOnly
+          ? "Salve oportunidades interessantes para comparar e retomar depois."
+          : "Tente buscar por outro termo ou visualizar todas as categorias."}
       </p>
 
       <button type="button" onClick={onReset}>
-        Limpar filtros
+        {savedOnly ? "Explorar oportunidades" : "Limpar filtros"}
         <RefreshIcon />
       </button>
     </motion.div>
@@ -2433,11 +2691,15 @@ function MapNode({
   detail,
   accent,
   icon,
+  onClick,
 }) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       className={`map-node ${className}`}
       style={{ "--node-accent": accent }}
+      onClick={onClick}
+      aria-label={`Explorar vagas de ${label}`}
       whileHover={{
         y: -4,
         rotate: 0,
@@ -2450,7 +2712,7 @@ function MapNode({
         <strong>{label}</strong>
         <small>{detail}</small>
       </div>
-    </motion.div>
+    </motion.button>
   );
 }
 
@@ -2558,6 +2820,14 @@ function extractInitialSalary(salary) {
   return Number(match[1].replace(".", ""));
 }
 
+function formatJobCount(category) {
+  const count = JOBS.filter(
+    (job) => job.category === category,
+  ).length;
+
+  return `${count} ${count === 1 ? "vaga" : "vagas"}`;
+}
+
 const homeStyles = `
   :root {
     color-scheme: light;
@@ -2615,7 +2885,8 @@ const homeStyles = `
 
     position: relative;
     min-height: 100vh;
-    overflow: hidden;
+    min-height: 100dvh;
+    overflow: clip;
     isolation: isolate;
     color: var(--ink);
     background:
@@ -3441,55 +3712,93 @@ const homeStyles = `
     pointer-events: none;
   }
 
-  .map-video-card {
+  .map-feature-card {
     position: absolute;
     z-index: 5;
-    top: 19%;
-    left: 24%;
-    width: 51%;
-    height: 53%;
-    overflow: hidden;
+    top: 18%;
+    left: 23%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 54%;
+    height: 56%;
+    overflow: clip;
+    padding: 1rem;
     border: 3px solid var(--ink);
-    border-radius:
-      42% 58% 53% 47% /
-      49% 38% 62% 51%;
-    background: var(--ink);
+    border-radius: 1.8rem 2.7rem 1.9rem 2.4rem;
+    background:
+      radial-gradient(
+        circle at 86% 12%,
+        var(--feature-accent),
+        transparent 8rem
+      ),
+      linear-gradient(
+        145deg,
+        var(--feature-soft-accent),
+        var(--paper-light) 70%
+      );
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
     box-shadow:
       8px 8px 0 var(--violet),
       11px 11px 0 var(--ink);
     transform: rotate(-3deg);
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease;
   }
 
-  .map-video-card video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: saturate(1.08) contrast(1.04);
-    transform: scale(1.05);
+  .map-feature-card:hover {
+    transform: translate(-3px, -4px) rotate(-1deg);
+    box-shadow:
+      11px 11px 0 var(--pink),
+      15px 15px 0 var(--ink);
   }
 
-  .map-video-overlay {
+  .map-feature-pattern {
     position: absolute;
     inset: 0;
-    background:
+    opacity: 0.22;
+    pointer-events: none;
+    background-image:
       linear-gradient(
-        to top,
-        rgba(23, 23, 26, 0.7),
-        transparent 65%
+        rgba(23, 23, 26, 0.2) 1px,
+        transparent 1px
       ),
       linear-gradient(
-        135deg,
-        rgba(255, 79, 139, 0.13),
-        transparent 50%
+        90deg,
+        rgba(23, 23, 26, 0.2) 1px,
+        transparent 1px
       );
+    background-size: 22px 22px;
+    mask-image: linear-gradient(to bottom, black, transparent 72%);
   }
 
-  .map-video-live {
+  .map-feature-symbol {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
+    top: 1.1rem;
+    right: -0.6rem;
+    color: var(--feature-accent);
+    font-family: "Courier New", monospace;
+    font-size: clamp(3.5rem, 6vw, 5.8rem);
+    font-weight: 950;
+    line-height: 0.8;
+    letter-spacing: -0.14em;
+    opacity: 0.72;
+    pointer-events: none;
+    transform: rotate(8deg);
+    text-shadow:
+      -1px -1px 0 var(--ink),
+      1px 1px 0 var(--ink);
+  }
+
+  .map-feature-live {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
+    align-self: flex-start;
     gap: 0.4rem;
     padding: 0.4rem 0.55rem;
     border: 2px solid var(--ink);
@@ -3503,38 +3812,89 @@ const homeStyles = `
     box-shadow: 2px 2px 0 var(--ink);
   }
 
-  .map-video-live span {
+  .map-feature-live i {
     width: 0.45rem;
     height: 0.45rem;
     border: 1.5px solid var(--ink);
     border-radius: 50%;
-    background: var(--lime);
+    background: var(--feature-accent);
     animation: liveBlink 1.6s ease-in-out infinite;
   }
 
-  .map-video-copy {
-    position: absolute;
-    left: 1.2rem;
-    right: 1.2rem;
-    bottom: 1.15rem;
+  .map-feature-copy {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
-    color: #ffffff;
+    gap: 0.35rem;
+    margin-top: auto;
   }
 
-  .map-video-copy span {
-    margin-bottom: 0.25rem;
-    font-size: 0.59rem;
-    font-weight: 750;
+  .map-feature-copy small {
+    font-size: 0.52rem;
+    font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  .map-video-copy strong {
-    font-size: clamp(1rem, 2vw, 1.55rem);
+  .map-feature-copy > strong {
+    max-width: 12ch;
+    font-size: clamp(1.15rem, 2.25vw, 1.8rem);
     font-weight: 950;
-    line-height: 1;
-    letter-spacing: -0.045em;
+    line-height: 0.94;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+  }
+
+  .map-feature-copy > span {
+    color: #5d5650;
+    font-size: 0.57rem;
+    font-weight: 760;
+  }
+
+  .map-feature-footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+    border-top: 2px dashed rgba(23, 23, 26, 0.28);
+  }
+
+  .map-feature-footer > span:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .map-feature-footer small {
+    color: var(--muted);
+    font-size: 0.46rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .map-feature-footer strong {
+    font-size: 0.61rem;
+    font-weight: 950;
+  }
+
+  .map-feature-action {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 0.28rem;
+    font-size: 0.5rem;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .map-feature-action svg {
+    width: 0.8rem;
+    height: 0.8rem;
   }
 
   .map-node {
@@ -3548,6 +3908,10 @@ const homeStyles = `
     border: 2px solid var(--ink);
     border-radius: 0.9rem;
     background: var(--paper-light);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     box-shadow:
       4px 4px 0 var(--node-accent),
       6px 6px 0 var(--ink);
@@ -3770,6 +4134,10 @@ const homeStyles = `
       clamp(6rem, 11vw, 10rem)
       clamp(1.25rem, 4vw, 4.75rem)
       0;
+  }
+
+  .jobs-section {
+    scroll-margin-top: 5.5rem;
   }
 
   .section-heading {
@@ -4023,7 +4391,9 @@ const homeStyles = `
 
   .jobs-toolbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns:
+      minmax(18rem, 1fr)
+      repeat(3, minmax(10.5rem, 0.42fr));
     gap: 1rem;
     margin-bottom: 1.25rem;
   }
@@ -4104,6 +4474,14 @@ const homeStyles = `
     border-radius: 1rem;
     background: var(--yellow);
     box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .jobs-filter--mode {
+    background: #d5f3ff;
+  }
+
+  .jobs-filter--level {
+    background: #e6ffc4;
   }
 
   .jobs-sort > span {
@@ -4195,6 +4573,15 @@ const homeStyles = `
     font-size: 0.5rem;
   }
 
+  .category-filter--saved {
+    margin-left: auto;
+  }
+
+  .category-filter--saved > svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
   .jobs-result-header {
     display: flex;
     align-items: center;
@@ -4204,6 +4591,31 @@ const homeStyles = `
     color: var(--muted);
     font-size: 0.68rem;
     font-weight: 700;
+  }
+
+  .jobs-result-copy {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .jobs-result-insights {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .jobs-result-insights > span {
+    padding: 0.3rem 0.48rem;
+    border: 1.5px solid rgba(23, 23, 26, 0.28);
+    border-radius: 999px;
+    background: rgba(255, 253, 248, 0.7);
+    color: #655e58;
+    font-size: 0.54rem;
+    font-weight: 850;
+    white-space: nowrap;
   }
 
   .jobs-result-header strong {
@@ -5415,6 +5827,7 @@ const homeStyles = `
     position: relative;
     width: min(100%, 48rem);
     max-height: calc(100vh - 2.4rem);
+    max-height: calc(100dvh - 2.4rem);
     overflow-y: auto;
     border: 3px solid var(--ink);
     border-radius: 1.8rem;
@@ -5776,7 +6189,8 @@ const homeStyles = `
       transform 180ms ease;
   }
 
-  .command-results > button:hover {
+  .command-results > button:hover,
+  .command-results > button.command-result--active {
     border-color: var(--ink);
     background: var(--blue);
     transform: translateX(3px);
@@ -5880,8 +6294,13 @@ const homeStyles = `
     display: flex;
     flex-direction: column;
     width: min(92%, 25rem);
-    min-height: 100%;
-    padding: 1.2rem;
+    height: 100vh;
+    height: 100dvh;
+    padding:
+      1.2rem
+      1.2rem
+      max(1.2rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
     border-left: 3px solid var(--ink);
     background:
       linear-gradient(
@@ -6280,6 +6699,14 @@ const homeStyles = `
       grid-template-columns: 1fr 1fr;
     }
 
+    .jobs-toolbar {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .jobs-search-box {
+      grid-column: 1 / -1;
+    }
+
     .bento-card--profile {
       grid-row: span 2;
     }
@@ -6375,7 +6802,7 @@ const homeStyles = `
     }
 
     .map-paper {
-      inset-right: 0.5rem;
+      right: 0.5rem;
       border-radius: 1.6rem;
     }
 
@@ -6383,11 +6810,20 @@ const homeStyles = `
       border-radius: 1.6rem;
     }
 
-    .map-video-card {
-      top: 21%;
-      left: 14%;
-      width: 70%;
-      height: 46%;
+    .map-feature-card {
+      top: 20%;
+      left: 10%;
+      width: 80%;
+      height: 54%;
+      padding: 0.9rem;
+    }
+
+    .map-feature-copy > strong {
+      font-size: clamp(1.15rem, 5vw, 1.55rem);
+    }
+
+    .map-feature-symbol {
+      font-size: 4.3rem;
     }
 
     .map-node {
@@ -6421,9 +6857,7 @@ const homeStyles = `
     }
 
     .map-match-card {
-      right: 0.8rem;
-      top: 43%;
-      width: 9rem;
+      display: none;
     }
 
     .map-orbit-badge {
@@ -6468,6 +6902,11 @@ const homeStyles = `
     }
 
     .jobs-result-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .jobs-result-copy {
       align-items: flex-start;
       flex-direction: column;
     }
@@ -6688,11 +7127,21 @@ const homeStyles = `
     }
 
     .map-node small {
-      font-size: 0.48rem;
+      font-size: 0.56rem;
     }
 
-    .map-match-card {
-      width: 8rem;
+    .map-feature-card {
+      left: 8%;
+      width: 84%;
+    }
+
+    .map-feature-action {
+      font-size: 0;
+    }
+
+    .map-feature-action svg {
+      width: 1rem;
+      height: 1rem;
     }
 
     .map-orbit-badge {
