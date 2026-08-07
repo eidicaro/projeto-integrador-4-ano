@@ -263,14 +263,14 @@ const SHORTCUTS = [
     action: "resume",
   },
   {
-    title: "Para empresas",
+    title: "Meu radar",
     description:
-      "Publique oportunidades e encontre talentos para fortalecer o seu time.",
-    tag: "Encontrar talentos",
+      "Reúna as vagas que chamaram sua atenção e volte a elas quando quiser.",
+    tag: "Ver vagas salvas",
     accent: "#baf26d",
     className: "shortcut-card--applications",
-    icon: "route",
-    action: "company",
+    icon: "bookmark",
+    action: "saved",
   },
 ];
 
@@ -326,6 +326,10 @@ export default function Home() {
   const pageRef = useRef(null);
   const jobsRef = useRef(null);
   const toastTimerRef = useRef(null);
+  const adminAccessRef = useRef({
+    count: 0,
+    lastInteractionAt: 0,
+  });
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -545,6 +549,16 @@ export default function Home() {
         target instanceof HTMLSelectElement;
 
       if (
+        event.altKey &&
+        event.shiftKey &&
+        event.key.toLowerCase() === "p"
+      ) {
+        event.preventDefault();
+        navigate("/admin/login");
+        return;
+      }
+
+      if (
         (event.ctrlKey || event.metaKey) &&
         event.key.toLowerCase() === "k"
       ) {
@@ -572,7 +586,7 @@ export default function Home() {
 
     return () =>
       window.removeEventListener("keydown", handleKeyboard);
-  }, [commandOpen]);
+  }, [commandOpen, navigate]);
 
   useEffect(() => {
     const shouldLock =
@@ -629,6 +643,30 @@ export default function Home() {
     );
   }
 
+  function handleBrandInteraction() {
+    const now = Date.now();
+    const adminAccess = adminAccessRef.current;
+
+    if (now - adminAccess.lastInteractionAt > 850) {
+      adminAccess.count = 0;
+    }
+
+    adminAccess.count += 1;
+    adminAccess.lastInteractionAt = now;
+
+    if (adminAccess.count >= 5) {
+      adminAccess.count = 0;
+      adminAccess.lastInteractionAt = 0;
+      navigate("/admin/login");
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }
+
   function scrollToJobs() {
     jobsRef.current?.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
@@ -678,8 +716,8 @@ export default function Home() {
         navigate("/createResume");
         break;
 
-      case "company":
-        navigate("/admin/login");
+      case "saved":
+        viewSavedJobs();
         break;
 
       default:
@@ -805,12 +843,7 @@ export default function Home() {
           <button
             type="button"
             className="home-logo"
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: reduceMotion ? "auto" : "smooth",
-              })
-            }
+            onClick={handleBrandInteraction}
             aria-label="Voltar ao início"
           >
             <span className="home-logo-p">p</span>
@@ -838,13 +871,6 @@ export default function Home() {
 
             <button type="button" onClick={scrollToJobs}>
               Vagas
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/admin/login")}
-            >
-              Para empresas
             </button>
 
             <button
@@ -1830,14 +1856,7 @@ export default function Home() {
               <button
                 type="button"
                 className="footer-logo"
-                onClick={() =>
-                  window.scrollTo({
-                    top: 0,
-                    behavior: reduceMotion
-                      ? "auto"
-                      : "smooth",
-                  })
-                }
+                onClick={handleBrandInteraction}
               >
                 <span className="home-logo-p">p</span>
                 <span className="home-logo-o">o</span>
@@ -1845,8 +1864,8 @@ export default function Home() {
               </button>
 
               <p>
-                Talentos, empresas e oportunidades conectados por
-                experiências mais humanas.
+                Talentos e oportunidades conectados por experiências
+                mais humanas.
               </p>
             </div>
 
@@ -1859,9 +1878,9 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={() => navigate("/admin/login")}
+                onClick={() => navigate("/cadastro")}
               >
-                Para empresas
+                Criar perfil
               </button>
 
               <button
@@ -1916,9 +1935,9 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={() => navigate("/admin/login")}
+                onClick={viewSavedJobs}
               >
-                Área administrativa
+                Vagas salvas
               </button>
             </div>
           </div>
@@ -2571,18 +2590,9 @@ function MobileMenu({
 
           <button
             type="button"
-            onClick={() => onNavigate("/admin/login")}
-          >
-            <span>03</span>
-            Para empresas
-            <ArrowUpRightIcon />
-          </button>
-
-          <button
-            type="button"
             onClick={() => onNavigate("/createResume")}
           >
-            <span>04</span>
+            <span>03</span>
             Criar currículo
             <ArrowUpRightIcon />
           </button>
@@ -2591,7 +2601,7 @@ function MobileMenu({
             type="button"
             onClick={() => onNavigate("saved")}
           >
-            <span>05</span>
+            <span>04</span>
             Vagas salvas
             <i className="mobile-saved-count">
               {savedCount}
