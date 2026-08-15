@@ -9,8 +9,13 @@ composer install
 Copy-Item .env.example .env
 php artisan key:generate
 php artisan migrate --seed
-php artisan storage:link
 php artisan serve
 ```
 
 A especificação funcional dos endpoints está em [docs/API.md](../docs/API.md).
+
+Crie contas administrativas pelo prompt seguro, nunca por cadastro público:
+
+```powershell
+php artisan app:create-recruiter
+```

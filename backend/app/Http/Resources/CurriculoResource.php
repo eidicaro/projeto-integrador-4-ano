@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CurriculoResource extends JsonResource
@@ -13,7 +12,7 @@ class CurriculoResource extends JsonResource
     {
         $foto = $this->foto;
         if ($foto && ! Str::startsWith($foto, ['http://', 'https://'])) {
-            $foto = url(Storage::disk('public')->url($foto));
+            $foto = url("/api/curriculos/{$this->id}/foto");
         }
 
         return [

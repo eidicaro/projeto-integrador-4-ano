@@ -187,6 +187,191 @@ function escapeCsv(value) {
   return `"${text}"`;
 }
 
+const MAX_PAGE_REQUESTS = 1000;
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+function syncDialogAccessibility() {
+  const dialogs = Array.from(
+    document.querySelectorAll("[data-admin-dialog]")
+  );
+
+  dialogs.forEach((dialog, index) => {
+    if (index === dialogs.length - 1) {
+      dialog.removeAttribute("aria-hidden");
+    } else {
+      dialog.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
+async function fetchAllPages(path, { perPage, signal }) {
+  const records = [];
+  let page = 1;
+
+  while (page <= MAX_PAGE_REQUESTS) {
+    const response = await api.get(path, {
+      params: { page, per_page: perPage },
+      signal,
+    });
+    const pageRecords = unwrapApiCollection(response);
+    const meta = response?.data?.meta;
+
+    records.push(...pageRecords);
+
+    if (!meta) {
+      if (pageRecords.length < perPage) return records;
+      throw new Error(`A API não informou a paginação completa de ${path}.`);
+    }
+
+    const currentPage = Number(meta.current_page);
+    const lastPage = Number(meta.last_page);
+
+    if (
+      !Number.isInteger(currentPage) ||
+      !Number.isInteger(lastPage) ||
+      currentPage < 1 ||
+      lastPage < currentPage
+    ) {
+      throw new Error(`A API retornou paginação inválida para ${path}.`);
+    }
+
+    if (currentPage >= lastPage) return records;
+
+    const nextPage = currentPage + 1;
+    if (nextPage <= page) {
+      throw new Error(`A paginação de ${path} não avançou.`);
+    }
+    page = nextPage;
+  }
+
+  throw new Error(`O limite seguro de páginas foi excedido para ${path}.`);
+}
+
+function AccessibleDialog({
+  children,
+  className = "see-modal",
+  ariaLabel,
+  ariaLabelledBy,
+  onClose,
+  overlayStyle,
+  canClose = true,
+}) {
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  const canCloseRef = useRef(canClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    canCloseRef.current = canClose;
+  }, [canClose, onClose]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    if (!dialog) return undefined;
+
+    syncDialogAccessibility();
+
+    const isTopmost = () => {
+      const dialogs = document.querySelectorAll("[data-admin-dialog]");
+      return dialogs[dialogs.length - 1] === dialog;
+    };
+    const getFocusable = () =>
+      Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTOR)).filter(
+        (element) => element.getAttribute("aria-hidden") !== "true"
+      );
+    const focusFrame = window.requestAnimationFrame(() => {
+      const initialFocus =
+        dialog.querySelector("[data-dialog-initial-focus]") ||
+        getFocusable()[0] ||
+        dialog;
+      initialFocus.focus({ preventScroll: true });
+    });
+
+    function handleKeyDown(event) {
+      if (!isTopmost()) return;
+
+      if (event.key === "Escape" && canCloseRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        onCloseRef.current?.();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog.focus({ preventScroll: true });
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (activeElement === last || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      syncDialogAccessibility();
+      if (previouslyFocused?.isConnected) {
+        previouslyFocused.focus({ preventScroll: true });
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      className="see-overlay"
+      style={overlayStyle}
+      onMouseDown={(event) => {
+        if (
+          event.target === event.currentTarget &&
+          canCloseRef.current
+        ) {
+          onCloseRef.current?.();
+        }
+      }}
+    >
+      <div
+        ref={dialogRef}
+        className={className}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        tabIndex={-1}
+        data-admin-dialog
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function Icon({ name, size = 20, strokeWidth = 1.8 }) {
   const props = {
     width: size,
@@ -509,26 +694,25 @@ export default function AdminSee() {
     let active = true;
 
     Promise.all([
-      api.get("/admin/vagas", {
-        params: { per_page: 100 },
+      fetchAllPages("/admin/vagas", {
+        perPage: 100,
         signal: controller.signal,
       }),
-      api.get("/admin/candidaturas", {
-        params: { per_page: 100 },
+      fetchAllPages("/admin/candidaturas", {
+        perPage: 500,
         signal: controller.signal,
       }),
     ])
-      .then(([jobsResponse, candidatesResponse]) => {
+      .then(([jobsRecords, candidateRecords]) => {
         if (!active) return;
 
-        const loadedJobs = unwrapApiCollection(jobsResponse)
+        const loadedJobs = jobsRecords
           .filter((job) => job?.id !== null && job?.id !== undefined)
           .map(normalizeJob);
-        const loadedCandidates = unwrapApiCollection(candidatesResponse);
 
         setJobs(loadedJobs);
         setCandidatesByJob(
-          groupCandidatesByJob(loadedCandidates, loadedJobs)
+          groupCandidatesByJob(candidateRecords, loadedJobs)
         );
         setSelectedJobs([]);
         setLoadError("");
@@ -589,10 +773,7 @@ export default function AdminSee() {
       }
 
       if (event.key === "Escape") {
-        setCommandOpen(false);
-        setModal(null);
-        setConfirmAction(null);
-        setSelectedCandidateId(null);
+        setModal((current) => current === "filters" ? null : current);
       }
     }
 
@@ -697,6 +878,23 @@ export default function AdminSee() {
     });
   }
 
+  function requestCandidateDelete(jobId, candidateId) {
+    const candidate = (candidatesByJob[jobId] || []).find(
+      (item) => item.id === candidateId
+    );
+    if (!candidate) return;
+
+    setConfirmAction({
+      type: "delete-candidate",
+      title: "Remover este candidato?",
+      description: `${candidate.name} será removido deste processo seletivo. O histórico já registrado continuará preservado.`,
+      confirmLabel: "Remover candidato",
+      jobId,
+      candidateId,
+      candidateName: candidate.name,
+    });
+  }
+
   async function archiveJob(jobId) {
     const job = jobs.find((item) => item.id === jobId);
     if (!job || pendingAction) return;
@@ -787,6 +985,24 @@ export default function AdminSee() {
         });
         notify("success", "Itens excluídos", `${selectedIds.length} vaga(s) foram removidas.`);
         setSelectedJobs([]);
+      }
+
+      if (action.type === "delete-candidate") {
+        await api.delete(
+          `/admin/candidaturas/${encodeURIComponent(action.candidateId)}`
+        );
+        setCandidatesByJob((current) => ({
+          ...current,
+          [action.jobId]: (current[action.jobId] || []).filter(
+            (candidate) => candidate.id !== action.candidateId
+          ),
+        }));
+        setSelectedCandidateId(null);
+        notify(
+          "success",
+          "Candidato removido",
+          `${action.candidateName} foi removido do processo.`
+        );
       }
 
       setConfirmAction(null);
@@ -961,26 +1177,6 @@ export default function AdminSee() {
     }
   }
 
-  async function removeCandidate(jobId, candidateId) {
-    if (pendingAction) return;
-    const candidate = (candidatesByJob[jobId] || []).find((item) => item.id === candidateId);
-    setPendingAction(`candidate-delete-${candidateId}`);
-
-    try {
-      await api.delete(`/admin/candidaturas/${encodeURIComponent(candidateId)}`);
-      setCandidatesByJob((current) => ({
-        ...current,
-        [jobId]: (current[jobId] || []).filter((item) => item.id !== candidateId),
-      }));
-      setSelectedCandidateId(null);
-      notify("success", "Candidato removido", candidate ? `${candidate.name} foi removido do processo.` : "O candidato foi removido.");
-    } catch (error) {
-      notify("error", "Não foi possível remover", getApiErrorMessage(error));
-    } finally {
-      setPendingAction("");
-    }
-  }
-
   function handleCandidateDrop(stage) {
     if (!draggedCandidate || !selectedJobId) return;
     void moveCandidate(selectedJobId, draggedCandidate.candidateId, stage);
@@ -1115,9 +1311,20 @@ export default function AdminSee() {
         key={candidate.id}
         className="see-candidate-card"
         draggable
+        tabIndex={0}
+        role="button"
+        aria-label={`Abrir perfil de ${candidate.name}`}
         onDragStart={() => setDraggedCandidate({ candidateId: candidate.id })}
         onDragEnd={() => setDraggedCandidate(null)}
+        onMouseDown={(event) => event.currentTarget.focus()}
         onClick={() => openCandidateProfile(candidate)}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openCandidateProfile(candidate);
+          }
+        }}
       >
         <div className="see-candidate-card__top">
           <div className="see-avatar">
@@ -1811,8 +2018,11 @@ export default function AdminSee() {
         </nav>
 
         {modal === "job" && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setModal(null)}>
-            <div className="see-modal" role="dialog" aria-modal="true" aria-label="Detalhes da vaga">
+          <AccessibleDialog
+            className="see-modal"
+            ariaLabel="Detalhes da vaga"
+            onClose={() => setModal(null)}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="briefcase" size={18} /></span><div><h2 className="see-modal__title">Detalhes da oportunidade</h2><span className="see-modal__subtitle">Atualizada {formatRelativeDate(selectedJob.updatedAt)}</span></div></div>
@@ -1870,13 +2080,15 @@ export default function AdminSee() {
                   <button type="button" className="see-action-btn see-action-btn--primary" onClick={() => openCandidates(selectedJob.id)}><Icon name="users" size={15} />Gerenciar candidatos</button>
                 </div>
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {modal === "candidates" && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setModal(null)}>
-            <div className="see-modal see-modal--wide" role="dialog" aria-modal="true" aria-label="Gestão de candidatos">
+          <AccessibleDialog
+            className="see-modal see-modal--wide"
+            ariaLabel="Gestão de candidatos"
+            onClose={() => setModal(null)}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="users" size={18} /></span><div><h2 className="see-modal__title">Pipeline — {selectedJob.title}</h2><span className="see-modal__subtitle">{(candidatesByJob[selectedJob.id] || []).length} candidatos no processo</span></div></div>
@@ -1886,8 +2098,8 @@ export default function AdminSee() {
               <div className="see-modal__body">
                 <div className="see-candidate-toolbar">
                   <div className="see-candidate-toolbar__left">
-                    <div className="see-candidate-search"><Icon name="search" size={15} /><input value={candidateSearch} onChange={(event) => setCandidateSearch(event.target.value)} placeholder="Buscar candidatos..." /></div>
-                    <select className="see-select" value={candidateStageFilter} onChange={(event) => setCandidateStageFilter(event.target.value)}><option value="todos">Todas as etapas</option>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id}>{stage.label}</option>)}</select>
+                    <div className="see-candidate-search"><Icon name="search" size={15} /><input value={candidateSearch} onChange={(event) => setCandidateSearch(event.target.value)} placeholder="Buscar candidatos..." aria-label="Buscar candidatos" data-dialog-initial-focus /></div>
+                    <select className="see-select" value={candidateStageFilter} onChange={(event) => setCandidateStageFilter(event.target.value)} aria-label="Filtrar candidatos por etapa"><option value="todos">Todas as etapas</option>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id}>{stage.label}</option>)}</select>
                   </div>
                   <div className="see-candidate-toolbar__right">
                     <div className="see-view-toggle"><button type="button" className={candidateView === "kanban" ? "active" : ""} onClick={() => setCandidateView("kanban")} aria-label="Kanban"><Icon name="grid" size={14} /></button><button type="button" className={candidateView === "list" ? "active" : ""} onClick={() => setCandidateView("list")} aria-label="Lista"><Icon name="list" size={14} /></button></div>
@@ -1923,13 +2135,15 @@ export default function AdminSee() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {modal === "add-candidate" && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setModal("candidates")}>
-            <div className="see-modal" role="dialog" aria-modal="true" aria-label="Adicionar candidato">
+          <AccessibleDialog
+            className="see-modal"
+            ariaLabel="Adicionar candidato"
+            onClose={() => setModal("candidates")}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="userPlus" size={18} /></span><div><h2 className="see-modal__title">Adicionar candidato</h2><span className="see-modal__subtitle">{selectedJob.title}</span></div></div>
@@ -1937,7 +2151,7 @@ export default function AdminSee() {
               </header>
               <form className="see-modal__body" onSubmit={submitCandidate} noValidate>
                 <div className="see-form-grid">
-                  <div className="see-field"><label htmlFor="candidateName">Nome completo *</label><input id="candidateName" value={candidateForm.name} onChange={(event) => setCandidateForm((current) => ({ ...current, name: event.target.value }))} placeholder="Nome do candidato" />{candidateFormErrors.name && <span className="see-field__error">{candidateFormErrors.name}</span>}</div>
+                  <div className="see-field"><label htmlFor="candidateName">Nome completo *</label><input id="candidateName" value={candidateForm.name} onChange={(event) => setCandidateForm((current) => ({ ...current, name: event.target.value }))} placeholder="Nome do candidato" data-dialog-initial-focus />{candidateFormErrors.name && <span className="see-field__error">{candidateFormErrors.name}</span>}</div>
                   <div className="see-field"><label htmlFor="candidateEmail">E-mail *</label><input id="candidateEmail" type="email" value={candidateForm.email} onChange={(event) => setCandidateForm((current) => ({ ...current, email: event.target.value }))} placeholder="candidato@email.com" />{candidateFormErrors.email && <span className="see-field__error">{candidateFormErrors.email}</span>}</div>
                   <div className="see-field"><label htmlFor="candidatePhone">Telefone</label><input id="candidatePhone" value={candidateForm.phone} onChange={(event) => setCandidateForm((current) => ({ ...current, phone: event.target.value }))} placeholder="(00) 00000-0000" />{candidateFormErrors.phone && <span className="see-field__error">{candidateFormErrors.phone}</span>}</div>
                   <div className="see-field"><label htmlFor="candidateLocation">Localização</label><input id="candidateLocation" value={candidateForm.location} onChange={(event) => setCandidateForm((current) => ({ ...current, location: event.target.value }))} placeholder="Cidade - UF" />{candidateFormErrors.location && <span className="see-field__error">{candidateFormErrors.location}</span>}</div>
@@ -1950,13 +2164,15 @@ export default function AdminSee() {
                   <button type="submit" className="see-action-btn see-action-btn--primary" disabled={pendingAction === "candidate-create"}><Icon name="userPlus" size={14} />{pendingAction === "candidate-create" ? "Adicionando..." : "Adicionar ao pipeline"}</button>
                 </div>
               </form>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {selectedCandidate && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setSelectedCandidateId(null)}>
-            <div className="see-modal" role="dialog" aria-modal="true" aria-label="Perfil do candidato">
+          <AccessibleDialog
+            className="see-modal"
+            ariaLabel="Perfil do candidato"
+            onClose={() => setSelectedCandidateId(null)}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="users" size={18} /></span><div><h2 className="see-modal__title">Perfil do candidato</h2><span className="see-modal__subtitle">Inscrição em {selectedJob.title}</span></div></div>
@@ -1970,38 +2186,43 @@ export default function AdminSee() {
                     <div className="see-profile__contact"><span><Icon name="mail" size={13} />{selectedCandidate.email}</span><span><Icon name="phone" size={13} />{selectedCandidate.phone || "Não informado"}</span><span><Icon name="map" size={13} />{selectedCandidate.location || "Não informado"}</span></div>
                   </aside>
                   <div className="see-profile__main">
-                    <section className="see-profile__panel"><h4>Etapa do processo</h4><div className="see-profile__stage" style={{ marginTop: 10 }}><select className="see-select" value={selectedCandidate.stage} onChange={(event) => moveCandidate(selectedJob.id, selectedCandidate.id, event.target.value)}>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id} disabled={stage.readonly}>{stage.label}</option>)}</select></div></section>
+                    <section className="see-profile__panel"><h4>Etapa do processo</h4><div className="see-profile__stage" style={{ marginTop: 10 }}><select className="see-select" value={selectedCandidate.stage} onChange={(event) => moveCandidate(selectedJob.id, selectedCandidate.id, event.target.value)} aria-label={`Etapa de ${selectedCandidate.name}`}>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id} disabled={stage.readonly}>{stage.label}</option>)}</select></div></section>
                     <section className="see-profile__panel"><h4>Habilidades</h4><div className="see-profile__skills">{(selectedCandidate.skills || []).length ? selectedCandidate.skills.map((skill) => <span key={skill}>{skill}</span>) : <span>Não informado</span>}</div></section>
-                    <section className="see-profile__panel"><h4>Anotações</h4><div className="see-field" style={{ marginTop: 10 }}><textarea value={candidateNotesDraft} maxLength={5000} onChange={(event) => setCandidateNotesDraft(event.target.value)} placeholder="Registre informações relevantes para o processo." /><button type="button" className="see-action-btn" style={{ marginTop: 9 }} disabled={pendingAction === `candidate-notes-${selectedCandidate.id}`} onClick={() => updateCandidateNotes(selectedJob.id, selectedCandidate.id)}>{pendingAction === `candidate-notes-${selectedCandidate.id}` ? "Salvando..." : "Salvar anotações"}</button></div></section>
-                    <section className="see-profile__panel"><h4>Avaliação</h4><div className="see-rating" style={{ marginTop: 9 }}>{[1,2,3,4,5].map((rating) => <button key={rating} type="button" className={rating <= (selectedCandidate.rating || 0) ? "see-rating__star see-rating__star--active" : "see-rating__star"} onClick={() => updateCandidateRating(selectedJob.id, selectedCandidate.id, rating)}><Icon name="star" size={16} /></button>)}</div></section>
+                    <section className="see-profile__panel"><h4>Anotações</h4><div className="see-field" style={{ marginTop: 10 }}><textarea value={candidateNotesDraft} maxLength={5000} onChange={(event) => setCandidateNotesDraft(event.target.value)} placeholder="Registre informações relevantes para o processo." aria-label={`Anotações sobre ${selectedCandidate.name}`} /><button type="button" className="see-action-btn" style={{ marginTop: 9 }} disabled={pendingAction === `candidate-notes-${selectedCandidate.id}`} onClick={() => updateCandidateNotes(selectedJob.id, selectedCandidate.id)}>{pendingAction === `candidate-notes-${selectedCandidate.id}` ? "Salvando..." : "Salvar anotações"}</button></div></section>
+                    <section className="see-profile__panel"><h4>Avaliação</h4><div className="see-rating" style={{ marginTop: 9 }} aria-label={`Avaliação ${selectedCandidate.rating || 0} de 5`}>{[1,2,3,4,5].map((rating) => <button key={rating} type="button" className={rating <= (selectedCandidate.rating || 0) ? "see-rating__star see-rating__star--active" : "see-rating__star"} onClick={() => updateCandidateRating(selectedJob.id, selectedCandidate.id, rating)} aria-label={`Avaliar ${selectedCandidate.name} com ${rating} estrelas`} aria-pressed={rating === selectedCandidate.rating}><Icon name="star" size={16} /></button>)}</div></section>
                   </div>
                 </div>
-                <div className="see-detail-actions"><button type="button" className="see-action-btn see-action-btn--danger" onClick={() => removeCandidate(selectedJob.id, selectedCandidate.id)}><Icon name="trash" size={14} />Remover candidato</button><button type="button" className="see-action-btn" onClick={() => window.location.href = `mailto:${selectedCandidate.email}`}><Icon name="mail" size={14} />Enviar e-mail</button></div>
+                <div className="see-detail-actions"><button type="button" className="see-action-btn see-action-btn--danger" onClick={() => requestCandidateDelete(selectedJob.id, selectedCandidate.id)}><Icon name="trash" size={14} />Remover candidato</button><button type="button" className="see-action-btn" onClick={() => window.location.href = `mailto:${selectedCandidate.email}`}><Icon name="mail" size={14} />Enviar e-mail</button></div>
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {confirmAction && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setConfirmAction(null)}>
-            <div className="see-modal see-modal--small" role="dialog" aria-modal="true" aria-label="Confirmar exclusão">
+          <AccessibleDialog
+            className="see-modal see-modal--small"
+            ariaLabel="Confirmar exclusão"
+            onClose={() => setConfirmAction(null)}
+            canClose={pendingAction !== "delete"}
+          >
               <div className="see-modal__accent" />
               <div className="see-modal__body see-confirm">
                 <span className="see-confirm__icon"><Icon name="trash" size={22} /></span>
                 <h2>{confirmAction.title}</h2><p>{confirmAction.description}</p>
-                <div className="see-confirm__actions"><button type="button" className="see-action-btn" onClick={() => setConfirmAction(null)} disabled={pendingAction === "delete"}>Cancelar</button><button type="button" className="see-action-btn see-action-btn--danger" onClick={executeConfirmAction} disabled={pendingAction === "delete"}><Icon name="trash" size={14} />{pendingAction === "delete" ? "Excluindo..." : "Excluir permanentemente"}</button></div>
+                <div className="see-confirm__actions"><button type="button" className="see-action-btn" onClick={() => setConfirmAction(null)} disabled={pendingAction === "delete"} data-dialog-initial-focus>Cancelar</button><button type="button" className="see-action-btn see-action-btn--danger" onClick={executeConfirmAction} disabled={pendingAction === "delete"}><Icon name="trash" size={14} />{pendingAction === "delete" ? (confirmAction.type === "delete-candidate" ? "Removendo..." : "Excluindo...") : (confirmAction.confirmLabel || "Excluir")}</button></div>
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {commandOpen && (
-          <div className="see-overlay" style={{ placeItems: "start center", paddingTop: "12vh" }} onMouseDown={(event) => event.target === event.currentTarget && setCommandOpen(false)}>
-            <div className="see-command" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-              <div className="see-command__search"><Icon name="search" size={19} /><input autoFocus value={commandSearch} onChange={(event) => setCommandSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" && filteredCommandActions[0] && runCommand(filteredCommandActions[0])} placeholder="Digite uma ação..." /><button type="button" className="see-modal__close" onClick={() => setCommandOpen(false)}><Icon name="close" size={15} /></button></div>
+          <AccessibleDialog
+            className="see-command"
+            ariaLabel="Paleta de comandos"
+            overlayStyle={{ placeItems: "start center", paddingTop: "12vh" }}
+            onClose={() => setCommandOpen(false)}
+          >
+              <div className="see-command__search"><Icon name="search" size={19} /><input value={commandSearch} onChange={(event) => setCommandSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" && filteredCommandActions[0] && runCommand(filteredCommandActions[0])} placeholder="Digite uma ação..." aria-label="Buscar ação na paleta de comandos" data-dialog-initial-focus /><button type="button" className="see-modal__close" onClick={() => setCommandOpen(false)} aria-label="Fechar paleta de comandos"><Icon name="close" size={15} /></button></div>
               <div className="see-command__body"><span className="see-command__label">Ações disponíveis</span>{filteredCommandActions.map((action) => <button key={action.id} type="button" className="see-command__item" onClick={() => runCommand(action)}><span className="see-command__item-icon"><Icon name={action.icon} size={17} /></span><span className="see-command__item-copy"><strong>{action.title}</strong><span>{action.description}</span></span><Icon name="chevron" size={14} /></button>)}</div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {toast && (

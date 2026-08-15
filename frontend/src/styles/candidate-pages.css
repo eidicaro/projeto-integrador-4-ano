@@ -169,6 +169,12 @@
 .saved-jobs-grid { display: grid; gap: 18px; }
 .saved-jobs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
+.candidate-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
 .application-card,
 .saved-job-card {
   border: 1px solid var(--candidate-line);

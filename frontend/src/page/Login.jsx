@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/login.png";
 import bgVideo from "../assets/bg.mp4";
 import { useAuth } from "../context/AuthContext";
+import useBackgroundVideoEnabled from "../hooks/useBackgroundVideoEnabled";
 import {
   getApiErrorMessage,
   getApiFieldError,
@@ -15,6 +16,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const backgroundVideoEnabled = useBackgroundVideoEnabled();
   const pageRef = useRef(null);
 
   const [email, setEmail] = useState(
@@ -1936,17 +1938,19 @@ export default function Login() {
               />
 
               <div className="video-frame">
-                <video
-                  className="composition-video"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  aria-hidden="true"
-                >
-                  <source src={bgVideo} type="video/mp4" />
-                </video>
+                {backgroundVideoEnabled && (
+                  <video
+                    className="composition-video"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-hidden="true"
+                  >
+                    <source src={bgVideo} type="video/mp4" />
+                  </video>
+                )}
 
                 <div
                   className="video-frame-overlay"

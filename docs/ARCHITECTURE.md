@@ -13,15 +13,19 @@ O frontend usa um cliente Axios único. Em navegadores, a autenticação usa o m
 
 ### Usuário
 
-Possui um papel fechado: `candidato` ou `recrutador`. O cadastro público sempre cria um candidato; recrutadores só são provisionados por processo administrativo/seed local.
+Possui um papel fechado: `candidato` ou `recrutador`. O cadastro público sempre cria um candidato; recrutadores são provisionados pelo comando interativo `php artisan app:create-recruiter` ou pelo seed estritamente local.
 
 ### Currículo
 
 Existe no máximo um currículo por candidato, garantido por índice único. As cinco coleções filhas são sincronizadas dentro da mesma transação do registro principal.
 
+A foto é armazenada em `storage/app/private` e entregue por um endpoint autenticado que aplica a mesma policy do currículo; ela não depende de symlink público.
+
 ### Vaga
 
 Pertence ao recrutador que a criou. Somente esse recrutador pode alterar a vaga ou consultar suas candidaturas. A consulta pública considera apenas vagas `publicada` cujo prazo não expirou.
+
+Um candidato pode manter uma coleção de vagas salvas por meio da pivot `vagas_salvas`, com unicidade por usuário/vaga. A listagem omite vagas fechadas ou expiradas.
 
 ### Candidatura
 

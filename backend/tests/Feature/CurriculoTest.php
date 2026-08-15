@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Habilidade;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use RuntimeException;
 use Tests\TestCase;
@@ -203,6 +204,36 @@ class CurriculoTest extends TestCase
         )->assertUnprocessable()->assertJsonValidationErrors('foto');
 
         $this->assertNull($resume->fresh()->foto);
+    }
+
+    public function test_photo_is_stored_privately_and_served_only_to_authorized_users(): void
+    {
+        Storage::fake('local');
+        Storage::fake('public');
+        $candidate = $this->candidate();
+        $resume = $this->curriculo($candidate);
+        $photo = UploadedFile::fake()->createWithContent('avatar.png', $this->png(1, 1));
+        Sanctum::actingAs($candidate, ['candidate']);
+
+        $response = $this->post(
+            "/api/curriculos/{$resume->id}/foto",
+            ['foto' => $photo],
+            ['Accept' => 'application/json'],
+        )->assertOk();
+
+        $path = $resume->fresh()->foto;
+        $this->assertNotNull($path);
+        Storage::disk('local')->assertExists($path);
+        Storage::disk('public')->assertMissing($path);
+        $response->assertJsonPath('data.foto', url("/api/curriculos/{$resume->id}/foto"));
+
+        $this->get("/api/curriculos/{$resume->id}/foto")
+            ->assertOk()
+            ->assertHeader('content-type', 'image/png')
+            ->assertHeader('cache-control', 'no-store, private');
+
+        Sanctum::actingAs($this->candidate(), ['candidate']);
+        $this->get("/api/curriculos/{$resume->id}/foto")->assertForbidden();
     }
 
     private function png(int $width, int $height): string

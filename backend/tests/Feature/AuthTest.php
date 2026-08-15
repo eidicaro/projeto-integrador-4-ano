@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -166,6 +168,25 @@ class AuthTest extends TestCase
             ->assertJsonMissingPath('data.user.password');
     }
 
+    public function test_profile_update_normalizes_contact_data_without_allowing_role_changes(): void
+    {
+        $user = $this->candidate();
+        Sanctum::actingAs($user, ['candidate']);
+
+        $this->patchJson('/api/me', [
+            'name' => '  Nome Atualizado  ',
+            'email' => ' NOVO.EMAIL@EXAMPLE.COM ',
+            'telefone' => '(15) 99999-1234',
+            'role' => UserRole::Recruiter->value,
+        ])->assertOk()
+            ->assertJsonPath('data.user.name', 'Nome Atualizado')
+            ->assertJsonPath('data.user.email', 'novo.email@example.com')
+            ->assertJsonPath('data.user.telefone', '15999991234')
+            ->assertJsonPath('data.user.role', UserRole::Candidate->value);
+
+        $this->assertSame(UserRole::Candidate, $user->fresh()->role);
+    }
+
     public function test_logout_revokes_only_the_current_bearer_token(): void
     {
         $user = $this->candidate();
@@ -180,6 +201,32 @@ class AuthTest extends TestCase
         $this->assertDatabaseHas('personal_access_tokens', ['id' => $other->accessToken->id]);
     }
 
+    public function test_logout_invalidates_a_stateful_session_without_deleting_the_transient_token(): void
+    {
+        $user = $this->candidate();
+        $this->withHeaders([
+            'Origin' => 'http://localhost:5173',
+            'Referer' => 'http://localhost:5173/',
+        ]);
+
+        $this->get('/sanctum/csrf-cookie')->assertNoContent();
+        $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk()->assertJsonPath('data.token', null);
+
+        $this->getJson('/api/me')
+            ->assertOk()
+            ->assertJsonPath('data.user.id', $user->id);
+
+        $this->postJson('/api/logout')->assertNoContent();
+
+        Auth::forgetGuards();
+        $this->getJson('/api/me')->assertUnauthorized();
+        $this->assertGuest('web');
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
     public function test_logout_all_revokes_every_token(): void
     {
         $user = $this->candidate();
@@ -190,6 +237,40 @@ class AuthTest extends TestCase
             ->postJson('/api/logout-all')
             ->assertNoContent();
 
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $user->id,
+        ]);
+    }
+
+    public function test_forgot_password_uses_the_same_generic_response_for_known_and_unknown_accounts(): void
+    {
+        $user = $this->candidate();
+
+        $known = $this->postJson('/api/forgot-password', ['email' => $user->email])
+            ->assertOk()
+            ->json('message');
+        $unknown = $this->postJson('/api/forgot-password', ['email' => 'unknown@example.com'])
+            ->assertOk()
+            ->json('message');
+
+        $this->assertSame($known, $unknown);
+    }
+
+    public function test_password_reset_changes_the_password_and_revokes_personal_tokens(): void
+    {
+        $user = $this->candidate();
+        $user->createToken('existing-device', ['candidate']);
+        $token = Password::broker()->createToken($user);
+
+        $this->postJson('/api/reset-password', [
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'NovaSenhaForte123',
+            'password_confirmation' => 'NovaSenhaForte123',
+        ])->assertOk();
+
+        $this->assertTrue(Hash::check('NovaSenhaForte123', $user->fresh()->password));
         $this->assertDatabaseMissing('personal_access_tokens', [
             'tokenable_type' => User::class,
             'tokenable_id' => $user->id,

@@ -10,6 +10,10 @@ class VagaResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $canViewPrivateFields = $request->user()?->isRecruiter() === true
+            && $this->created_by === $request->user()->id;
+        $canViewSalary = (bool) $this->salario_visivel || $canViewPrivateFields;
+
         return [
             'id' => $this->id,
             'slug' => $this->slug,
@@ -21,10 +25,16 @@ class VagaResource extends JsonResource
             'workMode' => $this->modalidade,
             'seniority' => $this->senioridade,
             'openings' => $this->quantidade_vagas,
-            'applicationEmail' => $this->email_candidatura,
+            'applicationEmail' => $this->when($canViewPrivateFields, $this->email_candidatura),
             'applicationDeadline' => $this->data_limite?->format('Y-m-d'),
-            'salaryMin' => $this->salario_min !== null ? (float) $this->salario_min : null,
-            'salaryMax' => $this->salario_max !== null ? (float) $this->salario_max : null,
+            'salaryMin' => $this->when(
+                $canViewSalary,
+                $this->salario_min !== null ? (float) $this->salario_min : null,
+            ),
+            'salaryMax' => $this->when(
+                $canViewSalary,
+                $this->salario_max !== null ? (float) $this->salario_max : null,
+            ),
             'salaryVisible' => (bool) $this->salario_visivel,
             'description' => $this->descricao,
             'responsibilities' => $this->responsabilidades,

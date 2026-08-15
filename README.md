@@ -19,6 +19,7 @@ Aplicação full-stack para divulgação de vagas, cadastro de candidatos, cria�
 - Currículo único com experiências, formações, cursos, habilidades, idiomas, links e foto.
 - Criação e edição transacional do currículo.
 - Candidatura sem duplicidade e histórico pessoal de candidaturas.
+- Vagas salvas no banco, com inclusão e remoção idempotentes.
 - Snapshot imutável do currículo no momento da candidatura.
 
 ### Recrutador
@@ -26,7 +27,7 @@ Aplicação full-stack para divulgação de vagas, cadastro de candidatos, cria�
 - Login e rotas protegidas por perfil.
 - Criação e gestão de vagas com todos os campos da interface.
 - Publicação, pausa, arquivamento, duplicação, exclusão lógica e ações em lote.
-- Pipeline de candidatos com seis etapas, avaliação e observações.
+- Pipeline de candidatos com etapas auditadas, avaliação e observações editáveis.
 - Inclusão manual de candidatos sem criar contas falsas.
 - Dashboard, filtros, paginação e histórico de movimentações.
 
@@ -38,7 +39,7 @@ Aplicação full-stack para divulgação de vagas, cadastro de candidatos, cria�
 - CORS restrito por variável de ambiente.
 - Cookies de sessão criptografados, CSRF e headers de segurança.
 - Foreign keys, índices, unicidade de currículo e candidatura, soft delete e transações.
-- Upload de imagem limitado a JPEG, PNG ou WebP de até 2 MB.
+- Upload de imagem limitado a JPEG, PNG ou WebP de até 2 MB e 4096 × 4096 px.
 - Respostas não revelam senhas, tokens, `remember_token` ou dados de candidatos fora do escopo autorizado.
 
 ## Pré-requisitos
@@ -65,13 +66,18 @@ Crie o banco `banco_talentos` no MySQL e ajuste as variáveis `DB_*` do arquivo 
 
 ```powershell
 php artisan migrate --seed
-php artisan storage:link
 php artisan serve
 ```
 
 O backend ficará em `http://localhost:8000`.
 
 O seeder só cria dados demonstrativos fora de produção. Por padrão local, o recrutador é `admin@pointmedia.com.br` e a senha é `Point@2026!`. Defina `SEED_RECRUITER_PASSWORD` antes do seed para substituir essa senha.
+
+Para criar um recrutador sem expor senha em argumento ou endpoint público, use o comando interativo:
+
+```powershell
+php artisan app:create-recruiter
+```
 
 ### 2. Frontend
 
@@ -113,11 +119,14 @@ Antes de publicar:
 1. Use HTTPS e defina `APP_ENV=production`, `APP_DEBUG=false`, `LOG_LEVEL=warning` e `SESSION_SECURE_COOKIE=true`.
 2. Use segredos exclusivos; nunca copie a chave ou a senha do ambiente local.
 3. Restrinja `FRONTEND_URL`, `CORS_ALLOWED_ORIGINS`, `SANCTUM_STATEFUL_DOMAINS` e `SESSION_DOMAIN` aos domínios reais.
-4. Configure um provedor de e-mail para redefinição de senha.
-5. Use usuário MySQL exclusivo, com senha forte e privilégios mínimos.
-6. Execute migrations em backup testado e configure backups automáticos do banco e de `storage/app/public`.
-7. Não execute o seeder demonstrativo em produção.
-8. Rode testes, lint, build e auditorias de dependências no CI antes do deploy.
+4. Antes de `npm run build`, defina `VITE_API_URL` no frontend com a origem HTTPS real do Laravel, sem `/api`; o valor é incorporado ao bundle.
+5. Configure o host do frontend para reescrever rotas desconhecidas para `index.html` (`try_files $uri $uri/ /index.html;` no Nginx). O build já inclui `_redirects` para hosts compatíveis.
+6. Configure um provedor de e-mail para redefinição de senha.
+7. Use usuário MySQL exclusivo, com senha forte e privilégios mínimos.
+8. Execute migrations em backup testado e configure backups automáticos do banco e de `storage/app/private`.
+9. Não execute o seeder demonstrativo em produção.
+10. Rode testes, lint, build e auditorias de dependências no CI antes do deploy.
+11. Avalie comprimir ou substituir `frontend/src/assets/bg.mp4` (14,8 MB) se a meta de banda em desktop exigir um asset menor. O frontend já não renderiza nem solicita o vídeo em mobile, touch, `save-data` ou movimento reduzido.
 
 ## Documentação
 

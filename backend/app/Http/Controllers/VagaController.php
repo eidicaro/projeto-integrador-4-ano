@@ -231,11 +231,21 @@ class VagaController extends Controller
     private function applySort(Builder $query, string $sort): void
     {
         match ($sort) {
-            'salary_asc' => $query->orderByRaw('salario_min is null')->orderBy('salario_min'),
-            'salary_desc' => $query->orderByDesc('salario_max'),
+            'salary_asc' => $this->applyPublicSalarySort($query, 'salario_min', 'asc'),
+            'salary_desc' => $this->applyPublicSalarySort($query, 'salario_max', 'desc'),
             'title' => $query->orderBy('titulo'),
             default => $query->latest('publicada_em')->latest('id'),
         };
+    }
+
+    private function applyPublicSalarySort(Builder $query, string $column, string $direction): void
+    {
+        $visibleSalary = "CASE WHEN salario_visivel = ? THEN {$column} ELSE NULL END";
+
+        $query
+            ->orderByRaw("{$visibleSalary} IS NULL", [true])
+            ->orderByRaw("{$visibleSalary} {$direction}", [true])
+            ->latest('id');
     }
 
     private function applyAdminSort(Builder $query, string $sort): void

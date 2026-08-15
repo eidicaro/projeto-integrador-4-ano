@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CurriculoController extends Controller
 {
@@ -94,9 +96,7 @@ class CurriculoController extends Controller
             ], Response::HTTP_CONFLICT);
         }
 
-        if ($curriculo->foto) {
-            Storage::disk('public')->delete($curriculo->foto);
-        }
+        $this->deletePhoto($curriculo->foto);
 
         $curriculo->delete();
 
@@ -108,16 +108,32 @@ class CurriculoController extends Controller
         $this->authorize('update', $curriculo);
 
         $oldPhoto = $curriculo->foto;
-        $path = $request->file('foto')->store('curriculos/fotos', 'public');
+        $path = $request->file('foto')->store('curriculos/fotos', 'local');
         $curriculo->update(['foto' => $path]);
 
-        if ($oldPhoto) {
-            Storage::disk('public')->delete($oldPhoto);
-        }
+        $this->deletePhoto($oldPhoto);
 
         return response()->json([
             'message' => 'Foto atualizada com sucesso.',
             'data' => new CurriculoResource($curriculo->fresh()->load(self::RELATIONS)),
+        ]);
+    }
+
+    public function foto(Request $request, Curriculo $curriculo): StreamedResponse
+    {
+        $this->authorize('view', $curriculo);
+
+        $path = $curriculo->foto;
+        if (! $path || Str::startsWith($path, ['http://', 'https://'])) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        abort_unless(Storage::disk('local')->exists($path), Response::HTTP_NOT_FOUND);
+
+        return Storage::disk('local')->response($path, null, [
+            'Cache-Control' => 'private, no-store',
+            'Content-Disposition' => 'inline',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 
@@ -126,7 +142,7 @@ class CurriculoController extends Controller
         $this->authorize('update', $curriculo);
 
         if ($curriculo->foto) {
-            Storage::disk('public')->delete($curriculo->foto);
+            $this->deletePhoto($curriculo->foto);
             $curriculo->update(['foto' => null]);
         }
 
@@ -158,5 +174,15 @@ class CurriculoController extends Controller
                 $curriculo->{$relation}()->createMany($data[$relation]);
             }
         }
+    }
+
+    private function deletePhoto(?string $path): void
+    {
+        if (! $path || Str::startsWith($path, ['http://', 'https://'])) {
+            return;
+        }
+
+        Storage::disk('local')->delete($path);
+        Storage::disk('public')->delete($path);
     }
 }

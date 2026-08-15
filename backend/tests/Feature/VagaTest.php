@@ -54,6 +54,71 @@ class VagaTest extends TestCase
             ->assertJsonPath('data.id', $expired->id);
     }
 
+    public function test_public_job_responses_hide_private_recruiter_fields(): void
+    {
+        $job = $this->vaga($this->recruiter(), [
+            'email_candidatura' => 'interno@example.com',
+            'salario_min' => 7000,
+            'salario_max' => 9000,
+            'salario_visivel' => false,
+        ]);
+
+        $this->getJson('/api/vagas')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $job->id)
+            ->assertJsonPath('data.0.salaryVisible', false)
+            ->assertJsonMissingPath('data.0.applicationEmail')
+            ->assertJsonMissingPath('data.0.salaryMin')
+            ->assertJsonMissingPath('data.0.salaryMax');
+
+        $this->getJson("/api/vagas/{$job->id}")
+            ->assertOk()
+            ->assertJsonMissingPath('data.applicationEmail')
+            ->assertJsonMissingPath('data.salaryMin')
+            ->assertJsonMissingPath('data.salaryMax');
+    }
+
+    public function test_public_salary_sort_never_uses_hidden_salary_values(): void
+    {
+        $owner = $this->recruiter();
+        $visibleLow = $this->vaga($owner, [
+            'salario_min' => 3000,
+            'salario_max' => 4000,
+            'salario_visivel' => true,
+        ]);
+        $visibleHigh = $this->vaga($owner, [
+            'salario_min' => 8000,
+            'salario_max' => 10000,
+            'salario_visivel' => true,
+        ]);
+        $hiddenHigh = $this->vaga($owner, [
+            'salario_min' => 100000,
+            'salario_max' => 120000,
+            'salario_visivel' => false,
+        ]);
+        $hiddenLow = $this->vaga($owner, [
+            'salario_min' => 1,
+            'salario_max' => 2,
+            'salario_visivel' => false,
+        ]);
+
+        $ascending = $this->getJson('/api/vagas?sort=salary_asc&per_page=10')->assertOk();
+        $this->assertSame([
+            $visibleLow->id,
+            $visibleHigh->id,
+            $hiddenLow->id,
+            $hiddenHigh->id,
+        ], collect($ascending->json('data'))->pluck('id')->all());
+
+        $descending = $this->getJson('/api/vagas?sort=salary_desc&per_page=10')->assertOk();
+        $this->assertSame([
+            $visibleHigh->id,
+            $visibleLow->id,
+            $hiddenLow->id,
+            $hiddenHigh->id,
+        ], collect($descending->json('data'))->pluck('id')->all());
+    }
+
     public function test_candidate_cannot_create_or_manage_jobs(): void
     {
         $candidate = $this->candidate();

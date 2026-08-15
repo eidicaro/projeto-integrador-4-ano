@@ -32,6 +32,7 @@ Route::middleware('throttle:api')->group(function (): void {
             Route::get('/curriculos/{curriculo}', [CurriculoController::class, 'show']);
             Route::match(['put', 'patch'], '/curriculos/{curriculo}', [CurriculoController::class, 'update'])->middleware('role:candidato');
             Route::delete('/curriculos/{curriculo}', [CurriculoController::class, 'destroy'])->middleware('role:candidato');
+            Route::get('/curriculos/{curriculo}/foto', [CurriculoController::class, 'foto']);
             Route::post('/curriculos/{curriculo}/foto', [CurriculoController::class, 'uploadFoto'])->middleware('role:candidato');
             Route::delete('/curriculos/{curriculo}/foto', [CurriculoController::class, 'destroyFoto'])->middleware('role:candidato');
 

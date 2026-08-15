@@ -10,8 +10,13 @@
 - Senha mínima de oito caracteres, com maiúscula, minúscula e número.
 - Resposta genérica na recuperação de senha para evitar enumeração de contas.
 - CORS por allowlist e headers `nosniff`, `DENY`, Referrer Policy e Permissions Policy.
+- Respostas autenticadas usam `Cache-Control: no-store, private`; contas desativadas deixam de acessar rotas protegidas.
+- Notas, avaliações, autores do histórico, e-mail operacional e faixas salariais marcadas como privadas só são serializados para o recrutador proprietário.
+- Fotos de currículo ficam no disco privado e só são entregues por rota autenticada com policy de acesso ao currículo.
+- O servidor genérico de arquivos do disco local permanece desativado; o diretório privado não deve ser publicado pelo servidor web.
 - HSTS em produção quando a requisição chega por HTTPS.
 - Soft delete em vagas e candidaturas; snapshots e histórico preservam rastreabilidade.
+- Recrutadores são criados por comando interativo; não existe endpoint público de elevação de privilégio.
 
 ## Dados pessoais e LGPD
 

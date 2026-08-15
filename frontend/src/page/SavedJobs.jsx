@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 import CandidateHeader from "../components/CandidateHeader";
 import api, { getApiErrorMessage } from "../lib/api";
 import { normalizeJob, unwrapApiCollection } from "../lib/candidate";
+import {
+  mergeUniqueById,
+  readPaginatedResponse,
+} from "../lib/pagination";
 import "../styles/candidate-pages.css";
 
 export default function SavedJobs() {
@@ -12,18 +16,25 @@ export default function SavedJobs() {
   const [error, setError] = useState("");
   const [removingId, setRemovingId] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
 
     api.get("/vagas-salvas", {
-      params: { per_page: 50 },
+      params: { page: 1, per_page: 50 },
       signal: controller.signal,
     })
       .then((response) => {
         if (!active) return;
+        const pagination = readPaginatedResponse(response);
+
         setJobs(unwrapApiCollection(response).map(normalizeJob));
+        setPage(pagination.currentPage);
+        setHasMore(pagination.hasMore);
         setError("");
       })
       .catch((requestError) => {
@@ -45,13 +56,47 @@ export default function SavedJobs() {
     };
   }, [reloadKey]);
 
+  async function loadMoreJobs() {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    setError("");
+
+    try {
+      const response = await api.get("/vagas-salvas", {
+        params: { page: page + 1, per_page: 50 },
+      });
+      const pagination = readPaginatedResponse(response);
+      const loadedJobs = unwrapApiCollection(response).map(normalizeJob);
+
+      setJobs((current) => mergeUniqueById(current, loadedJobs));
+      setPage(pagination.currentPage);
+      setHasMore(pagination.hasMore);
+    } catch (requestError) {
+      setError(
+        getApiErrorMessage(
+          requestError,
+          "Não foi possível carregar mais vagas salvas.",
+        ),
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
   async function removeJob(job) {
     setRemovingId(job.id);
     setError("");
 
     try {
       await api.delete(`/vagas/${encodeURIComponent(job.id)}/salvar`);
-      setJobs((current) => current.filter((item) => item.id !== job.id));
+      setJobs((current) =>
+        current.filter((item) => String(item.id) !== String(job.id)),
+      );
+
+      if (hasMore) {
+        setPage((currentPage) => Math.max(0, currentPage - 1));
+      }
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, "Não foi possível remover a vaga salva."),
@@ -89,6 +134,7 @@ export default function SavedJobs() {
               className="candidate-button"
               type="button"
               onClick={() => {
+                setError("");
                 setLoading(true);
                 setReloadKey((value) => value + 1);
               }}
@@ -103,9 +149,10 @@ export default function SavedJobs() {
             <Link className="candidate-button" to="/homeUser">Encontrar vagas</Link>
           </section>
         ) : (
-          <section className="saved-jobs-grid" aria-label="Vagas salvas">
-            {jobs.map((job) => (
-              <article className="saved-job-card" key={job.id}>
+          <>
+            <section className="saved-jobs-grid" aria-label="Vagas salvas">
+              {jobs.map((job) => (
+                <article className="saved-job-card" key={job.id}>
                 <img src={job.image} alt="" loading="lazy" />
                 <div className="saved-job-card__body">
                   <p className="saved-job-card__meta">
@@ -129,9 +176,24 @@ export default function SavedJobs() {
                     </button>
                   </div>
                 </div>
-              </article>
-            ))}
-          </section>
+                </article>
+              ))}
+            </section>
+
+            {hasMore && (
+              <div className="candidate-load-more">
+                <button
+                  className="candidate-button"
+                  type="button"
+                  disabled={loadingMore}
+                  aria-busy={loadingMore}
+                  onClick={loadMoreJobs}
+                >
+                  {loadingMore ? "Carregando mais…" : "Carregar mais vagas"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

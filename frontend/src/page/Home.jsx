@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -14,10 +15,19 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import bgVideo from "../assets/bg.mp4";
+import { useAuth } from "../context/AuthContext";
+import useBackgroundVideoEnabled from "../hooks/useBackgroundVideoEnabled";
+import useDialogFocus from "../hooks/useDialogFocus";
 import api, { getApiErrorMessage } from "../lib/api";
+import {
+  collectPaginatedItems,
+  mergeUniqueById,
+  readPaginatedResponse,
+} from "../lib/pagination";
 
 const ALL_CATEGORIES = "Todas";
 const FALLBACK_CATEGORY = "Outras oportunidades";
+const EMPTY_SAVED_JOBS = new Set();
 
 const JOB_PALETTES = [
   { accent: "#ff4f8b", softAccent: "#ffd5e4" },
@@ -302,7 +312,9 @@ function loadSavedJobs() {
     );
     const parsed = stored ? JSON.parse(stored) : [];
 
-    return Array.isArray(parsed) ? new Set(parsed) : new Set();
+    return Array.isArray(parsed)
+      ? new Set(parsed.map(String))
+      : new Set();
   } catch (error) {
     console.error(
       "Não foi possível recuperar as vagas salvas:",
@@ -310,6 +322,15 @@ function loadSavedJobs() {
     );
     return new Set();
   }
+}
+
+function storeGuestSavedJobs(savedJobIds) {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(
+    "point:saved-jobs",
+    JSON.stringify(Array.from(savedJobIds)),
+  );
 }
 
 
@@ -404,7 +425,12 @@ const COMMANDS = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { loading: authLoading, user } = useAuth();
   const reduceMotion = useReducedMotion();
+  const backgroundVideoEnabled = useBackgroundVideoEnabled();
+  const isCandidate =
+    String(user?.role || "").toLocaleLowerCase("pt-BR") ===
+    "candidato";
 
   const pageRef = useRef(null);
   const jobsRef = useRef(null);
@@ -424,14 +450,45 @@ export default function Home() {
   const [jobsError, setJobsError] = useState("");
   const [jobsTotal, setJobsTotal] = useState(0);
   const [jobsReloadKey, setJobsReloadKey] = useState(0);
+  const [jobsPage, setJobsPage] = useState(1);
+  const [jobsHasMore, setJobsHasMore] = useState(false);
+  const [jobsLoadingMore, setJobsLoadingMore] = useState(false);
+  const [jobsMoreError, setJobsMoreError] = useState("");
 
   const [selectedJob, setSelectedJob] = useState(null);
-  const [savedJobs, setSavedJobs] = useState(loadSavedJobs);
+  const [guestSavedJobs, setGuestSavedJobs] = useState(loadSavedJobs);
+  const [candidateSavedJobs, setCandidateSavedJobs] = useState(
+    () => new Set(),
+  );
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [savingJobIds, setSavingJobIds] = useState(
+    () => new Set(),
+  );
 
   const [toast, setToast] = useState("");
   const [activityIndex, setActivityIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [headerCompact, setHeaderCompact] = useState(false);
+  const savedJobs = isCandidate
+    ? candidateSavedJobs
+    : user
+      ? EMPTY_SAVED_JOBS
+      : guestSavedJobs;
+
+  const showToast = useCallback((message) => {
+    setToast(message);
+
+    window.clearTimeout(toastTimerRef.current);
+
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast("");
+    }, 2600);
+  }, []);
+
+  useEffect(
+    () => () => window.clearTimeout(toastTimerRef.current),
+    [],
+  );
 
   const categoryCounts = useMemo(() => {
     const counts = new Map();
@@ -601,31 +658,28 @@ export default function Home() {
 
     api
       .get("/vagas", {
-        params: { per_page: 50 },
+        params: { page: 1, per_page: 50 },
         signal: controller.signal,
       })
       .then((response) => {
         if (controller.signal.aborted) return;
 
-        const payload = response?.data;
+        const page = readPaginatedResponse(response);
 
-        if (!Array.isArray(payload?.data)) {
+        if (!Array.isArray(response?.data?.data)) {
           throw new Error(
             "A API retornou uma lista de vagas inválida.",
           );
         }
 
-        const normalizedJobs = payload.data
+        const normalizedJobs = page.items
           .map(normalizeJob)
           .filter(Boolean);
-        const total = toOptionalNumber(payload?.meta?.total);
 
         setJobs(normalizedJobs);
-        setJobsTotal(
-          total === null
-            ? normalizedJobs.length
-            : Math.max(normalizedJobs.length, total),
-        );
+        setJobsPage(page.currentPage);
+        setJobsHasMore(page.hasMore);
+        setJobsTotal(Math.max(normalizedJobs.length, page.total));
         setJobsError("");
         setJobsLoading(false);
       })
@@ -639,6 +693,8 @@ export default function Home() {
 
         setJobs([]);
         setJobsTotal(0);
+        setJobsPage(1);
+        setJobsHasMore(false);
         setJobsError(
           error?.response
             ? getApiErrorMessage(
@@ -654,18 +710,143 @@ export default function Home() {
   }, [jobsReloadKey]);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(
-        "point:saved-jobs",
-        JSON.stringify(Array.from(savedJobs)),
-      );
-    } catch (error) {
-      console.error(
-        "Não foi possível salvar os favoritos:",
-        error,
-      );
+    if (authLoading) return undefined;
+
+    if (!isCandidate) {
+      return undefined;
     }
-  }, [savedJobs]);
+
+    const controller = new AbortController();
+    let active = true;
+
+    async function syncCandidateFavorites() {
+      setFavoritesLoading(true);
+
+      const storedJobIds = Array.from(loadSavedJobs()).filter((jobId) =>
+        /^\d+$/.test(jobId),
+      );
+      const localJobIds = storedJobIds.slice(0, 500);
+      const remainingLocalIds = new Set(storedJobIds);
+      let migratedCount = 0;
+      let pendingMigrationCount = Math.max(
+        0,
+        storedJobIds.length - localJobIds.length,
+      );
+
+      try {
+        const migrations = [];
+
+        for (let start = 0; start < localJobIds.length; start += 10) {
+          const batch = localJobIds.slice(start, start + 10);
+          const batchResults = await Promise.all(
+            batch.map(async (jobId) => {
+              try {
+                await api.put(
+                  `/vagas/${encodeURIComponent(jobId)}/salvar`,
+                  undefined,
+                  { signal: controller.signal },
+                );
+
+                return { jobId, migrated: true, discard: true };
+              } catch (error) {
+                if (
+                  controller.signal.aborted ||
+                  error?.code === "ERR_CANCELED"
+                ) {
+                  throw error;
+                }
+
+                return {
+                  jobId,
+                  migrated: false,
+                  discard: [404, 409, 422].includes(
+                    error?.response?.status,
+                  ),
+                };
+              }
+            }),
+          );
+
+          migrations.push(...batchResults);
+        }
+
+        migrations.forEach(({ jobId, migrated, discard }) => {
+          if (migrated) migratedCount += 1;
+          if (!migrated && !discard) pendingMigrationCount += 1;
+          if (discard) remainingLocalIds.delete(jobId);
+        });
+
+        try {
+          storeGuestSavedJobs(remainingLocalIds);
+        } catch (storageError) {
+          console.error(
+            "Não foi possível concluir a migração dos favoritos:",
+            storageError,
+          );
+        }
+
+        if (active) {
+          setGuestSavedJobs(new Set(remainingLocalIds));
+        }
+
+        const apiSavedJobs = await collectPaginatedItems((page) =>
+          api.get("/vagas-salvas", {
+            params: { page, per_page: 50 },
+            signal: controller.signal,
+          }),
+        );
+
+        if (!active) return;
+
+        setCandidateSavedJobs(
+          new Set(
+            apiSavedJobs
+              .map((job) => job?.id)
+              .filter(
+                (jobId) => jobId !== null && jobId !== undefined,
+              )
+              .map(String),
+          ),
+        );
+
+        if (pendingMigrationCount > 0) {
+          showToast(
+            "Algumas vagas salvas continuam neste dispositivo e serão sincronizadas novamente.",
+          );
+        } else if (migratedCount > 0) {
+          showToast(
+            migratedCount === 1
+              ? "Uma vaga salva neste dispositivo foi vinculada à sua conta."
+              : `${migratedCount} vagas salvas neste dispositivo foram vinculadas à sua conta.`,
+          );
+        }
+      } catch (error) {
+        if (
+          !active ||
+          controller.signal.aborted ||
+          error?.code === "ERR_CANCELED"
+        ) {
+          return;
+        }
+
+        showToast(
+          getApiErrorMessage(
+            error,
+            "Não foi possível sincronizar suas vagas salvas.",
+          ),
+        );
+      } finally {
+        if (active) setFavoritesLoading(false);
+      }
+    }
+
+    syncCandidateFavorites();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [authLoading, isCandidate, showToast, user?.id]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -830,36 +1011,100 @@ export default function Home() {
     }
   }
 
-  function toggleSaved(jobId) {
-    const isCurrentlySaved = savedJobs.has(jobId);
+  async function toggleSaved(jobId) {
+    const normalizedJobId = String(jobId);
 
-    setSavedJobs((current) => {
-      const next = new Set(current);
+    if (
+      authLoading ||
+      (isCandidate && favoritesLoading) ||
+      savingJobIds.has(normalizedJobId)
+    ) {
+      return;
+    }
 
-      if (next.has(jobId)) {
-        next.delete(jobId);
+    const isCurrentlySaved = savedJobs.has(normalizedJobId);
+
+    if (user && !isCandidate) {
+      showToast("Apenas candidatos podem salvar oportunidades.");
+      return;
+    }
+
+    if (!user) {
+      const next = new Set(savedJobs);
+
+      if (next.has(normalizedJobId)) {
+        next.delete(normalizedJobId);
       } else {
-        next.add(jobId);
+        next.add(normalizedJobId);
       }
 
+      setGuestSavedJobs(next);
+      let storageFailed = false;
+
+      try {
+        storeGuestSavedJobs(next);
+      } catch (error) {
+        storageFailed = true;
+        console.error(
+          "Não foi possível salvar os favoritos:",
+          error,
+        );
+      }
+
+      showToast(
+        storageFailed
+          ? "Favorito atualizado nesta sessão, mas o navegador bloqueou o armazenamento."
+          : isCurrentlySaved
+            ? "Vaga removida dos seus favoritos."
+            : "Vaga salva no seu radar!",
+      );
+      return;
+    }
+
+    setSavingJobIds((current) => {
+      const next = new Set(current);
+      next.add(normalizedJobId);
       return next;
     });
 
-    showToast(
-      isCurrentlySaved
-        ? "Vaga removida dos seus favoritos."
-        : "Vaga salva no seu radar!",
-    );
-  }
+    try {
+      if (isCurrentlySaved) {
+        await api.delete(
+          `/vagas/${encodeURIComponent(jobId)}/salvar`,
+        );
+      } else {
+        await api.put(
+          `/vagas/${encodeURIComponent(jobId)}/salvar`,
+        );
+      }
 
-  function showToast(message) {
-    setToast(message);
+      setCandidateSavedJobs((current) => {
+        const next = new Set(current);
 
-    window.clearTimeout(toastTimerRef.current);
+        if (isCurrentlySaved) next.delete(normalizedJobId);
+        else next.add(normalizedJobId);
 
-    toastTimerRef.current = window.setTimeout(() => {
-      setToast("");
-    }, 2600);
+        return next;
+      });
+      showToast(
+        isCurrentlySaved
+          ? "Vaga removida dos seus favoritos."
+          : "Vaga salva no seu radar!",
+      );
+    } catch (error) {
+      showToast(
+        getApiErrorMessage(
+          error,
+          "Não foi possível atualizar suas vagas salvas.",
+        ),
+      );
+    } finally {
+      setSavingJobIds((current) => {
+        const next = new Set(current);
+        next.delete(normalizedJobId);
+        return next;
+      });
+    }
   }
 
   function executeCommand(commandId) {
@@ -906,7 +1151,48 @@ export default function Home() {
   function retryJobs() {
     setJobsLoading(true);
     setJobsError("");
+    setJobsMoreError("");
     setJobsReloadKey((current) => current + 1);
+  }
+
+  async function loadMoreJobs() {
+    if (jobsLoadingMore || !jobsHasMore) return;
+
+    setJobsLoadingMore(true);
+    setJobsMoreError("");
+
+    try {
+      const response = await api.get("/vagas", {
+        params: { page: jobsPage + 1, per_page: 50 },
+      });
+      const page = readPaginatedResponse(response);
+
+      if (!Array.isArray(response?.data?.data)) {
+        throw new Error("A API retornou uma lista de vagas inválida.");
+      }
+
+      const normalizedJobs = page.items
+        .map(normalizeJob)
+        .filter(Boolean);
+
+      setJobs((current) =>
+        mergeUniqueById(current, normalizedJobs),
+      );
+      setJobsPage(page.currentPage);
+      setJobsHasMore(page.hasMore);
+      setJobsTotal((currentTotal) =>
+        Math.max(currentTotal, page.total),
+      );
+    } catch (error) {
+      setJobsMoreError(
+        getApiErrorMessage(
+          error,
+          "Não foi possível carregar mais oportunidades.",
+        ),
+      );
+    } finally {
+      setJobsLoadingMore(false);
+    }
   }
 
   return (
@@ -1266,16 +1552,18 @@ export default function Home() {
               </svg>
 
               <div className="map-video-card">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  aria-hidden="true"
-                >
-                  <source src={bgVideo} type="video/mp4" />
-                </video>
+                {backgroundVideoEnabled && (
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-hidden="true"
+                  >
+                    <source src={bgVideo} type="video/mp4" />
+                  </video>
+                )}
 
                 <div className="map-video-overlay" />
 
@@ -1574,7 +1862,12 @@ export default function Home() {
                     key={job.id}
                     job={job}
                     index={index}
-                    saved={savedJobs.has(job.id)}
+                    saved={savedJobs.has(String(job.id))}
+                    saving={
+                      authLoading ||
+                      (isCandidate && favoritesLoading) ||
+                      savingJobIds.has(String(job.id))
+                    }
                     onSave={() => toggleSaved(job.id)}
                     onOpen={() => openJob(job)}
                   />
@@ -1598,14 +1891,24 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {!jobsLoading && !jobsError && jobsTotal > 0 && (
+          {jobsMoreError && (
+            <p className="jobs-more-error" role="alert">
+              {jobsMoreError}
+            </p>
+          )}
+
+          {!jobsLoading && !jobsError && jobsHasMore && (
             <div className="jobs-more-wrapper">
               <button
                 type="button"
                 className="jobs-more-button"
-                onClick={() => navigate("/vagas")}
+                onClick={loadMoreJobs}
+                disabled={jobsLoadingMore}
+                aria-busy={jobsLoadingMore}
               >
-                Ver todas as oportunidades
+                {jobsLoadingMore
+                  ? "Carregando oportunidades..."
+                  : `Carregar mais oportunidades (${jobs.length} de ${jobsTotal})`}
                 <ArrowRightIcon />
               </button>
             </div>
@@ -2072,16 +2375,26 @@ export default function Home() {
           {selectedJob && (
             <JobModal
               job={selectedJob}
-              saved={savedJobs.has(selectedJob.id)}
+              saved={savedJobs.has(String(selectedJob.id))}
+              saving={
+                authLoading ||
+                (isCandidate && favoritesLoading) ||
+                savingJobIds.has(String(selectedJob.id))
+              }
               onClose={() => setSelectedJob(null)}
               onSave={() => toggleSaved(selectedJob.id)}
-              onApply={() =>
+              onApply={() => {
+                const destination = `/vagas/${selectedJob.id}`;
+
+                if (authLoading || isCandidate || user) {
+                  navigate(destination);
+                  return;
+                }
+
                 navigate("/login", {
-                  state: {
-                    redirectTo: `/vagas/${selectedJob.id}`,
-                  },
-                })
-              }
+                  state: { redirectTo: destination },
+                });
+              }}
             />
           )}
         </AnimatePresence>
@@ -2127,6 +2440,7 @@ function JobCard({
   job,
   index,
   saved,
+  saving,
   onSave,
   onOpen,
 }) {
@@ -2173,14 +2487,19 @@ function JobCard({
               ? "job-save-button job-save-button--saved"
               : "job-save-button"
           }
+          disabled={saving}
+          aria-busy={saving}
+          aria-pressed={saved}
           onClick={(event) => {
             event.stopPropagation();
             onSave();
           }}
           aria-label={
-            saved
-              ? "Remover vaga dos favoritos"
-              : "Salvar vaga"
+            saving
+              ? `Atualizando favoritos para ${job.title}`
+              : saved
+                ? `Remover ${job.title} dos favoritos`
+                : `Salvar ${job.title}`
           }
         >
           <BookmarkIcon filled={saved} />
@@ -2243,12 +2562,26 @@ function JobCard({
 function JobModal({
   job,
   saved,
+  saving,
   onClose,
   onSave,
   onApply,
 }) {
+  const dialogRootRef = useRef(null);
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useDialogFocus({
+    active: true,
+    containerRef: modalRef,
+    initialFocusRef: closeButtonRef,
+    onClose,
+    rootRef: dialogRootRef,
+  });
+
   return (
     <Motion.div
+      ref={dialogRootRef}
       className="modal-overlay"
       role="dialog"
       aria-modal="true"
@@ -2263,7 +2596,9 @@ function JobModal({
       }}
     >
       <Motion.article
+        ref={modalRef}
         className="job-modal"
+        tabIndex={-1}
         style={{
           "--job-accent": job.accent,
           "--job-soft-accent": job.softAccent,
@@ -2292,6 +2627,7 @@ function JobModal({
         }}
       >
         <button
+          ref={closeButtonRef}
           type="button"
           className="modal-close-button"
           onClick={onClose}
@@ -2327,9 +2663,19 @@ function JobModal({
                 : "modal-save-button"
             }
             onClick={onSave}
+            disabled={saving}
+            aria-busy={saving}
+            aria-pressed={saved}
+            aria-label={
+              saving
+                ? `Atualizando favoritos para ${job.title}`
+                : saved
+                  ? `Remover ${job.title} dos favoritos`
+                  : `Salvar ${job.title}`
+            }
           >
             <BookmarkIcon filled={saved} />
-            {saved ? "Salva" : "Salvar"}
+            {saving ? "Salvando..." : saved ? "Salva" : "Salvar"}
           </button>
         </header>
 
@@ -2427,7 +2773,11 @@ function JobModal({
               ` · Inscrições até ${job.applicationDeadline}`}
           </span>
 
-          <button type="button" onClick={onApply}>
+          <button
+            type="button"
+            onClick={onApply}
+            aria-label={`Candidatar-se à vaga ${job.title}`}
+          >
             Candidatar agora
             <ArrowRightIcon />
           </button>
@@ -2444,8 +2794,21 @@ function CommandPalette({
   onExecute,
   onClose,
 }) {
+  const dialogRootRef = useRef(null);
+  const paletteRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useDialogFocus({
+    active: true,
+    containerRef: paletteRef,
+    initialFocusRef: inputRef,
+    onClose,
+    rootRef: dialogRootRef,
+  });
+
   return (
     <Motion.div
+      ref={dialogRootRef}
       className="command-overlay"
       role="dialog"
       aria-modal="true"
@@ -2460,7 +2823,9 @@ function CommandPalette({
       }}
     >
       <Motion.div
+        ref={paletteRef}
         className="command-palette"
+        tabIndex={-1}
         initial={{
           opacity: 0,
           y: -24,
@@ -2486,8 +2851,10 @@ function CommandPalette({
           <SearchIcon />
 
           <input
+            ref={inputRef}
             autoFocus
             type="search"
+            aria-label="Buscar uma ação rápida"
             value={query}
             onChange={(event) =>
               onQueryChange(event.target.value)
@@ -2495,7 +2862,11 @@ function CommandPalette({
             placeholder="Para onde você quer ir?"
           />
 
-          <button type="button" onClick={onClose}>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar busca rápida"
+          >
             ESC
           </button>
         </div>
@@ -2553,9 +2924,25 @@ function MobileMenu({
   onClose,
   onNavigate,
 }) {
+  const dialogRootRef = useRef(null);
+  const menuRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useDialogFocus({
+    active: true,
+    containerRef: menuRef,
+    initialFocusRef: closeButtonRef,
+    onClose,
+    rootRef: dialogRootRef,
+  });
+
   return (
     <Motion.div
+      ref={dialogRootRef}
       className="mobile-menu-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu de navegação"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -2566,7 +2953,9 @@ function MobileMenu({
       }}
     >
       <Motion.aside
+        ref={menuRef}
         className="mobile-menu"
+        tabIndex={-1}
         initial={{ x: "105%" }}
         animate={{ x: 0 }}
         exit={{ x: "105%" }}
@@ -2584,6 +2973,7 @@ function MobileMenu({
           </span>
 
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Fechar menu"
@@ -4732,9 +5122,15 @@ const homeStyles = `
       box-shadow 190ms ease;
   }
 
-  .job-save-button:hover {
+  .job-save-button:not(:disabled):hover {
     transform: translate(-2px, -2px) rotate(-8deg);
     box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .job-save-button:disabled,
+  .modal-save-button:disabled {
+    cursor: wait;
+    opacity: 0.68;
   }
 
   .job-save-button--saved {
@@ -4895,6 +5291,14 @@ const homeStyles = `
     margin-top: 2.5rem;
   }
 
+  .jobs-more-error {
+    margin: 2rem auto 0;
+    color: #9f1239;
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-align: center;
+  }
+
   .jobs-more-button {
     display: flex;
     align-items: center;
@@ -4997,6 +5401,13 @@ const homeStyles = `
   .empty-jobs button svg {
     width: 0.9rem;
     height: 0.9rem;
+  }
+
+  .jobs-more-button:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+    box-shadow: 4px 4px 0 var(--pink);
   }
 
   .empty-jobs--loading .empty-jobs-icon {

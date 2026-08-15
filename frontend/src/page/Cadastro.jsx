@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/cadastro.png";
 import bgVideo from "../assets/bg.mp4";
 import { useAuth } from "../context/AuthContext";
+import useBackgroundVideoEnabled from "../hooks/useBackgroundVideoEnabled";
 import {
   getApiErrorMessage,
   getApiFieldError,
@@ -23,6 +24,7 @@ const INITIAL_FORM = {
 export default function Cadastro() {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const backgroundVideoEnabled = useBackgroundVideoEnabled();
   const pageRef = useRef(null);
 
   const [etapa, setEtapa] = useState(1);
@@ -2346,17 +2348,19 @@ export default function Cadastro() {
 
             <article className="passport">
               <div className="passport-top">
-                <video
-                  className="passport-video"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  aria-hidden="true"
-                >
-                  <source src={bgVideo} type="video/mp4" />
-                </video>
+                {backgroundVideoEnabled && (
+                  <video
+                    className="passport-video"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-hidden="true"
+                  >
+                    <source src={bgVideo} type="video/mp4" />
+                  </video>
+                )}
 
                 <div
                   className="passport-video-overlay"

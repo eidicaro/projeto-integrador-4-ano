@@ -708,7 +708,8 @@ export default function AdminCreate() {
   const navigate = useNavigate();
   const location = useLocation();
   const editJob = location.state?.editJob || null;
-  const isEditing = editJob?.id !== null && editJob?.id !== undefined;
+  const editJobId = editJob?.id ?? null;
+  const isEditing = editJobId !== null;
 
   const [initialDraft] = useState(() => isEditing ? null : loadStoredDraft());
   const titleInputRef = useRef(null);
@@ -830,7 +831,7 @@ export default function AdminCreate() {
   ]);
 
   const saveDraft = useCallback((showFeedback = true) => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isEditing) return;
 
     const savedAt = new Date();
 
@@ -863,7 +864,7 @@ export default function AdminCreate() {
         });
       }
     }
-  }, [form]);
+  }, [form, isEditing]);
 
   const focusFirstInvalidField = useCallback(() => {
     const firstInvalidField = Object.keys(errors)[0];
@@ -899,6 +900,10 @@ export default function AdminCreate() {
   }, [errors, focusFirstInvalidField]);
 
   useEffect(() => {
+    if (isEditing) {
+      return undefined;
+    }
+
     const autoSaveTimer = window.setTimeout(() => {
       saveDraft(false);
     }, 600);
@@ -906,7 +911,7 @@ export default function AdminCreate() {
     return () => {
       window.clearTimeout(autoSaveTimer);
     };
-  }, [saveDraft]);
+  }, [isEditing, saveDraft]);
 
   useEffect(() => {
     if (!toast) {
@@ -929,7 +934,8 @@ export default function AdminCreate() {
 
       if (
         modifierPressed &&
-        event.key.toLowerCase() === "s"
+        event.key.toLowerCase() === "s" &&
+        !isEditing
       ) {
         event.preventDefault();
         saveDraft(true);
@@ -962,7 +968,7 @@ export default function AdminCreate() {
         handleKeyboardShortcut
       );
     };
-  }, [isPublishing, openPublishModal, saveDraft]);
+  }, [isEditing, isPublishing, openPublishModal, saveDraft]);
 
   useEffect(() => {
     function handleBeforeUnload(event) {
@@ -1146,7 +1152,7 @@ export default function AdminCreate() {
   }
 
   function confirmReset() {
-    setForm(emptyForm);
+    setForm(isEditing ? createFormFromJob(editJob) : emptyForm);
     setTagInput("");
     setTouched({});
     setSubmitted(false);
@@ -1154,7 +1160,7 @@ export default function AdminCreate() {
     setModalMode(null);
     setLastSaved(null);
 
-    if (typeof window !== "undefined") {
+    if (!isEditing && typeof window !== "undefined") {
       window.localStorage.removeItem(
         DRAFT_STORAGE_KEY
       );
@@ -1162,9 +1168,10 @@ export default function AdminCreate() {
 
     setToast({
       type: "info",
-      title: "Formulário limpo",
-      description:
-        "Uma nova vaga pode ser criada do zero.",
+      title: isEditing ? "Alterações descartadas" : "Formulário limpo",
+      description: isEditing
+        ? "Os dados originais da vaga foram restaurados sem alterar seu rascunho de criação."
+        : "Uma nova vaga pode ser criada do zero.",
     });
 
     window.setTimeout(() => {
@@ -1187,15 +1194,17 @@ export default function AdminCreate() {
       };
       const response = isEditing
         ? await api.patch(
-            `/admin/vagas/${encodeURIComponent(editJob.id)}`,
+            `/admin/vagas/${encodeURIComponent(editJobId)}`,
             payload
           )
         : await api.post("/admin/vagas", payload);
       const newJob = unwrapApiData(response);
 
-      window.localStorage.removeItem(
-        DRAFT_STORAGE_KEY
-      );
+      if (!isEditing) {
+        window.localStorage.removeItem(
+          DRAFT_STORAGE_KEY
+        );
+      }
 
       setModalMode(null);
       navigate("/admin/ver-vagas", {
@@ -4224,36 +4233,45 @@ Candidaturas: ${
               </button>
 
               <div className="create-topbar__actions">
-                <div className="create-save-status">
-                  <span className="create-save-status__dot" />
+                {isEditing ? (
+                  <div className="create-save-status">
+                    <span className="create-save-status__dot" />
+                    Rascunho de criação preservado
+                  </div>
+                ) : (
+                  <>
+                    <div className="create-save-status">
+                      <span className="create-save-status__dot" />
 
-                  {lastSaved
-                    ? `Salvo às ${lastSaved.toLocaleTimeString(
-                        "pt-BR",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}`
-                    : "Salvamento automático"}
-                </div>
+                      {lastSaved
+                        ? `Salvo às ${lastSaved.toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}`
+                        : "Salvamento automático"}
+                    </div>
 
-                <button
-                  type="button"
-                  className="create-topbar-button"
-                  onClick={() =>
-                    saveDraft(true)
-                  }
-                >
-                  <Icon
-                    name="save"
-                    size={16}
-                  />
+                    <button
+                      type="button"
+                      className="create-topbar-button"
+                      onClick={() =>
+                        saveDraft(true)
+                      }
+                    >
+                      <Icon
+                        name="save"
+                        size={16}
+                      />
 
-                  <span className="create-topbar-button__text">
-                    Salvar rascunho
-                  </span>
-                </button>
+                      <span className="create-topbar-button__text">
+                        Salvar rascunho
+                      </span>
+                    </button>
+                  </>
+                )}
               </div>
             </header>
 
@@ -5395,19 +5413,21 @@ Candidaturas: ${
 
                 <div className="create-form-actions">
                   <div className="create-form-actions__secondary">
-                    <button
-                      type="button"
-                      className="create-secondary-button"
-                      onClick={() =>
-                        saveDraft(true)
-                      }
-                    >
-                      <Icon
-                        name="save"
-                        size={15}
-                      />
-                      Salvar
-                    </button>
+                    {!isEditing && (
+                      <button
+                        type="button"
+                        className="create-secondary-button"
+                        onClick={() =>
+                          saveDraft(true)
+                        }
+                      >
+                        <Icon
+                          name="save"
+                          size={15}
+                        />
+                        Salvar
+                      </button>
+                    )}
 
                     <button
                       type="button"
@@ -5420,7 +5440,7 @@ Candidaturas: ${
                         name="trash"
                         size={15}
                       />
-                      Limpar
+                      {isEditing ? "Descartar alterações" : "Limpar"}
                     </button>
                   </div>
 
@@ -5627,7 +5647,9 @@ Candidaturas: ${
                   className="create-modal__title"
                 >
                   {modalMode === "reset"
-                    ? "Limpar todo o formulário?"
+                    ? isEditing
+                      ? "Descartar alterações desta edição?"
+                      : "Limpar todo o formulário?"
                     : isEditing
                       ? "Atualizar esta oportunidade?"
                       : "Publicar esta oportunidade?"}
@@ -5635,7 +5657,9 @@ Candidaturas: ${
 
                 <p className="create-modal__description">
                   {modalMode === "reset"
-                    ? "Todas as informações preenchidas e o rascunho salvo neste navegador serão removidos. Esta ação não poderá ser desfeita."
+                    ? isEditing
+                      ? "Os dados da vaga serão restaurados para o estado em que a edição foi aberta. Seu rascunho de criação continuará intacto."
+                      : "Todas as informações preenchidas e o rascunho salvo neste navegador serão removidos. Esta ação não poderá ser desfeita."
                     : isEditing
                       ? "Revise o resumo abaixo. Após a confirmação, as alterações serão salvas no servidor."
                       : "Revise o resumo abaixo. Após a confirmação, a vaga será adicionada à sua lista de oportunidades publicadas."}
@@ -5707,7 +5731,7 @@ Candidaturas: ${
                         name="trash"
                         size={15}
                       />
-                      Limpar formulário
+                      {isEditing ? "Restaurar dados" : "Limpar formulário"}
                     </button>
                   ) : (
                     <button

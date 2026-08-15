@@ -10,6 +10,8 @@ class CandidaturaResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $canViewRecruiterFields = $request->user()?->isRecruiter() === true;
+
         return [
             'id' => $this->id,
             'userId' => $this->user_id,
@@ -23,8 +25,8 @@ class CandidaturaResource extends JsonResource
             'experience' => $this->experiencia_resumo,
             'skills' => $this->habilidades ?? [],
             'stage' => $this->status instanceof CandidaturaStatus ? $this->status->value : $this->status,
-            'rating' => $this->avaliacao ?? 0,
-            'notes' => $this->observacoes,
+            'rating' => $this->when($canViewRecruiterFields, $this->avaliacao ?? 0),
+            'notes' => $this->when($canViewRecruiterFields, $this->observacoes),
             'source' => $this->origem,
             'job' => new VagaResource($this->whenLoaded('vaga')),
             'resume' => new CurriculoResource($this->whenLoaded('curriculo')),

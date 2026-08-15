@@ -9,9 +9,13 @@ import {
     extractAuthenticatedUser,
     getApplicationJobId,
     normalizeJob,
-    unwrapApiCollection,
     unwrapApiData,
 } from "../lib/candidate";
+import {
+    collectPaginatedItems,
+    mergeUniqueById,
+    readPaginatedResponse,
+} from "../lib/pagination";
 import "../styles/candidate-pages.css";
 
 function createInitialsAvatar(name) {
@@ -43,6 +47,10 @@ export default function HomeUser() {
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState("");
     const [reloadKey, setReloadKey] = useState(0);
+    const [jobsPage, setJobsPage] = useState(1);
+    const [jobsHasMore, setJobsHasMore] = useState(false);
+    const [jobsLoadingMore, setJobsLoadingMore] = useState(false);
+    const [jobsMoreError, setJobsMoreError] = useState("");
     const [applyingJobId, setApplyingJobId] = useState(null);
     const [savingJobId, setSavingJobId] = useState(null);
     const [applyError, setApplyError] = useState("");
@@ -62,25 +70,30 @@ export default function HomeUser() {
         Promise.all([
             api.get("/me", { signal: controller.signal }),
             api.get("/vagas", {
-                params: { per_page: 50 },
+                params: { page: 1, per_page: 50 },
                 signal: controller.signal,
             }),
             api.get("/curriculos/me", { signal: controller.signal }),
-            api.get("/minhas-candidaturas", {
-                signal: controller.signal,
-            }),
-            api.get("/vagas-salvas", {
-                params: { per_page: 50 },
-                signal: controller.signal,
-            }),
+            collectPaginatedItems((page) =>
+                api.get("/minhas-candidaturas", {
+                    params: { page, per_page: 100 },
+                    signal: controller.signal,
+                }),
+            ),
+            collectPaginatedItems((page) =>
+                api.get("/vagas-salvas", {
+                    params: { page, per_page: 50 },
+                    signal: controller.signal,
+                }),
+            ),
         ])
             .then(
                 ([
                     userResponse,
                     jobsResponse,
                     resumeResponse,
-                    applicationsResponse,
-                    savedJobsResponse,
+                    loadedApplications,
+                    loadedSavedJobs,
                 ]) => {
                     if (!active) return;
 
@@ -91,7 +104,8 @@ export default function HomeUser() {
                         );
                     }
 
-                    const loadedJobs = unwrapApiCollection(jobsResponse)
+                    const jobsPageData = readPaginatedResponse(jobsResponse);
+                    const loadedJobs = jobsPageData.items
                         .filter(
                             (job) =>
                                 job?.id !== null && job?.id !== undefined,
@@ -100,13 +114,13 @@ export default function HomeUser() {
 
                     setUsuario(loadedUser);
                     setVagas(loadedJobs);
+                    setJobsPage(jobsPageData.currentPage);
+                    setJobsHasMore(jobsPageData.hasMore);
                     setCurriculo(unwrapApiData(resumeResponse));
-                    setCandidaturas(
-                        unwrapApiCollection(applicationsResponse),
-                    );
+                    setCandidaturas(loadedApplications);
                     setSavedJobIds(
                         new Set(
-                            unwrapApiCollection(savedJobsResponse)
+                            loadedSavedJobs
                                 .map((savedJob) =>
                                     savedJob?.id ??
                                     savedJob?.vagaId ??
@@ -195,7 +209,42 @@ export default function HomeUser() {
     function handleRetry() {
         setLoading(true);
         setLoadError("");
+        setJobsMoreError("");
         setReloadKey((currentKey) => currentKey + 1);
+    }
+
+    async function loadMoreJobs() {
+        if (jobsLoadingMore || !jobsHasMore) return;
+
+        setJobsLoadingMore(true);
+        setJobsMoreError("");
+
+        try {
+            const response = await api.get("/vagas", {
+                params: { page: jobsPage + 1, per_page: 50 },
+            });
+            const page = readPaginatedResponse(response);
+            const loadedJobs = page.items
+                .filter(
+                    (job) => job?.id !== null && job?.id !== undefined,
+                )
+                .map(normalizeJob);
+
+            setVagas((currentJobs) =>
+                mergeUniqueById(currentJobs, loadedJobs),
+            );
+            setJobsPage(page.currentPage);
+            setJobsHasMore(page.hasMore);
+        } catch (error) {
+            setJobsMoreError(
+                getApiErrorMessage(
+                    error,
+                    "Não foi possível carregar mais oportunidades.",
+                ),
+            );
+        } finally {
+            setJobsLoadingMore(false);
+        }
     }
 
     function openJob(vaga) {
@@ -456,8 +505,9 @@ export default function HomeUser() {
                         </p>
                     </section>
                 ) : (
-                    Object.entries(vagasAgrupadas).map(
-                        ([categoria, jobs]) => (
+                    <>
+                        {Object.entries(vagasAgrupadas).map(
+                            ([categoria, jobs]) => (
                             <section key={categoria} style={styles.section}>
                                 <div>
                                     <h2 style={styles.sectionTitle}>
@@ -595,8 +645,31 @@ export default function HomeUser() {
                                     })}
                                 </div>
                             </section>
-                        ),
-                    )
+                            ),
+                        )}
+
+                        {jobsMoreError && (
+                            <p style={styles.loadMoreError} role="alert">
+                                {jobsMoreError}
+                            </p>
+                        )}
+
+                        {jobsHasMore && (
+                            <div style={styles.loadMoreWrapper}>
+                                <button
+                                    type="button"
+                                    style={styles.retryButton}
+                                    onClick={loadMoreJobs}
+                                    disabled={jobsLoadingMore}
+                                    aria-busy={jobsLoadingMore}
+                                >
+                                    {jobsLoadingMore
+                                        ? "Carregando mais vagas..."
+                                        : "Carregar mais vagas"}
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <JobModal
@@ -904,6 +977,17 @@ const styles = {
         borderRadius: "24px",
         background: "rgba(255,255,255,0.82)",
         boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+        textAlign: "center",
+    },
+    loadMoreWrapper: {
+        display: "flex",
+        justifyContent: "center",
+        margin: "-24px 0 60px",
+    },
+    loadMoreError: {
+        margin: "-24px auto 24px",
+        color: "#991b1b",
+        fontWeight: "700",
         textAlign: "center",
     },
     stateTitle: {

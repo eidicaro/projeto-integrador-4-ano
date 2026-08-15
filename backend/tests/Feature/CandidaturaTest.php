@@ -336,6 +336,32 @@ class CandidaturaTest extends TestCase
             ->assertJsonPath('data.id', $application->id);
     }
 
+    public function test_candidate_responses_hide_internal_recruiter_fields_and_application_email(): void
+    {
+        $owner = $this->recruiter();
+        $candidate = $this->candidate();
+        $resume = $this->curriculo($candidate);
+        $job = $this->vaga($owner, ['email_candidatura' => 'interno@example.com']);
+        $application = $this->candidatura($candidate, $resume, $job, [
+            'avaliacao' => 4,
+            'observacoes' => 'Anotação confidencial do recrutador.',
+        ]);
+        Sanctum::actingAs($candidate, ['candidate']);
+
+        $this->getJson('/api/minhas-candidaturas')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $application->id)
+            ->assertJsonMissingPath('data.0.rating')
+            ->assertJsonMissingPath('data.0.notes')
+            ->assertJsonMissingPath('data.0.job.applicationEmail');
+
+        $this->getJson("/api/candidaturas/{$application->id}")
+            ->assertOk()
+            ->assertJsonMissingPath('data.rating')
+            ->assertJsonMissingPath('data.notes')
+            ->assertJsonMissingPath('data.job.applicationEmail');
+    }
+
     public function test_pipeline_stage_changes_are_audited_and_history_respects_application_visibility(): void
     {
         $owner = $this->recruiter();
@@ -371,7 +397,11 @@ class CandidaturaTest extends TestCase
         Sanctum::actingAs($candidate, ['candidate']);
         $this->getJson("/api/candidaturas/{$applicationId}/historico")
             ->assertOk()
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(2, 'data')
+            ->assertJsonMissingPath('data.0.observation')
+            ->assertJsonMissingPath('data.0.changedBy')
+            ->assertJsonMissingPath('data.1.observation')
+            ->assertJsonMissingPath('data.1.changedBy');
 
         Sanctum::actingAs($this->candidate(), ['candidate']);
         $this->getJson("/api/candidaturas/{$applicationId}/historico")->assertForbidden();
