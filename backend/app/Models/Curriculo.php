@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Curriculo extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id',
         'nome_completo',
         'area_atuacao',
         'telefone',
@@ -15,34 +19,47 @@ class Curriculo extends Model
         'cidade_estado',
         'links',
         'resumo',
-        'foto'
+        'foto',
     ];
-    
-    public function experiencias()
+
+    protected function casts(): array
+    {
+        return [
+            'links' => 'array',
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function experiencias(): HasMany
     {
         return $this->hasMany(Experiencia::class);
     }
-    
-    public function formacoes()
+
+    public function formacoes(): HasMany
     {
         return $this->hasMany(Formacao::class);
     }
-    
-    public function cursos()
+
+    public function cursos(): HasMany
     {
         return $this->hasMany(Curso::class);
     }
-    
-    public function habilidades()
+
+    public function habilidades(): HasMany
     {
         return $this->hasMany(Habilidade::class);
     }
-    
-    public function idiomas()
+
+    public function idiomas(): HasMany
     {
         return $this->hasMany(Idioma::class);
     }
-    public function candidaturas()
+
+    public function candidaturas(): HasMany
     {
         return $this->hasMany(Candidatura::class);
     }

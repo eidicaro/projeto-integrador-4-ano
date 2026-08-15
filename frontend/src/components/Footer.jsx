@@ -1,16 +1,26 @@
 import linkedin from "./../assets/linkedin.png"
-import insta from "./../assets/insta.png"
-import face from "./../assets/face.png"
+import insta from "./../assets/Insta.png"
+import face from "./../assets/Face.png"
 import point from "./../assets/point.png"
 import fatecPoint from "./../assets/fatecPoint.png"
+import { Link } from "react-router-dom"
 
 export default function Footer() {
 
     return (
 
-        <footer style={styles.footer}>
+        <footer className="point-footer" style={styles.footer}>
 
-            <div style={styles.left}>
+            <style>{`
+                @media (max-width: 720px) {
+                    .point-footer { align-items: flex-start !important; padding: 34px 22px !important; }
+                    .point-footer-left { width: 100%; flex-wrap: wrap; }
+                    .point-footer-pages { margin-left: 0 !important; min-width: 130px; }
+                    .point-footer-right { width: 100%; align-items: flex-start !important; }
+                }
+            `}</style>
+
+            <div className="point-footer-left" style={styles.left}>
 
                 <div style={styles.leftContainer}>
 
@@ -23,17 +33,17 @@ export default function Footer() {
 
                 </div>
 
-                <div style={styles.centerContainer}>
+                <nav className="point-footer-pages" style={styles.centerContainer} aria-label="Páginas do candidato">
                     <h3 style={styles.title}>Páginas</h3>
 
-                    <p style={styles.link} onMouseEnter={(e) => { e.currentTarget.style.color = "#ff4fa3";}} onMouseLeave={(e) => {e.currentTarget.style.color = "#fff";}} >Perfil</p>
-                    <p style={styles.link} onMouseEnter={(e) => { e.currentTarget.style.color = "#ff4fa3";}} onMouseLeave={(e) => {e.currentTarget.style.color = "#fff";}}>Vagas</p>
-                    <p style={styles.link} onMouseEnter={(e) => { e.currentTarget.style.color = "#ff4fa3";}} onMouseLeave={(e) => {e.currentTarget.style.color = "#fff";}}>Portfólio</p>
+                    <Link to="/perfil" style={styles.link}>Perfil</Link>
+                    <Link to="/homeUser" style={styles.link}>Vagas</Link>
+                    <Link to="/createResume" style={styles.link}>Currículo</Link>
 
-                </div>
+                </nav>
             </div>
 
-            <div style={styles.rightContainer}>
+            <div className="point-footer-right" style={styles.rightContainer}>
 
                 <div style={styles.socials}>
 
@@ -71,6 +81,7 @@ const styles = {
 
     left:{
         display: "flex",
+        gap: "40px",
     }, 
 
     leftContainer: {
@@ -94,9 +105,9 @@ const styles = {
     centerContainer: {
         display: "flex",
         flexDirection: "column",
-        textAling: "left",
-        marginLeft: "30%",
-        width: "00%",
+        textAlign: "left",
+        marginLeft: "20px",
+        minWidth: "120px",
         gap: "8px",
     },
 
@@ -108,7 +119,9 @@ const styles = {
     link: {
         margin: 0,
         cursor: "pointer",
-        transition: "0.2s"
+        transition: "0.2s",
+        color: "#fff",
+        textDecoration: "none",
     },
 
     rightContainer: {

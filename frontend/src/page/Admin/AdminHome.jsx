@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../context/AuthContext";
+import api, { getApiErrorMessage } from "../../lib/api";
+import { unwrapApiData } from "../../lib/candidate";
+
 const shortcuts = [
   {
     id: "create-job",
@@ -25,6 +29,55 @@ const shortcuts = [
     shortcut: "V",
   },
 ];
+
+const EMPTY_DASHBOARD = {
+  jobs: { total: 0, published: 0, paused: 0, archived: 0 },
+  applications: { total: 0, new: 0, interviews: 0, hired: 0 },
+  recentApplications: [],
+};
+
+const APPLICATION_STAGE_LABELS = {
+  novo: "Nova candidatura",
+  triagem: "Em triagem",
+  entrevista: "Em entrevista",
+  oferta: "Em oferta",
+  contratado: "Contratação concluída",
+  reprovado: "Processo encerrado",
+};
+
+function normalizeDashboard(payload) {
+  const jobs = payload?.jobs || {};
+  const applications = payload?.applications || {};
+
+  return {
+    jobs: {
+      total: Number(jobs.total) || 0,
+      published: Number(jobs.published) || 0,
+      paused: Number(jobs.paused) || 0,
+      archived: Number(jobs.archived) || 0,
+    },
+    applications: {
+      total: Number(applications.total) || 0,
+      new: Number(applications.new) || 0,
+      interviews: Number(applications.interviews) || 0,
+      hired: Number(applications.hired) || 0,
+    },
+    recentApplications: Array.isArray(payload?.recentApplications)
+      ? payload.recentApplications
+      : [],
+  };
+}
+
+function formatApplicationDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date);
+}
 
 function Icon({ name, size = 22, strokeWidth = 1.8 }) {
   const commonProps = {
@@ -178,12 +231,26 @@ function Icon({ name, size = 22, strokeWidth = 1.8 }) {
 
 export default function AdminHome() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [lastUpdated, setLastUpdated] = useState(() => new Date());
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [commandSearch, setCommandSearch] = useState("");
   const [toast, setToast] = useState(null);
+  const [dashboard, setDashboard] = useState(EMPTY_DASHBOARD);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const adminName = user?.name?.trim() || "Administrador";
+  const adminFirstName = adminName.split(/\s+/)[0];
+  const adminInitials = adminName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -192,6 +259,40 @@ export default function AdminHome() {
 
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    api.get("/admin/dashboard", { signal: controller.signal })
+      .then((response) => {
+        if (!active) return;
+        setDashboard(normalizeDashboard(unwrapApiData(response)));
+        setDashboardError("");
+        setLastUpdated(new Date());
+
+        if (reloadKey > 0) {
+          setToast({
+            title: "Painel atualizado",
+            description: "Os indicadores foram sincronizados com o servidor.",
+          });
+        }
+      })
+      .catch((error) => {
+        if (!active || error?.code === "ERR_CANCELED") return;
+        setDashboardError(
+          getApiErrorMessage(error, "Não foi possível carregar os indicadores."),
+        );
+      })
+      .finally(() => {
+        if (active) setDashboardLoading(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [reloadKey]);
 
   useEffect(() => {
     function handleKeyboard(event) {
@@ -290,14 +391,9 @@ export default function AdminHome() {
   }
 
   function handleRefresh() {
-    const updatedAt = new Date();
-
-    setLastUpdated(updatedAt);
-
-    setToast({
-      title: "Painel atualizado",
-      description: "As informações visuais foram sincronizadas.",
-    });
+    setDashboardLoading(true);
+    setDashboardError("");
+    setReloadKey((current) => current + 1);
   }
 
   function handleCardMouseMove(event) {
@@ -2219,12 +2315,12 @@ export default function AdminHome() {
             <div className="admin-sidebar__bottom">
               <div className="admin-profile">
                 <div className="admin-profile__avatar">
-                  AD
+                  {adminInitials}
                   <span className="admin-profile__status" />
                 </div>
 
                 <div className="admin-profile__content">
-                  <span className="admin-profile__name">Administrador</span>
+                  <span className="admin-profile__name">{adminName}</span>
                   <span className="admin-profile__role">
                     Acesso administrativo
                   </span>
@@ -2268,6 +2364,7 @@ export default function AdminHome() {
                   type="button"
                   className="admin-icon-button"
                   onClick={handleRefresh}
+                  disabled={dashboardLoading}
                   aria-label="Atualizar painel"
                   title="Atualizar painel"
                 >
@@ -2289,7 +2386,7 @@ export default function AdminHome() {
                 <h1 className="admin-hero__title">
                   {greeting},{" "}
                   <span className="admin-hero__title-gradient">
-                    Administrador.
+                    {adminFirstName}.
                   </span>
                 </h1>
 
@@ -2305,9 +2402,9 @@ export default function AdminHome() {
                     {formattedDate}
                   </span>
 
-                  <span className="admin-detail-pill admin-detail-pill--online">
+                  <span className={`admin-detail-pill ${dashboardError ? "" : "admin-detail-pill--online"}`}>
                     <span className="admin-detail-pill__dot" />
-                    Sistema disponível
+                    {dashboardLoading ? "Sincronizando" : dashboardError ? "Servidor indisponível" : "Sistema disponível"}
                   </span>
 
                   <span className="admin-detail-pill">
@@ -2404,9 +2501,9 @@ export default function AdminHome() {
                   <Icon name="layers" size={17} />
                 </span>
 
-                <span className="admin-info-card__label">Atalhos ativos</span>
+                <span className="admin-info-card__label">Vagas publicadas</span>
                 <strong className="admin-info-card__value">
-                  {shortcuts.length} opções
+                  {dashboardLoading ? "—" : `${dashboard.jobs.published} de ${dashboard.jobs.total}`}
                 </strong>
               </article>
 
@@ -2415,13 +2512,9 @@ export default function AdminHome() {
                   <Icon name="calendar" size={17} />
                 </span>
 
-                <span className="admin-info-card__label">Data atual</span>
+                <span className="admin-info-card__label">Candidaturas</span>
                 <strong className="admin-info-card__value">
-                  {new Intl.DateTimeFormat("pt-BR", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  }).format(currentDate)}
+                  {dashboardLoading ? "—" : dashboard.applications.total}
                 </strong>
               </article>
 
@@ -2431,10 +2524,10 @@ export default function AdminHome() {
                 </span>
 
                 <span className="admin-info-card__label">
-                  Status do sistema
+                  Em entrevistas
                 </span>
                 <strong className="admin-info-card__value">
-                  Operacional
+                  {dashboardLoading ? "—" : dashboard.applications.interviews}
                 </strong>
               </article>
 
@@ -2444,10 +2537,10 @@ export default function AdminHome() {
                 </span>
 
                 <span className="admin-info-card__label">
-                  Última atualização
+                  Contratações
                 </span>
                 <strong className="admin-info-card__value">
-                  Hoje às {formattedUpdateTime}
+                  {dashboardLoading ? "—" : dashboard.applications.hired}
                 </strong>
               </article>
             </section>
@@ -2466,7 +2559,7 @@ export default function AdminHome() {
                       </h3>
 
                       <p className="admin-panel__subtitle">
-                        Informações desta sessão administrativa
+                        Candidaturas mais recentes
                       </p>
                     </div>
                   </div>
@@ -2478,54 +2571,45 @@ export default function AdminHome() {
                 </div>
 
                 <div className="admin-activity-list">
-                  <div className="admin-activity-item">
-                    <span className="admin-activity-item__marker">
-                      <Icon name="check" size={15} />
-                    </span>
-
-                    <div className="admin-activity-item__content">
-                      <p className="admin-activity-item__title">
-                        Painel carregado com sucesso
-                      </p>
-
-                      <p className="admin-activity-item__description">
-                        Todos os componentes administrativos estão disponíveis.
-                      </p>
+                  {dashboardLoading ? (
+                    <div className="admin-activity-item" role="status">
+                      <span className="admin-activity-item__marker"><Icon name="refresh" size={15} /></span>
+                      <div className="admin-activity-item__content">
+                        <p className="admin-activity-item__title">Carregando atividade</p>
+                        <p className="admin-activity-item__description">Sincronizando as candidaturas mais recentes.</p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="admin-activity-item">
-                    <span className="admin-activity-item__marker">
-                      <Icon name="shield" size={15} />
-                    </span>
-
-                    <div className="admin-activity-item__content">
-                      <p className="admin-activity-item__title">
-                        Sessão administrativa ativa
-                      </p>
-
-                      <p className="admin-activity-item__description">
-                        As opções de cadastro e visualização estão prontas para
-                        uso.
-                      </p>
+                  ) : dashboardError ? (
+                    <div className="admin-activity-item" role="alert">
+                      <span className="admin-activity-item__marker"><Icon name="shield" size={15} /></span>
+                      <div className="admin-activity-item__content">
+                        <p className="admin-activity-item__title">Falha na sincronização</p>
+                        <p className="admin-activity-item__description">{dashboardError}</p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="admin-activity-item">
-                    <span className="admin-activity-item__marker">
-                      <Icon name="command" size={15} />
-                    </span>
-
-                    <div className="admin-activity-item__content">
-                      <p className="admin-activity-item__title">
-                        Navegação rápida disponível
-                      </p>
-
-                      <p className="admin-activity-item__description">
-                        Pressione Ctrl + K para abrir o menu de ações.
-                      </p>
+                  ) : dashboard.recentApplications.length ? (
+                    dashboard.recentApplications.map((application) => (
+                      <div className="admin-activity-item" key={application.id}>
+                        <span className="admin-activity-item__marker"><Icon name="check" size={15} /></span>
+                        <div className="admin-activity-item__content">
+                          <p className="admin-activity-item__title">
+                            {application.name || "Novo candidato"} · {APPLICATION_STAGE_LABELS[application.stage] || "Candidatura atualizada"}
+                          </p>
+                          <p className="admin-activity-item__description">
+                            {application.job?.title || "Vaga não informada"}{formatApplicationDate(application.appliedAt) ? ` · ${formatApplicationDate(application.appliedAt)}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="admin-activity-item">
+                      <span className="admin-activity-item__marker"><Icon name="activity" size={15} /></span>
+                      <div className="admin-activity-item__content">
+                        <p className="admin-activity-item__title">Nenhuma candidatura recente</p>
+                        <p className="admin-activity-item__description">As novas movimentações aparecerão aqui automaticamente.</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </article>
 
@@ -2539,7 +2623,7 @@ export default function AdminHome() {
                     <div>
                       <h3 className="admin-panel__title">Saúde do sistema</h3>
                       <p className="admin-panel__subtitle">
-                        Monitoramento local
+                        Monitoramento da API
                       </p>
                     </div>
                   </div>
@@ -2549,17 +2633,18 @@ export default function AdminHome() {
                   <div className="admin-system__ring" />
 
                   <div className="admin-system__center">
-                    <Icon name="check" size={25} />
+                    <Icon name={dashboardError ? "close" : dashboardLoading ? "refresh" : "check"} size={25} />
                   </div>
                 </div>
 
                 <h4 className="admin-system__title">
-                  Tudo funcionando
+                  {dashboardLoading ? "Sincronizando" : dashboardError ? "Atenção necessária" : "Tudo funcionando"}
                 </h4>
 
                 <p className="admin-system__description">
-                  O painel está carregado e pronto para receber suas próximas
-                  ações.
+                  {dashboardLoading
+                    ? "Aguarde enquanto os dados administrativos são carregados."
+                    : dashboardError || "O painel está sincronizado e pronto para receber suas próximas ações."}
                 </p>
 
                 <div className="admin-system__footer">

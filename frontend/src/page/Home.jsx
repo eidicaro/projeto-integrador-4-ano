@@ -7,220 +7,312 @@ import {
 
 import {
   AnimatePresence,
-  motion,
+  motion as Motion,
   useReducedMotion,
 } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 
 import bgVideo from "../assets/bg.mp4";
+import api, { getApiErrorMessage } from "../lib/api";
 
-const CATEGORIES = [
-  "Todas",
-  "Desenvolvimento",
-  "Design",
-  "Dados",
-  "Produto",
-  "Qualidade",
+const ALL_CATEGORIES = "Todas";
+const FALLBACK_CATEGORY = "Outras oportunidades";
+
+const JOB_PALETTES = [
+  { accent: "#ff4f8b", softAccent: "#ffd5e4" },
+  { accent: "#9183ff", softAccent: "#ddd8ff" },
+  { accent: "#64c7ee", softAccent: "#d5f3ff" },
+  { accent: "#baf26d", softAccent: "#e6ffc4" },
+  { accent: "#ffd447", softAccent: "#fff2b3" },
+  { accent: "#ff9466", softAccent: "#ffe0d2" },
 ];
 
-const JOBS = [
+const MAP_NODE_SLOTS = [
   {
-    id: 1,
-    title: "Frontend Developer",
-    company: "Point Tech",
-    companyInitials: "PT",
-    location: "São Paulo, SP",
-    type: "Remoto",
-    level: "Júnior",
-    category: "Desenvolvimento",
-    salary: "R$ 4.500 — R$ 6.500",
-    postedAt: "Há 2 horas",
-    match: 96,
-    applicants: 18,
+    className: "map-node--development",
     accent: "#ff4f8b",
-    softAccent: "#ffd5e4",
-    symbol: "</>",
-    featured: true,
-    isNew: true,
-    description:
-      "Faça parte de um time que cria experiências digitais rápidas, acessíveis e visualmente marcantes para milhares de pessoas.",
-    requirements: [
-      "React e JavaScript moderno",
-      "HTML semântico e CSS responsivo",
-      "Consumo de APIs REST",
-      "Git e trabalho colaborativo",
-    ],
-    skills: ["React", "JavaScript", "CSS", "REST API"],
-  },
-  {
-    id: 2,
-    title: "Product Designer",
-    company: "Creative Studio",
-    companyInitials: "CS",
-    location: "Campinas, SP",
-    type: "Híbrido",
-    level: "Pleno",
-    category: "Design",
-    salary: "R$ 6.000 — R$ 8.500",
-    postedAt: "Hoje",
-    match: 91,
-    applicants: 27,
-    accent: "#9183ff",
-    softAccent: "#ddd8ff",
-    symbol: "✦",
-    featured: true,
-    isNew: true,
-    description:
-      "Transforme problemas complexos em jornadas simples, bonitas e funcionais, trabalhando ao lado de produto e tecnologia.",
-    requirements: [
-      "Figma e prototipação",
-      "Pesquisa com usuários",
-      "Design systems",
-      "Comunicação e documentação",
-    ],
-    skills: ["Figma", "UX Research", "UI", "Design System"],
-  },
-  {
-    id: 3,
-    title: "Backend Developer",
-    company: "Cloud System",
-    companyInitials: "CL",
-    location: "Curitiba, PR",
-    type: "Remoto",
-    level: "Pleno",
-    category: "Desenvolvimento",
-    salary: "R$ 7.000 — R$ 10.000",
-    postedAt: "Há 1 dia",
-    match: 88,
-    applicants: 34,
-    accent: "#64c7ee",
-    softAccent: "#d5f3ff",
-    symbol: "{ }",
-    featured: false,
-    isNew: false,
-    description:
-      "Construa serviços escaláveis, APIs seguras e integrações críticas para uma plataforma em crescimento acelerado.",
-    requirements: [
-      "Node.js ou NestJS",
-      "PostgreSQL",
-      "APIs REST",
-      "Testes automatizados",
-    ],
-    skills: ["Node.js", "PostgreSQL", "Docker", "Redis"],
-  },
-  {
-    id: 4,
-    title: "Analista de Dados",
-    company: "Data Bloom",
-    companyInitials: "DB",
-    location: "Belo Horizonte, MG",
-    type: "Híbrido",
-    level: "Júnior",
-    category: "Dados",
-    salary: "R$ 4.000 — R$ 5.800",
-    postedAt: "Há 1 dia",
-    match: 84,
-    applicants: 22,
-    accent: "#baf26d",
-    softAccent: "#e6ffc4",
-    symbol: "↗",
-    featured: false,
-    isNew: true,
-    description:
-      "Transforme dados em histórias claras e decisões melhores por meio de análises, dashboards e indicadores.",
-    requirements: [
-      "SQL",
-      "Excel ou Google Sheets",
-      "Power BI ou ferramenta similar",
-      "Raciocínio analítico",
-    ],
-    skills: ["SQL", "Power BI", "Excel", "Python"],
-  },
-  {
-    id: 5,
-    title: "Product Manager",
-    company: "Next Wave",
-    companyInitials: "NW",
-    location: "Rio de Janeiro, RJ",
-    type: "Remoto",
-    level: "Sênior",
-    category: "Produto",
-    salary: "R$ 11.000 — R$ 15.000",
-    postedAt: "Há 2 dias",
-    match: 79,
-    applicants: 41,
-    accent: "#ffd447",
-    softAccent: "#fff2b3",
-    symbol: "◎",
-    featured: false,
-    isNew: false,
-    description:
-      "Lidere a evolução de produtos digitais, conectando estratégia, experiência do usuário e execução técnica.",
-    requirements: [
-      "Discovery de produto",
-      "Priorização e roadmap",
-      "Análise de métricas",
-      "Liderança multidisciplinar",
-    ],
-    skills: ["Produto", "Discovery", "Métricas", "Roadmap"],
-  },
-  {
-    id: 6,
-    title: "QA Engineer",
-    company: "Reliable Apps",
-    companyInitials: "RA",
-    location: "Florianópolis, SC",
-    type: "Remoto",
-    level: "Pleno",
-    category: "Qualidade",
-    salary: "R$ 6.000 — R$ 8.000",
-    postedAt: "Há 3 dias",
-    match: 76,
-    applicants: 16,
-    accent: "#ff9466",
-    softAccent: "#ffe0d2",
-    symbol: "✓",
-    featured: false,
-    isNew: false,
-    description:
-      "Eleve a confiabilidade de produtos digitais por meio de estratégias de qualidade, automação e testes bem planejados.",
-    requirements: [
-      "Testes manuais e automatizados",
-      "Cypress ou Playwright",
-      "Documentação de cenários",
-      "Integração contínua",
-    ],
-    skills: ["Cypress", "Playwright", "CI/CD", "Testes"],
-  },
-];
-
-const ACTIVITIES = [
-  {
-    title: "Nova vaga publicada",
-    detail: "Frontend Developer · Point Tech",
-    time: "Agora",
     icon: "briefcase",
   },
   {
-    title: "Talento contratado",
-    detail: "Uma nova jornada começou em Campinas",
-    time: "Há 4 min",
+    className: "map-node--design",
+    accent: "#9183ff",
     icon: "sparkles",
   },
   {
-    title: "Empresa verificada",
-    detail: "Creative Studio entrou para a plataforma",
-    time: "Há 12 min",
-    icon: "shield",
+    className: "map-node--data",
+    accent: "#64c7ee",
+    icon: "search",
   },
   {
-    title: "Novo match realizado",
-    detail: "Perfil e oportunidade com 96% de compatibilidade",
-    time: "Há 18 min",
+    className: "map-node--product",
+    accent: "#baf26d",
     icon: "target",
   },
 ];
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  maximumFractionDigits: 0,
+});
+
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
+function cleanText(value, fallback = "") {
+  return typeof value === "string" && value.trim()
+    ? value.trim()
+    : fallback;
+}
+
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizeList(value) {
+  const entries = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/\r?\n|[;•]/)
+      : [];
+
+  return [
+    ...new Set(
+      entries
+        .map((entry) =>
+          (typeof entry === "string" ||
+          typeof entry === "number"
+            ? cleanText(String(entry))
+            : ""
+          ).replace(/^[-–—*•]\s*/, ""),
+        )
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function normalizeSearchValue(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+}
+
+function getCompanyInitials(company) {
+  const initials = company
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toLocaleUpperCase("pt-BR");
+
+  return initials || "?";
+}
+
+function getPalette(key) {
+  const hash = String(key)
+    .split("")
+    .reduce(
+      (total, character) =>
+        (total * 31 + character.charCodeAt(0)) | 0,
+      0,
+    );
+
+  return JOB_PALETTES[Math.abs(hash) % JOB_PALETTES.length];
+}
+
+function formatSalary(rawJob) {
+  if (!rawJob.salaryVisible) {
+    return {
+      label: "Faixa não divulgada",
+      value: -1,
+    };
+  }
+
+  const minimum = toOptionalNumber(rawJob.salaryMin);
+  const maximum = toOptionalNumber(rawJob.salaryMax);
+
+  if (minimum !== null && maximum !== null) {
+    return {
+      label:
+        minimum === maximum
+          ? currencyFormatter.format(minimum)
+          : `${currencyFormatter.format(minimum)} — ${currencyFormatter.format(maximum)}`,
+      value: maximum,
+    };
+  }
+
+  if (minimum !== null) {
+    return {
+      label: `A partir de ${currencyFormatter.format(minimum)}`,
+      value: minimum,
+    };
+  }
+
+  if (maximum !== null) {
+    return {
+      label: `Até ${currencyFormatter.format(maximum)}`,
+      value: maximum,
+    };
+  }
+
+  return {
+    label: "Faixa não divulgada",
+    value: -1,
+  };
+}
+
+function getPublicationDetails(value) {
+  const timestamp = Date.parse(value);
+
+  if (!Number.isFinite(timestamp)) {
+    return {
+      label: "Data não informada",
+      timestamp: 0,
+      isNew: false,
+    };
+  }
+
+  const elapsed = Math.max(0, Date.now() - timestamp);
+  const hours = Math.floor(elapsed / 3_600_000);
+  const days = Math.floor(elapsed / 86_400_000);
+  let label;
+
+  if (hours < 1) {
+    label = "Agora";
+  } else if (hours < 24) {
+    label = `Há ${hours} ${hours === 1 ? "hora" : "horas"}`;
+  } else if (days < 7) {
+    label = `Há ${days} ${days === 1 ? "dia" : "dias"}`;
+  } else {
+    label = dateFormatter.format(timestamp);
+  }
+
+  return {
+    label,
+    timestamp,
+    isNew: elapsed <= 72 * 3_600_000,
+  };
+}
+
+function formatDeadline(value) {
+  const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(
+    String(value || ""),
+  )
+    ? `${value}T12:00:00`
+    : value;
+  const timestamp = Date.parse(normalizedValue);
+  return Number.isFinite(timestamp)
+    ? dateFormatter.format(timestamp)
+    : "Não informada";
+}
+
+function normalizeJob(rawJob) {
+  if (
+    !rawJob ||
+    (rawJob.id === null || rawJob.id === undefined)
+  ) {
+    return null;
+  }
+
+  const company = cleanText(
+    rawJob.company,
+    "Empresa não informada",
+  );
+  const category = cleanText(
+    rawJob.department,
+    FALLBACK_CATEGORY,
+  );
+  const employmentType = cleanText(rawJob.employmentType);
+  const workMode = cleanText(rawJob.workMode);
+  const seniority = cleanText(rawJob.seniority);
+  const salary = formatSalary(rawJob);
+  const publication = getPublicationDetails(
+    rawJob.publishedAt || rawJob.createdAt,
+  );
+  const palette = getPalette(`${rawJob.id}:${category}`);
+  const applicants = toOptionalNumber(rawJob.applicantsCount);
+  const openings = toOptionalNumber(rawJob.openings);
+
+  return {
+    id: rawJob.id,
+    slug: cleanText(rawJob.slug),
+    title: cleanText(
+      rawJob.title,
+      "Oportunidade sem título",
+    ),
+    company,
+    companyInitials: getCompanyInitials(company),
+    location: cleanText(
+      rawJob.location,
+      "Localização não informada",
+    ),
+    employmentType,
+    workMode,
+    type:
+      workMode || employmentType || "Formato não informado",
+    level: seniority || "Nível não informado",
+    category,
+    salary: salary.label,
+    salaryValue: salary.value,
+    postedAt: publication.label,
+    publishedTimestamp: publication.timestamp,
+    applicants:
+      applicants === null
+        ? 0
+        : Math.max(0, Math.trunc(applicants)),
+    openings:
+      openings === null
+        ? null
+        : Math.max(0, Math.trunc(openings)),
+    accent: palette.accent,
+    softAccent: palette.softAccent,
+    symbol: getCompanyInitials(category),
+    isNew: publication.isNew,
+    description: cleanText(
+      rawJob.description,
+      "Descrição não informada.",
+    ),
+    responsibilities: normalizeList(rawJob.responsibilities),
+    requirements: normalizeList(rawJob.requirements),
+    skills: normalizeList(rawJob.tags),
+    benefits: normalizeList(rawJob.benefits),
+    applicationDeadline: formatDeadline(
+      rawJob.applicationDeadline,
+    ),
+  };
+}
+
+function loadSavedJobs() {
+  if (typeof window === "undefined") return new Set();
+
+  try {
+    const stored = window.localStorage.getItem(
+      "point:saved-jobs",
+    );
+    const parsed = stored ? JSON.parse(stored) : [];
+
+    return Array.isArray(parsed) ? new Set(parsed) : new Set();
+  } catch (error) {
+    console.error(
+      "Não foi possível recuperar as vagas salvas:",
+      error,
+    );
+    return new Set();
+  }
+}
+
+
 
 const SHORTCUTS = [
   {
@@ -323,37 +415,139 @@ export default function Home() {
   const [commandQuery, setCommandQuery] = useState("");
 
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Todas");
-  const [sortBy, setSortBy] = useState("match");
+  const [activeCategory, setActiveCategory] = useState(
+    ALL_CATEGORIES,
+  );
+  const [sortBy, setSortBy] = useState("recent");
+  const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobsError, setJobsError] = useState("");
+  const [jobsTotal, setJobsTotal] = useState(0);
+  const [jobsReloadKey, setJobsReloadKey] = useState(0);
 
   const [selectedJob, setSelectedJob] = useState(null);
-  const [savedJobs, setSavedJobs] = useState(new Set());
-  const [savedHydrated, setSavedHydrated] = useState(false);
+  const [savedJobs, setSavedJobs] = useState(loadSavedJobs);
 
   const [toast, setToast] = useState("");
   const [activityIndex, setActivityIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [headerCompact, setHeaderCompact] = useState(false);
 
-  const filteredJobs = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+  const categoryCounts = useMemo(() => {
+    const counts = new Map();
 
-    const result = JOBS.filter((job) => {
-      const matchesCategory =
-        activeCategory === "Todas" ||
-        job.category === activeCategory;
-
-      const searchableContent = [
-        job.title,
-        job.company,
-        job.location,
-        job.type,
-        job.level,
+    jobs.forEach((job) => {
+      counts.set(
         job.category,
-        ...job.skills,
-      ]
-        .join(" ")
-        .toLowerCase();
+        (counts.get(job.category) || 0) + 1,
+      );
+    });
+
+    return counts;
+  }, [jobs]);
+
+  const categories = useMemo(
+    () => [
+      ALL_CATEGORIES,
+      ...Array.from(categoryCounts.keys()).sort((a, b) =>
+        a.localeCompare(b, "pt-BR"),
+      ),
+    ],
+    [categoryCounts],
+  );
+
+  const categoryHighlights = useMemo(
+    () =>
+      Array.from(categoryCounts, ([category, count]) => ({
+        category,
+        count,
+      }))
+        .sort(
+          (a, b) =>
+            b.count - a.count ||
+            a.category.localeCompare(b.category, "pt-BR"),
+        )
+        .slice(0, MAP_NODE_SLOTS.length),
+    [categoryCounts],
+  );
+
+  const activities = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs.slice(0, 4).map((job) => ({
+        id: job.id,
+        title: "Vaga publicada",
+        detail: `${job.title} · ${job.company}`,
+        time: job.postedAt,
+        icon: "briefcase",
+      }));
+    }
+
+    if (jobsLoading) {
+      return [
+        {
+          id: "loading",
+          title: "Atualizando oportunidades",
+          detail: "Consultando as vagas publicadas",
+          time: "Agora",
+          icon: "search",
+        },
+      ];
+    }
+
+    if (jobsError) {
+      return [
+        {
+          id: "error",
+          title: "Atualização indisponível",
+          detail: "Tente novamente no radar de vagas",
+          time: "",
+          icon: "shield",
+        },
+      ];
+    }
+
+    return [
+      {
+        id: "empty",
+        title: "Radar atualizado",
+        detail: "Aguardando novas vagas publicadas",
+        time: "Agora",
+        icon: "briefcase",
+      },
+    ];
+  }, [jobs, jobsError, jobsLoading]);
+
+  const currentActivityIndex =
+    activityIndex % activities.length;
+  const currentActivity = activities[currentActivityIndex];
+
+  const selectedCategory = categories.includes(activeCategory)
+    ? activeCategory
+    : ALL_CATEGORIES;
+
+  const filteredJobs = useMemo(() => {
+    const normalizedSearch = normalizeSearchValue(search.trim());
+
+    const result = jobs.filter((job) => {
+      const matchesCategory =
+        selectedCategory === ALL_CATEGORIES ||
+        job.category === selectedCategory;
+
+      const searchableContent = normalizeSearchValue(
+        [
+          job.title,
+          job.company,
+          job.location,
+          job.type,
+          job.level,
+          job.employmentType,
+          job.workMode,
+          job.category,
+          job.description,
+          ...job.requirements,
+          ...job.skills,
+        ].join(" "),
+      );
 
       const matchesSearch =
         !normalizedSearch ||
@@ -363,18 +557,27 @@ export default function Home() {
     });
 
     return [...result].sort((a, b) => {
-      if (sortBy === "recent") {
-        return Number(b.isNew) - Number(a.isNew);
-      }
-
       if (sortBy === "salary") {
-        return extractInitialSalary(b.salary) -
-          extractInitialSalary(a.salary);
+        return (
+          b.salaryValue - a.salaryValue ||
+          b.publishedTimestamp - a.publishedTimestamp
+        );
       }
 
-      return b.match - a.match;
+      if (sortBy === "popular") {
+        return (
+          b.applicants - a.applicants ||
+          b.publishedTimestamp - a.publishedTimestamp
+        );
+      }
+
+      if (sortBy === "title") {
+        return a.title.localeCompare(b.title, "pt-BR");
+      }
+
+      return b.publishedTimestamp - a.publishedTimestamp;
     });
-  }, [activeCategory, search, sortBy]);
+  }, [jobs, search, selectedCategory, sortBy]);
 
   const filteredCommands = useMemo(() => {
     const normalized = commandQuery.trim().toLowerCase();
@@ -394,31 +597,63 @@ export default function Home() {
   }, [commandQuery]);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(
-        "point:saved-jobs",
-      );
+    const controller = new AbortController();
 
-      if (stored) {
-        const parsed = JSON.parse(stored);
+    api
+      .get("/vagas", {
+        params: { per_page: 50 },
+        signal: controller.signal,
+      })
+      .then((response) => {
+        if (controller.signal.aborted) return;
 
-        if (Array.isArray(parsed)) {
-          setSavedJobs(new Set(parsed));
+        const payload = response?.data;
+
+        if (!Array.isArray(payload?.data)) {
+          throw new Error(
+            "A API retornou uma lista de vagas inválida.",
+          );
         }
-      }
-    } catch (error) {
-      console.error(
-        "Não foi possível recuperar as vagas salvas:",
-        error,
-      );
-    } finally {
-      setSavedHydrated(true);
-    }
-  }, []);
+
+        const normalizedJobs = payload.data
+          .map(normalizeJob)
+          .filter(Boolean);
+        const total = toOptionalNumber(payload?.meta?.total);
+
+        setJobs(normalizedJobs);
+        setJobsTotal(
+          total === null
+            ? normalizedJobs.length
+            : Math.max(normalizedJobs.length, total),
+        );
+        setJobsError("");
+        setJobsLoading(false);
+      })
+      .catch((error) => {
+        if (
+          controller.signal.aborted ||
+          error?.code === "ERR_CANCELED"
+        ) {
+          return;
+        }
+
+        setJobs([]);
+        setJobsTotal(0);
+        setJobsError(
+          error?.response
+            ? getApiErrorMessage(
+                error,
+                "Não foi possível carregar as vagas.",
+              )
+            : "Não foi possível conectar à API de vagas.",
+        );
+        setJobsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [jobsReloadKey]);
 
   useEffect(() => {
-    if (!savedHydrated) return;
-
     try {
       window.localStorage.setItem(
         "point:saved-jobs",
@@ -430,17 +665,17 @@ export default function Home() {
         error,
       );
     }
-  }, [savedHydrated, savedJobs]);
+  }, [savedJobs]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActivityIndex(
-        (current) => (current + 1) % ACTIVITIES.length,
+        (current) => (current + 1) % activities.length,
       );
     }, 3600);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [activities.length]);
 
   useEffect(() => {
     function handleScroll() {
@@ -668,6 +903,12 @@ export default function Home() {
     setSelectedJob(job);
   }
 
+  function retryJobs() {
+    setJobsLoading(true);
+    setJobsError("");
+    setJobsReloadKey((current) => current + 1);
+  }
+
   return (
     <>
       <style>{homeStyles}</style>
@@ -844,7 +1085,7 @@ export default function Home() {
         </AnimatePresence>
 
         <section className="home-hero">
-          <motion.div
+          <Motion.div
             className="hero-copy"
             initial={{ opacity: 0, x: -36 }}
             animate={{ opacity: 1, x: 0 }}
@@ -950,9 +1191,9 @@ export default function Home() {
                 <span>já estão construindo novos caminhos.</span>
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div
+          <Motion.div
             className="opportunity-map"
             initial={{ opacity: 0, x: 42, rotate: 2 }}
             animate={{ opacity: 1, x: 0, rotate: 0 }}
@@ -984,7 +1225,7 @@ export default function Home() {
                 fill="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M74 106C196 55 213 195 311 176C413 155 373 68 526 98"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -997,7 +1238,7 @@ export default function Home() {
                   }}
                 />
 
-                <motion.path
+                <Motion.path
                   d="M94 431C190 388 178 288 309 300C449 313 426 437 542 410"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -1010,7 +1251,7 @@ export default function Home() {
                   }}
                 />
 
-                <motion.path
+                <Motion.path
                   d="M306 176C264 224 273 264 309 300"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -1049,37 +1290,22 @@ export default function Home() {
                 </div>
               </div>
 
-              <MapNode
-                className="map-node--development"
-                label="Desenvolvimento"
-                detail="342 vagas"
-                accent="#ff4f8b"
-                icon={<CodeIcon />}
-              />
+              {categoryHighlights.map((highlight, index) => {
+                const slot = MAP_NODE_SLOTS[index];
 
-              <MapNode
-                className="map-node--design"
-                label="Design"
-                detail="184 vagas"
-                accent="#9183ff"
-                icon={<PenToolIcon />}
-              />
-
-              <MapNode
-                className="map-node--data"
-                label="Dados"
-                detail="126 vagas"
-                accent="#64c7ee"
-                icon={<ChartIcon />}
-              />
-
-              <MapNode
-                className="map-node--product"
-                label="Produto"
-                detail="98 vagas"
-                accent="#baf26d"
-                icon={<TargetIcon />}
-              />
+                return (
+                  <MapNode
+                    key={highlight.category}
+                    className={slot.className}
+                    label={highlight.category}
+                    detail={`${highlight.count} ${
+                      highlight.count === 1 ? "vaga" : "vagas"
+                    }`}
+                    accent={slot.accent}
+                    icon={<DynamicIcon name={slot.icon} />}
+                  />
+                );
+              })}
 
               <div
                 className="map-match-card"
@@ -1090,19 +1316,33 @@ export default function Home() {
                     <SparklesIcon />
                   </span>
 
-                  <span>
-                    Match encontrado
-                  </span>
+                  <span>Oportunidades abertas</span>
                 </div>
 
-                <strong>96%</strong>
+                <strong>
+                  {jobsLoading ? "…" : jobsError ? "—" : jobsTotal}
+                </strong>
 
                 <div className="match-progress">
-                  <span />
+                  <span
+                    style={{
+                      width: jobsLoading
+                        ? "42%"
+                        : jobsError
+                          ? "0%"
+                          : "100%",
+                    }}
+                  />
                 </div>
 
                 <small>
-                  Seu perfil combina muito com esta oportunidade.
+                  {jobsLoading
+                    ? "Atualizando o radar com dados da plataforma."
+                    : jobsError
+                      ? "A atualização será retomada ao tentar novamente."
+                      : jobsTotal === 1
+                        ? "Uma vaga publicada disponível agora."
+                        : "Vagas publicadas disponíveis agora."}
                 </small>
               </div>
 
@@ -1128,7 +1368,7 @@ export default function Home() {
                 <ArrowUpRightIcon />
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
         </section>
 
         <section
@@ -1152,7 +1392,7 @@ export default function Home() {
 
           <div className="shortcut-grid">
             {SHORTCUTS.map((shortcut, index) => (
-              <motion.button
+              <Motion.button
                 key={shortcut.title}
                 type="button"
                 className={`shortcut-card ${shortcut.className}`}
@@ -1187,7 +1427,7 @@ export default function Home() {
                   <span>{shortcut.tag}</span>
                   <ArrowUpRightIcon />
                 </span>
-              </motion.button>
+              </Motion.button>
             ))}
           </div>
         </section>
@@ -1217,6 +1457,7 @@ export default function Home() {
                 }
                 placeholder="Buscar vaga, empresa ou tecnologia..."
                 aria-label="Filtrar vagas"
+                disabled={jobsLoading}
               />
 
               {search && (
@@ -1238,10 +1479,12 @@ export default function Home() {
                 onChange={(event) =>
                   setSortBy(event.target.value)
                 }
+                disabled={jobsLoading}
               >
-                <option value="match">Melhor combinação</option>
                 <option value="recent">Mais recentes</option>
                 <option value="salary">Maior salário</option>
+                <option value="popular">Mais candidaturas</option>
+                <option value="title">Título (A–Z)</option>
               </select>
 
               <ChevronDownIcon />
@@ -1252,26 +1495,23 @@ export default function Home() {
             className="category-filters"
             aria-label="Filtrar por categoria"
           >
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <button
                 key={category}
                 type="button"
                 className={
-                  activeCategory === category
+                  selectedCategory === category
                     ? "category-filter category-filter--active"
                     : "category-filter"
                 }
                 onClick={() => setActiveCategory(category)}
+                disabled={jobsLoading}
               >
                 {category}
 
-                {category !== "Todas" && (
+                {category !== ALL_CATEGORIES && (
                   <span>
-                    {
-                      JOBS.filter(
-                        (job) => job.category === category,
-                      ).length
-                    }
+                    {categoryCounts.get(category) || 0}
                   </span>
                 )}
               </button>
@@ -1280,18 +1520,33 @@ export default function Home() {
 
           <div className="jobs-result-header">
             <span>
-              <strong>{filteredJobs.length}</strong>{" "}
-              {filteredJobs.length === 1
-                ? "oportunidade encontrada"
-                : "oportunidades encontradas"}
+              {jobsLoading ? (
+                "Carregando oportunidades..."
+              ) : jobsError ? (
+                "Não foi possível atualizar o radar"
+              ) : (
+                <>
+                  <strong>{filteredJobs.length}</strong>{" "}
+                  {filteredJobs.length === 1
+                    ? "oportunidade encontrada"
+                    : "oportunidades encontradas"}
+                  {jobsTotal > jobs.length &&
+                    selectedCategory === ALL_CATEGORIES &&
+                    !search && (
+                      <small> de {jobsTotal} publicadas</small>
+                    )}
+                </>
+              )}
             </span>
 
-            {(search || activeCategory !== "Todas") && (
+            {(search ||
+              selectedCategory !== ALL_CATEGORIES) &&
+              !jobsLoading && (
               <button
                 type="button"
                 onClick={() => {
                   setSearch("");
-                  setActiveCategory("Todas");
+                  setActiveCategory(ALL_CATEGORIES);
                 }}
               >
                 Limpar todos os filtros
@@ -1300,8 +1555,17 @@ export default function Home() {
           </div>
 
           <AnimatePresence mode="popLayout">
-            {filteredJobs.length > 0 ? (
-              <motion.div
+            {jobsLoading ? (
+              <JobsFeedback key="loading" type="loading" />
+            ) : jobsError ? (
+              <JobsFeedback
+                key="error"
+                type="error"
+                message={jobsError}
+                onAction={retryJobs}
+              />
+            ) : filteredJobs.length > 0 ? (
+              <Motion.div
                 layout
                 className="jobs-grid"
               >
@@ -1315,27 +1579,37 @@ export default function Home() {
                     onOpen={() => openJob(job)}
                   />
                 ))}
-              </motion.div>
+              </Motion.div>
+            ) : jobs.length === 0 ? (
+              <JobsFeedback
+                key="empty"
+                type="empty"
+                onAction={retryJobs}
+              />
             ) : (
-              <EmptyJobs
-                onReset={() => {
+              <JobsFeedback
+                key="filtered-empty"
+                type="filtered"
+                onAction={() => {
                   setSearch("");
-                  setActiveCategory("Todas");
+                  setActiveCategory(ALL_CATEGORIES);
                 }}
               />
             )}
           </AnimatePresence>
 
-          <div className="jobs-more-wrapper">
-            <button
-              type="button"
-              className="jobs-more-button"
-              onClick={() => navigate("/vagas")}
-            >
-              Ver todas as oportunidades
-              <ArrowRightIcon />
-            </button>
-          </div>
+          {!jobsLoading && !jobsError && jobsTotal > 0 && (
+            <div className="jobs-more-wrapper">
+              <button
+                type="button"
+                className="jobs-more-button"
+                onClick={() => navigate("/vagas")}
+              >
+                Ver todas as oportunidades
+                <ArrowRightIcon />
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="experience-section">
@@ -1346,7 +1620,7 @@ export default function Home() {
           />
 
           <div className="experience-bento">
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--profile"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1391,9 +1665,9 @@ export default function Home() {
                 Completar meu perfil
                 <ArrowUpRightIcon />
               </button>
-            </motion.article>
+            </Motion.article>
 
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--tracking"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1431,9 +1705,9 @@ export default function Home() {
                   status="waiting"
                 />
               </div>
-            </motion.article>
+            </Motion.article>
 
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--match"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1457,7 +1731,7 @@ export default function Home() {
                     className="match-ring-background"
                   />
 
-                  <motion.circle
+                  <Motion.circle
                     cx="60"
                     cy="60"
                     r="48"
@@ -1486,9 +1760,9 @@ export default function Home() {
                 Entenda por que uma oportunidade combina com o seu
                 perfil antes mesmo de se candidatar.
               </p>
-            </motion.article>
+            </Motion.article>
 
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--activity"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1507,8 +1781,8 @@ export default function Home() {
               </div>
 
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activityIndex}
+                <Motion.div
+                  key={currentActivity.id}
                   className="activity-current"
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1517,33 +1791,27 @@ export default function Home() {
                 >
                   <span className="activity-current-icon">
                     <DynamicIcon
-                      name={ACTIVITIES[activityIndex].icon}
+                      name={currentActivity.icon}
                     />
                   </span>
 
                   <span>
-                    <strong>
-                      {ACTIVITIES[activityIndex].title}
-                    </strong>
+                    <strong>{currentActivity.title}</strong>
 
-                    <small>
-                      {ACTIVITIES[activityIndex].detail}
-                    </small>
+                    <small>{currentActivity.detail}</small>
                   </span>
 
-                  <time>
-                    {ACTIVITIES[activityIndex].time}
-                  </time>
-                </motion.div>
+                  <time>{currentActivity.time}</time>
+                </Motion.div>
               </AnimatePresence>
 
               <div className="activity-dots">
-                {ACTIVITIES.map((activity, index) => (
+                {activities.map((activity, index) => (
                   <button
-                    key={activity.title}
+                    key={activity.id}
                     type="button"
                     className={
-                      index === activityIndex
+                      index === currentActivityIndex
                         ? "activity-dot activity-dot--active"
                         : "activity-dot"
                     }
@@ -1552,14 +1820,14 @@ export default function Home() {
                   />
                 ))}
               </div>
-            </motion.article>
+            </Motion.article>
           </div>
         </section>
 
         <section className="home-cta">
           <div className="home-cta-back" aria-hidden="true" />
 
-          <motion.div
+          <Motion.div
             className="home-cta-card"
             initial={{ opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -1622,7 +1890,7 @@ export default function Home() {
                 Novas vagas diariamente
               </span>
             </div>
-          </motion.div>
+          </Motion.div>
         </section>
 
         <footer className="home-footer">
@@ -1835,7 +2103,7 @@ export default function Home() {
 
         <AnimatePresence>
           {toast && (
-            <motion.div
+            <Motion.div
               className="home-toast"
               role="status"
               initial={{ opacity: 0, y: 24, scale: 0.94 }}
@@ -1847,7 +2115,7 @@ export default function Home() {
               </span>
 
               {toast}
-            </motion.div>
+            </Motion.div>
           )}
         </AnimatePresence>
       </main>
@@ -1863,11 +2131,9 @@ function JobCard({
   onOpen,
 }) {
   return (
-    <motion.article
+    <Motion.article
       layout
-      className={`job-card ${
-        job.featured ? "job-card--featured" : ""
-      }`}
+      className="job-card"
       style={{
         "--job-accent": job.accent,
         "--job-soft-accent": job.softAccent,
@@ -1893,13 +2159,6 @@ function JobCard({
         </span>
 
         <div className="job-card-badges">
-          {job.featured && (
-            <span className="job-featured-badge">
-              <SparklesIcon />
-              Destaque
-            </span>
-          )}
-
           {job.isNew && (
             <span className="job-new-badge">
               Nova
@@ -1928,8 +2187,10 @@ function JobCard({
         </button>
 
         <div className="job-match-pill">
-          <span>{job.match}%</span>
-          de combinação
+          <span>{job.applicants}</span>
+          {job.applicants === 1
+            ? " candidatura"
+            : " candidaturas"}
         </div>
       </div>
 
@@ -1949,11 +2210,13 @@ function JobCard({
           <span>{job.location}</span>
         </p>
 
-        <div className="job-skills">
-          {job.skills.slice(0, 3).map((skill) => (
-            <span key={skill}>{skill}</span>
-          ))}
-        </div>
+        {job.skills.length > 0 && (
+          <div className="job-skills">
+            {job.skills.slice(0, 3).map((skill) => (
+              <span key={skill}>{skill}</span>
+            ))}
+          </div>
+        )}
 
         <div className="job-card-footer">
           <div>
@@ -1973,7 +2236,7 @@ function JobCard({
           </button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -1985,7 +2248,7 @@ function JobModal({
   onApply,
 }) {
   return (
-    <motion.div
+    <Motion.div
       className="modal-overlay"
       role="dialog"
       aria-modal="true"
@@ -1999,7 +2262,7 @@ function JobModal({
         }
       }}
     >
-      <motion.article
+      <Motion.article
         className="job-modal"
         style={{
           "--job-accent": job.accent,
@@ -2082,12 +2345,16 @@ function JobModal({
           </div>
 
           <div>
-            <span>Compatibilidade</span>
-            <strong>{job.match}%</strong>
+            <span>Vagas abertas</span>
+            <strong>
+              {job.openings === null
+                ? "Não informado"
+                : job.openings}
+            </strong>
           </div>
 
           <div>
-            <span>Candidatos</span>
+            <span>Candidaturas</span>
             <strong>{job.applicants}</strong>
           </div>
         </div>
@@ -2098,33 +2365,66 @@ function JobModal({
             <p>{job.description}</p>
           </section>
 
-          <section>
-            <h3>O que esperamos de você</h3>
+          {job.responsibilities.length > 0 && (
+            <section>
+              <h3>Responsabilidades</h3>
 
-            <ul>
-              {job.requirements.map((requirement) => (
-                <li key={requirement}>
-                  <CheckIcon />
-                  {requirement}
-                </li>
-              ))}
-            </ul>
-          </section>
+              <ul>
+                {job.responsibilities.map((responsibility) => (
+                  <li key={responsibility}>
+                    <CheckIcon />
+                    {responsibility}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-          <section>
-            <h3>Tecnologias e habilidades</h3>
+          {job.requirements.length > 0 && (
+            <section>
+              <h3>O que esperamos de você</h3>
 
-            <div className="job-modal-skills">
-              {job.skills.map((skill) => (
-                <span key={skill}>{skill}</span>
-              ))}
-            </div>
-          </section>
+              <ul>
+                {job.requirements.map((requirement) => (
+                  <li key={requirement}>
+                    <CheckIcon />
+                    {requirement}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {job.skills.length > 0 && (
+            <section>
+              <h3>Tecnologias e habilidades</h3>
+
+              <div className="job-modal-skills">
+                {job.skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {job.benefits.length > 0 && (
+            <section>
+              <h3>Benefícios</h3>
+
+              <div className="job-modal-skills">
+                {job.benefits.map((benefit) => (
+                  <span key={benefit}>{benefit}</span>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <footer className="job-modal-footer">
           <span>
-            Publicada {job.postedAt.toLowerCase()}
+            Publicada: {job.postedAt}
+            {job.applicationDeadline !== "Não informada" &&
+              ` · Inscrições até ${job.applicationDeadline}`}
           </span>
 
           <button type="button" onClick={onApply}>
@@ -2132,8 +2432,8 @@ function JobModal({
             <ArrowRightIcon />
           </button>
         </footer>
-      </motion.article>
-    </motion.div>
+      </Motion.article>
+    </Motion.div>
   );
 }
 
@@ -2145,7 +2445,7 @@ function CommandPalette({
   onClose,
 }) {
   return (
-    <motion.div
+    <Motion.div
       className="command-overlay"
       role="dialog"
       aria-modal="true"
@@ -2159,7 +2459,7 @@ function CommandPalette({
         }
       }}
     >
-      <motion.div
+      <Motion.div
         className="command-palette"
         initial={{
           opacity: 0,
@@ -2243,8 +2543,8 @@ function CommandPalette({
             Fechar
           </span>
         </div>
-      </motion.div>
-    </motion.div>
+      </Motion.div>
+    </Motion.div>
   );
 }
 
@@ -2254,7 +2554,7 @@ function MobileMenu({
   onNavigate,
 }) {
   return (
-    <motion.div
+    <Motion.div
       className="mobile-menu-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -2265,7 +2565,7 @@ function MobileMenu({
         }
       }}
     >
-      <motion.aside
+      <Motion.aside
         className="mobile-menu"
         initial={{ x: "105%" }}
         animate={{ x: 0 }}
@@ -2366,34 +2666,68 @@ function MobileMenu({
         <div className="mobile-menu-footer">
           Point · Plataforma de talentos
         </div>
-      </motion.aside>
-    </motion.div>
+      </Motion.aside>
+    </Motion.div>
   );
 }
 
-function EmptyJobs({ onReset }) {
+function JobsFeedback({ type, message, onAction }) {
+  const content = {
+    loading: {
+      title: "Buscando vagas publicadas...",
+      description:
+        "Estamos atualizando o radar com as oportunidades mais recentes.",
+      actionLabel: "",
+    },
+    error: {
+      title: "O radar ficou indisponível.",
+      description:
+        message || "Tente carregar as oportunidades novamente.",
+      actionLabel: "Tentar novamente",
+    },
+    empty: {
+      title: "Ainda não há vagas publicadas.",
+      description:
+        "Novas oportunidades aparecerão aqui assim que forem publicadas.",
+      actionLabel: "Atualizar vagas",
+    },
+    filtered: {
+      title: "Nenhuma vaga passou por esse filtro.",
+      description:
+        "Tente buscar por outro termo ou visualizar todas as categorias.",
+      actionLabel: "Limpar filtros",
+    },
+  }[type];
+
   return (
-    <motion.div
-      className="empty-jobs"
+    <Motion.div
+      className={`empty-jobs empty-jobs--${type}`}
+      role={type === "error" ? "alert" : "status"}
+      aria-live={type === "error" ? "assertive" : "polite"}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="empty-jobs-icon">
-        <SearchIcon />
+        {type === "loading" ? (
+          <BriefcaseIcon />
+        ) : type === "filtered" ? (
+          <SearchIcon />
+        ) : (
+          <RefreshIcon />
+        )}
       </div>
 
-      <h3>Nenhuma vaga passou por esse filtro.</h3>
+      <h3>{content.title}</h3>
 
-      <p>
-        Tente buscar por outro termo ou visualizar todas as
-        categorias.
-      </p>
+      <p>{content.description}</p>
 
-      <button type="button" onClick={onReset}>
-        Limpar filtros
-        <RefreshIcon />
-      </button>
-    </motion.div>
+      {content.actionLabel && onAction && (
+        <button type="button" onClick={onAction}>
+          {content.actionLabel}
+          <RefreshIcon />
+        </button>
+      )}
+    </Motion.div>
   );
 }
 
@@ -2435,9 +2769,10 @@ function MapNode({
   icon,
 }) {
   return (
-    <motion.div
+    <Motion.div
       className={`map-node ${className}`}
       style={{ "--node-accent": accent }}
+      title={`${label} · ${detail}`}
       whileHover={{
         y: -4,
         rotate: 0,
@@ -2450,7 +2785,7 @@ function MapNode({
         <strong>{label}</strong>
         <small>{detail}</small>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -2548,14 +2883,6 @@ function DynamicIcon({ name }) {
     default:
       return <SparklesIcon />;
   }
-}
-
-function extractInitialSalary(salary) {
-  const match = salary.match(/R\$\s*([\d.]+)/);
-
-  if (!match) return 0;
-
-  return Number(match[1].replace(".", ""));
 }
 
 const homeStyles = `
@@ -3544,6 +3871,7 @@ const homeStyles = `
     align-items: center;
     gap: 0.55rem;
     min-width: 9.5rem;
+    max-width: 12.5rem;
     padding: 0.65rem;
     border: 2px solid var(--ink);
     border-radius: 0.9rem;
@@ -3576,8 +3904,11 @@ const homeStyles = `
   }
 
   .map-node strong {
+    overflow: hidden;
     font-size: 0.61rem;
     font-weight: 950;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .map-node small {
@@ -4072,6 +4403,13 @@ const homeStyles = `
     color: #a19a94;
   }
 
+  .jobs-search-box input:disabled,
+  .jobs-sort select:disabled,
+  .category-filter:disabled {
+    cursor: wait;
+    opacity: 0.62;
+  }
+
   .jobs-search-box button {
     display: grid;
     place-items: center;
@@ -4210,6 +4548,11 @@ const homeStyles = `
     color: var(--ink);
     font-size: 0.85rem;
     font-weight: 950;
+  }
+
+  .jobs-result-header small {
+    font-size: inherit;
+    font-weight: inherit;
   }
 
   .jobs-result-header button {
@@ -4654,6 +4997,34 @@ const homeStyles = `
   .empty-jobs button svg {
     width: 0.9rem;
     height: 0.9rem;
+  }
+
+  .empty-jobs--loading .empty-jobs-icon {
+    background: var(--blue);
+    animation: jobsLoadingPulse 1.15s ease-in-out infinite;
+  }
+
+  .empty-jobs--error {
+    background: rgba(255, 213, 228, 0.58);
+  }
+
+  .empty-jobs--error .empty-jobs-icon {
+    background: var(--pink);
+  }
+
+  .empty-jobs--empty .empty-jobs-icon {
+    background: var(--lime);
+  }
+
+  @keyframes jobsLoadingPulse {
+    0%,
+    100% {
+      transform: rotate(-6deg) scale(1);
+    }
+
+    50% {
+      transform: rotate(2deg) scale(1.06);
+    }
   }
 
   .experience-bento {

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Habilidade extends Model
 {
     protected $table = 'habilidades';
+
     protected $fillable = [
-        'curriculo_id',
-        'nome'
+        'nome',
     ];
-    
+
     public function curriculo()
     {
         return $this->belongsTo(Curriculo::class);

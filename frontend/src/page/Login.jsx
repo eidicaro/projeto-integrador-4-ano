@@ -1,16 +1,25 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import logo from "../assets/login.png";
 import bgVideo from "../assets/bg.mp4";
+import { useAuth } from "../context/AuthContext";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+} from "../lib/api";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const pageRef = useRef(null);
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(
+    () => location.state?.email || "",
+  );
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [lembrar, setLembrar] = useState(false);
@@ -36,8 +45,6 @@ export default function Login() {
 
     if (!senha) {
       novosErros.senha = "Digite sua senha.";
-    } else if (senha.length < 4) {
-      novosErros.senha = "A senha precisa ter pelo menos 4 caracteres.";
     }
 
     setErros(novosErros);
@@ -55,25 +62,44 @@ export default function Login() {
     setCarregando(true);
 
     try {
-      /*
-        Substitua esta simulação pela sua API:
+      const authenticatedUser = await login({
+        email: email.trim().toLowerCase(),
+        password: senha,
+        remember: lembrar,
+      });
 
-        await api.post("/login", {
-          email: email.trim(),
-          senha,
-          lembrar,
-        });
-      */
+      const requestedRedirect = location.state?.redirectTo;
+      const safeRedirect =
+        typeof requestedRedirect === "string" &&
+        requestedRedirect.startsWith("/") &&
+        !requestedRedirect.startsWith("//")
+          ? requestedRedirect
+          : null;
 
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const destination = safeRedirect ||
+        (String(authenticatedUser.role).toLowerCase() === "recrutador"
+          ? "/admin/home"
+          : "/homeUser");
 
-      navigate("/");
+      navigate(destination, { replace: true });
     } catch (error) {
+      const emailError = getApiFieldError(error, "email");
+      const passwordError = getApiFieldError(
+        error,
+        "password",
+        "senha",
+      );
+
       setErros({
-        email: "",
+        email: emailError,
         senha:
-          error?.response?.data?.message ||
-          "Não foi possível entrar. Tente novamente.",
+          passwordError ||
+          (!emailError
+            ? getApiErrorMessage(
+                error,
+                "Não foi possível entrar. Tente novamente.",
+              )
+            : ""),
       });
     } finally {
       setCarregando(false);
@@ -927,6 +953,18 @@ export default function Login() {
           font-size: 0.8rem;
           font-weight: 620;
           line-height: 1.55;
+        }
+
+        .login-success-message {
+          margin: 1rem 0 0;
+          padding: 0.8rem 0.9rem;
+          border: 1px solid rgba(24, 139, 91, 0.2);
+          border-radius: 0.8rem;
+          color: #176844;
+          background: #dcf8ec;
+          font-size: 0.76rem;
+          font-weight: 750;
+          line-height: 1.45;
         }
 
         .ticket-body {
@@ -1993,6 +2031,12 @@ export default function Login() {
                     Entre para acompanhar oportunidades, candidaturas e
                     novidades feitas para o seu perfil.
                   </p>
+
+                  {(location.state?.message || location.state?.cadastroRealizado) && (
+                    <p className="login-success-message" role="status">
+                      {location.state?.message || "Conta criada com sucesso. Você já pode entrar."}
+                    </p>
+                  )}
                 </header>
 
                 <div className="ticket-body">

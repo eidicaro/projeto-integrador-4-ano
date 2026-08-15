@@ -1,8 +1,13 @@
 import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import logo from "../assets/cadastro.png";
 import bgVideo from "../assets/bg.mp4";
+import { useAuth } from "../context/AuthContext";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+} from "../lib/api";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +22,7 @@ const INITIAL_FORM = {
 
 export default function Cadastro() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const pageRef = useRef(null);
 
   const [etapa, setEtapa] = useState(1);
@@ -214,24 +220,15 @@ export default function Cadastro() {
 
     try {
       const payload = {
-        nome: form.nome.trim(),
+        name: form.nome.trim(),
         email: form.email.trim().toLowerCase(),
         telefone: form.telefone.replace(/\D/g, ""),
-        senha: form.senha,
+        password: form.senha,
+        password_confirmation: form.confirmarSenha,
+        accepted_terms: true,
       };
 
-      /*
-       * Substitua esta simulação pela chamada real da sua API:
-       *
-       * await api.post("/usuarios", payload);
-       *
-       * Nunca envie confirmarSenha ou aceitouTermos ao banco,
-       * pois são controles locais da interface.
-       */
-
-      console.log("Novo usuário:", payload);
-
-      await new Promise((resolve) => setTimeout(resolve, 1100));
+      await register(payload);
 
       setConcluido(true);
 
@@ -245,11 +242,42 @@ export default function Cadastro() {
         },
       });
     } catch (error) {
+      const apiErrors = {
+        nome: getApiFieldError(error, "name", "nome"),
+        telefone: getApiFieldError(error, "telefone", "phone"),
+        email: getApiFieldError(error, "email"),
+        senha: getApiFieldError(error, "password", "senha"),
+        confirmarSenha: getApiFieldError(
+          error,
+          "password_confirmation",
+          "confirmarSenha",
+        ),
+        aceitouTermos: getApiFieldError(
+          error,
+          "accepted_terms",
+          "aceitouTermos",
+        ),
+      };
+
+      const hasFieldError = Object.values(apiErrors).some(Boolean);
+
       setErros({
-        cadastro:
-          error?.response?.data?.message ||
-          "Não foi possível criar sua conta. Tente novamente.",
+        ...apiErrors,
+        cadastro: hasFieldError
+          ? ""
+          : getApiErrorMessage(
+              error,
+              "Não foi possível criar sua conta. Tente novamente.",
+            ),
       });
+
+      if (apiErrors.nome || apiErrors.telefone) {
+        setDirecao("backward");
+        setEtapa(1);
+      } else if (apiErrors.email) {
+        setDirecao("backward");
+        setEtapa(2);
+      }
     } finally {
       setCarregando(false);
     }
@@ -1527,13 +1555,20 @@ export default function Cadastro() {
           line-height: 1.55;
         }
 
-        .terms-text strong {
+        .terms-text strong,
+        .terms-link {
           color: var(--ink);
           font-weight: 900;
           text-decoration: underline;
           text-decoration-color: var(--pink);
           text-decoration-thickness: 2px;
           text-underline-offset: 3px;
+        }
+
+        .terms-link:focus-visible {
+          border-radius: 0.2rem;
+          outline: 3px solid rgba(100, 199, 238, 0.5);
+          outline-offset: 2px;
         }
 
         .machine-actions {
@@ -3151,8 +3186,23 @@ function StepThree({
         </span>
 
         <span className="terms-text">
-          Li e concordo com os <strong>Termos de Uso</strong> e com a{" "}
-          <strong>Política de Privacidade</strong> da plataforma.
+          Li e concordo com os{" "}
+          <Link
+            className="terms-link"
+            to="/termos"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Termos de Uso
+          </Link>{" "}
+          e com a{" "}
+          <Link
+            className="terms-link"
+            to="/privacidade"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Política de Privacidade
+          </Link>{" "}
+          da plataforma.
         </span>
       </label>
 
