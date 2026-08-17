@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('curriculos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-        
+
             $table->string('nome_completo');
             $table->string('area_atuacao')->nullable();
             $table->string('telefone')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('links')->nullable();
             $table->text('resumo')->nullable();
             $table->string('foto')->nullable();
-        
+
             $table->timestamps();
         });
     }

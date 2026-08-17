@@ -1,13 +1,19 @@
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
+import api, { getApiErrorMessage } from "../../lib/api";
+import {
+  getLaravelValidationErrors,
+  unwrapApiData,
+} from "../../lib/candidate";
 
 const DRAFT_STORAGE_KEY = "admin-create-job-draft-v2";
-const JOBS_STORAGE_KEY = "admin-created-jobs-v2";
 
 const employmentTypes = [
   "CLT",
@@ -159,6 +165,7 @@ function loadStoredDraft() {
       form: {
         ...emptyForm,
         ...parsedDraft.form,
+        applicationEmail: "",
         tags: Array.isArray(parsedDraft.form.tags)
           ? parsedDraft.form.tags
           : [],
@@ -195,19 +202,6 @@ function formatDate(dateValue) {
   const [year, month, day] = dateValue.split("-");
 
   return `${day}/${month}/${year}`;
-}
-
-function createJobId() {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return crypto.randomUUID();
-  }
-
-  return `job-${Date.now()}-${Math.random()
-    .toString(16)
-    .slice(2)}`;
 }
 
 function validateForm(form) {
@@ -284,6 +278,95 @@ function validateForm(form) {
   }
 
   return errors;
+}
+
+const API_JOB_FIELDS = {
+  titulo: "title",
+  empresa: "company",
+  departamento: "department",
+  localizacao: "location",
+  tipo_contratacao: "employmentType",
+  modalidade: "workMode",
+  senioridade: "seniority",
+  quantidade_vagas: "openings",
+  email_candidatura: "applicationEmail",
+  data_limite: "applicationDeadline",
+  salario_min: "salaryMin",
+  salario_max: "salaryMax",
+  salario_visivel: "salaryVisible",
+  descricao: "description",
+  responsabilidades: "responsibilities",
+  requisitos: "requirements",
+  beneficios: "benefits",
+  imagem: "image",
+};
+
+function mapJobApiErrors(error) {
+  const validationErrors = getLaravelValidationErrors(error);
+
+  return Object.fromEntries(
+    Object.entries(validationErrors).map(([field, message]) => [
+      API_JOB_FIELDS[field] || field,
+      message,
+    ])
+  );
+}
+
+function createJobPayload(form) {
+  return {
+    title: form.title.trim(),
+    company: form.company.trim(),
+    department: form.department.trim(),
+    location: form.location.trim(),
+    employmentType: form.employmentType,
+    workMode: form.workMode,
+    seniority: form.seniority,
+    openings: Number(form.openings) || 1,
+    applicationEmail: form.applicationEmail.trim().toLowerCase(),
+    applicationDeadline: form.applicationDeadline || null,
+    salaryMin: form.salaryMin ? Number(form.salaryMin) : null,
+    salaryMax: form.salaryMax ? Number(form.salaryMax) : null,
+    salaryVisible: Boolean(form.salaryVisible),
+    description: form.description.trim(),
+    responsibilities: form.responsibilities.trim(),
+    requirements: form.requirements.trim(),
+    tags: form.tags,
+    benefits: form.benefits,
+    status: "publicada",
+  };
+}
+
+function createSafeDraft(form) {
+  return {
+    ...form,
+    applicationEmail: "",
+  };
+}
+
+function createFormFromJob(job) {
+  return {
+    ...emptyForm,
+    title: job?.title || "",
+    company: job?.company || "",
+    department: job?.department || "",
+    location: job?.location || "",
+    employmentType: job?.employmentType || "",
+    workMode: job?.workMode || "",
+    seniority: job?.seniority || "Não informado",
+    openings: String(job?.openings || 1),
+    applicationEmail: job?.applicationEmail || "",
+    applicationDeadline: job?.applicationDeadline
+      ? String(job.applicationDeadline).slice(0, 10)
+      : "",
+    salaryMin: job?.salaryMin ?? "",
+    salaryMax: job?.salaryMax ?? "",
+    salaryVisible: job?.salaryVisible !== false,
+    description: job?.description || "",
+    responsibilities: job?.responsibilities || "",
+    requirements: job?.requirements || "",
+    tags: Array.isArray(job?.tags) ? job.tags : [],
+    benefits: Array.isArray(job?.benefits) ? job.benefits : [],
+  };
 }
 
 function Icon({
@@ -623,32 +706,45 @@ function Icon({
 
 export default function AdminCreate() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editJob = location.state?.editJob || null;
+  const editJobId = editJob?.id ?? null;
+  const isEditing = editJobId !== null;
 
-  const initialDraftRef = useRef(loadStoredDraft());
+  const [initialDraft] = useState(() => isEditing ? null : loadStoredDraft());
   const titleInputRef = useRef(null);
 
   const [form, setForm] = useState(
-    initialDraftRef.current?.form || emptyForm
+    () => isEditing ? createFormFromJob(editJob) : initialDraft?.form || emptyForm
   );
 
   const [tagInput, setTagInput] = useState("");
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [apiErrors, setApiErrors] = useState({});
   const [lastSaved, setLastSaved] = useState(
-    initialDraftRef.current?.savedAt
-      ? new Date(initialDraftRef.current.savedAt)
+    initialDraft?.savedAt
+      ? new Date(initialDraft.savedAt)
       : null
   );
 
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState(() =>
+    initialDraft
+      ? {
+          type: "info",
+          title: "Rascunho recuperado",
+          description: "Continuamos exatamente de onde você parou.",
+        }
+      : null
+  );
   const [modalMode, setModalMode] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [mobilePreviewOpen, setMobilePreviewOpen] =
     useState(false);
 
   const errors = useMemo(
-    () => validateForm(form),
-    [form]
+    () => ({ ...validateForm(form), ...apiErrors }),
+    [apiErrors, form]
   );
 
   const completion = useMemo(() => {
@@ -734,20 +830,80 @@ export default function AdminCreate() {
     form.salaryVisible,
   ]);
 
-  useEffect(() => {
-    if (!initialDraftRef.current) {
+  const saveDraft = useCallback((showFeedback = true) => {
+    if (typeof window === "undefined" || isEditing) return;
+
+    const savedAt = new Date();
+
+    try {
+      window.localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({
+          form: createSafeDraft(form),
+          savedAt: savedAt.toISOString(),
+        })
+      );
+
+      setLastSaved(savedAt);
+
+      if (showFeedback) {
+        setToast({
+          type: "success",
+          title: "Rascunho salvo",
+          description:
+            "Os dados não sensíveis foram armazenados neste navegador. Por segurança, o e-mail não é salvo localmente.",
+        });
+      }
+    } catch {
+      if (showFeedback) {
+        setToast({
+          type: "error",
+          title: "Não foi possível salvar",
+          description:
+            "Verifique o armazenamento disponível do navegador.",
+        });
+      }
+    }
+  }, [form, isEditing]);
+
+  const focusFirstInvalidField = useCallback(() => {
+    const firstInvalidField = Object.keys(errors)[0];
+    if (!firstInvalidField) return;
+
+    const fieldElement = document.querySelector(
+      `[data-field="${firstInvalidField}"]`
+    );
+
+    fieldElement?.focus();
+    fieldElement?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [errors]);
+
+  const openPublishModal = useCallback(() => {
+    setSubmitted(true);
+
+    if (Object.keys(errors).length > 0) {
+      setToast({
+        type: "error",
+        title: "Revise algumas informações",
+        description:
+          "Existem campos obrigatórios que precisam de atenção.",
+      });
+
+      window.setTimeout(focusFirstInvalidField, 80);
       return;
     }
 
-    setToast({
-      type: "info",
-      title: "Rascunho recuperado",
-      description:
-        "Continuamos exatamente de onde você parou.",
-    });
-  }, []);
+    setModalMode("publish");
+  }, [errors, focusFirstInvalidField]);
 
   useEffect(() => {
+    if (isEditing) {
+      return undefined;
+    }
+
     const autoSaveTimer = window.setTimeout(() => {
       saveDraft(false);
     }, 600);
@@ -755,7 +911,7 @@ export default function AdminCreate() {
     return () => {
       window.clearTimeout(autoSaveTimer);
     };
-  }, [form]);
+  }, [isEditing, saveDraft]);
 
   useEffect(() => {
     if (!toast) {
@@ -778,7 +934,8 @@ export default function AdminCreate() {
 
       if (
         modifierPressed &&
-        event.key.toLowerCase() === "s"
+        event.key.toLowerCase() === "s" &&
+        !isEditing
       ) {
         event.preventDefault();
         saveDraft(true);
@@ -811,7 +968,7 @@ export default function AdminCreate() {
         handleKeyboardShortcut
       );
     };
-  }, [form, errors, isPublishing]);
+  }, [isEditing, isPublishing, openPublishModal, saveDraft]);
 
   useEffect(() => {
     function handleBeforeUnload(event) {
@@ -855,6 +1012,13 @@ export default function AdminCreate() {
       ...currentForm,
       [field]: value,
     }));
+    setApiErrors((currentErrors) => {
+      if (!currentErrors[field]) return currentErrors;
+
+      const nextErrors = { ...currentErrors };
+      delete nextErrors[field];
+      return nextErrors;
+    });
   }
 
   function handleFieldChange(event) {
@@ -879,44 +1043,6 @@ export default function AdminCreate() {
       errors[field] &&
         (submitted || touched[field])
     );
-  }
-
-  function saveDraft(showFeedback = true) {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const savedAt = new Date();
-
-    try {
-      window.localStorage.setItem(
-        DRAFT_STORAGE_KEY,
-        JSON.stringify({
-          form,
-          savedAt: savedAt.toISOString(),
-        })
-      );
-
-      setLastSaved(savedAt);
-
-      if (showFeedback) {
-        setToast({
-          type: "success",
-          title: "Rascunho salvo",
-          description:
-            "Todas as alterações foram armazenadas neste navegador.",
-        });
-      }
-    } catch {
-      if (showFeedback) {
-        setToast({
-          type: "error",
-          title: "Não foi possível salvar",
-          description:
-            "Verifique o armazenamento disponível do navegador.",
-        });
-      }
-    }
   }
 
   function addTag(rawTag) {
@@ -1020,62 +1146,21 @@ export default function AdminCreate() {
     });
   }
 
-  function focusFirstInvalidField() {
-    const firstInvalidField =
-      Object.keys(errors)[0];
-
-    if (!firstInvalidField) {
-      return;
-    }
-
-    const fieldElement =
-      document.querySelector(
-        `[data-field="${firstInvalidField}"]`
-      );
-
-    fieldElement?.focus();
-    fieldElement?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }
-
-  function openPublishModal() {
-    setSubmitted(true);
-
-    if (Object.keys(errors).length > 0) {
-      setToast({
-        type: "error",
-        title: "Revise algumas informações",
-        description:
-          "Existem campos obrigatórios que precisam de atenção.",
-      });
-
-      window.setTimeout(
-        focusFirstInvalidField,
-        80
-      );
-
-      return;
-    }
-
-    setModalMode("publish");
-  }
-
   function handleSubmit(event) {
     event.preventDefault();
     openPublishModal();
   }
 
   function confirmReset() {
-    setForm(emptyForm);
+    setForm(isEditing ? createFormFromJob(editJob) : emptyForm);
     setTagInput("");
     setTouched({});
     setSubmitted(false);
+    setApiErrors({});
     setModalMode(null);
     setLastSaved(null);
 
-    if (typeof window !== "undefined") {
+    if (!isEditing && typeof window !== "undefined") {
       window.localStorage.removeItem(
         DRAFT_STORAGE_KEY
       );
@@ -1083,9 +1168,10 @@ export default function AdminCreate() {
 
     setToast({
       type: "info",
-      title: "Formulário limpo",
-      description:
-        "Uma nova vaga pode ser criada do zero.",
+      title: isEditing ? "Alterações descartadas" : "Formulário limpo",
+      description: isEditing
+        ? "Os dados originais da vaga foram restaurados sem alterar seu rascunho de criação."
+        : "Uma nova vaga pode ser criada do zero.",
     });
 
     window.setTimeout(() => {
@@ -1093,86 +1179,76 @@ export default function AdminCreate() {
     }, 80);
   }
 
-  function confirmPublish() {
+  async function confirmPublish() {
     if (isPublishing) {
       return;
     }
 
     setIsPublishing(true);
-
-    const newJob = {
-      id: createJobId(),
-      ...form,
-      title: form.title.trim(),
-      company: form.company.trim(),
-      department: form.department.trim(),
-      location: form.location.trim(),
-      applicationEmail:
-        form.applicationEmail.trim(),
-      description: form.description.trim(),
-      responsibilities:
-        form.responsibilities.trim(),
-      requirements: form.requirements.trim(),
-      salaryMin: form.salaryMin
-        ? Number(form.salaryMin)
-        : null,
-      salaryMax: form.salaryMax
-        ? Number(form.salaryMax)
-        : null,
-      openings: Number(form.openings) || 1,
-      status: "publicada",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    setApiErrors({});
 
     try {
-      const currentJobsRaw =
-        window.localStorage.getItem(
-          JOBS_STORAGE_KEY
+      const payload = {
+        ...createJobPayload(form),
+        status: isEditing ? editJob.status || "publicada" : "publicada",
+      };
+      const response = isEditing
+        ? await api.patch(
+            `/admin/vagas/${encodeURIComponent(editJobId)}`,
+            payload
+          )
+        : await api.post("/admin/vagas", payload);
+      const newJob = unwrapApiData(response);
+
+      if (!isEditing) {
+        window.localStorage.removeItem(
+          DRAFT_STORAGE_KEY
         );
+      }
 
-      const currentJobs = currentJobsRaw
-        ? JSON.parse(currentJobsRaw)
-        : [];
-
-      const safeCurrentJobs = Array.isArray(
-        currentJobs
-      )
-        ? currentJobs
-        : [];
-
-      window.localStorage.setItem(
-        JOBS_STORAGE_KEY,
-        JSON.stringify([
-          newJob,
-          ...safeCurrentJobs,
-        ])
-      );
-
-      window.localStorage.removeItem(
-        DRAFT_STORAGE_KEY
-      );
-
-      window.setTimeout(() => {
-        setIsPublishing(false);
-        setModalMode(null);
-
-        navigate("/admin/ver-vagas", {
-          state: {
-            createdJob: newJob,
-            showCreatedMessage: true,
-          },
-        });
-      }, 850);
-    } catch {
-      setIsPublishing(false);
+      setModalMode(null);
+      navigate("/admin/ver-vagas", {
+        state: {
+          createdJob: newJob,
+          showCreatedMessage: !isEditing,
+          showUpdatedMessage: isEditing,
+        },
+      });
+    } catch (error) {
+      const validationErrors = mapJobApiErrors(error);
+      setApiErrors(validationErrors);
+      setModalMode(null);
+      setSubmitted(true);
 
       setToast({
         type: "error",
-        title: "Erro ao publicar",
+        title: isEditing ? "Erro ao atualizar" : "Erro ao publicar",
         description:
-          "Não foi possível armazenar a vaga neste navegador.",
+          Object.keys(validationErrors).length > 0
+            ? "Revise os campos destacados e tente novamente."
+            : getApiErrorMessage(
+                error,
+                isEditing
+                  ? "Não foi possível atualizar a vaga."
+                  : "Não foi possível publicar a vaga."
+              ),
       });
+
+      const firstApiField = Object.keys(validationErrors)[0];
+      if (firstApiField) {
+        window.setTimeout(() => {
+          const fieldElement = document.querySelector(
+            `[data-field="${firstApiField}"]`
+          );
+          fieldElement?.focus();
+          fieldElement?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 80);
+      }
+    } finally {
+      setIsPublishing(false);
     }
   }
 
@@ -4087,7 +4163,7 @@ Candidaturas: ${
                   </span>
 
                   <span className="create-nav__text">
-                    Criar vaga
+                    {isEditing ? "Editar vaga" : "Criar vaga"}
                   </span>
                 </button>
 
@@ -4157,36 +4233,45 @@ Candidaturas: ${
               </button>
 
               <div className="create-topbar__actions">
-                <div className="create-save-status">
-                  <span className="create-save-status__dot" />
+                {isEditing ? (
+                  <div className="create-save-status">
+                    <span className="create-save-status__dot" />
+                    Rascunho de criação preservado
+                  </div>
+                ) : (
+                  <>
+                    <div className="create-save-status">
+                      <span className="create-save-status__dot" />
 
-                  {lastSaved
-                    ? `Salvo às ${lastSaved.toLocaleTimeString(
-                        "pt-BR",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}`
-                    : "Salvamento automático"}
-                </div>
+                      {lastSaved
+                        ? `Salvo às ${lastSaved.toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}`
+                        : "Salvamento automático"}
+                    </div>
 
-                <button
-                  type="button"
-                  className="create-topbar-button"
-                  onClick={() =>
-                    saveDraft(true)
-                  }
-                >
-                  <Icon
-                    name="save"
-                    size={16}
-                  />
+                    <button
+                      type="button"
+                      className="create-topbar-button"
+                      onClick={() =>
+                        saveDraft(true)
+                      }
+                    >
+                      <Icon
+                        name="save"
+                        size={16}
+                      />
 
-                  <span className="create-topbar-button__text">
-                    Salvar rascunho
-                  </span>
-                </button>
+                      <span className="create-topbar-button__text">
+                        Salvar rascunho
+                      </span>
+                    </button>
+                  </>
+                )}
               </div>
             </header>
 
@@ -5328,19 +5413,21 @@ Candidaturas: ${
 
                 <div className="create-form-actions">
                   <div className="create-form-actions__secondary">
-                    <button
-                      type="button"
-                      className="create-secondary-button"
-                      onClick={() =>
-                        saveDraft(true)
-                      }
-                    >
-                      <Icon
-                        name="save"
-                        size={15}
-                      />
-                      Salvar
-                    </button>
+                    {!isEditing && (
+                      <button
+                        type="button"
+                        className="create-secondary-button"
+                        onClick={() =>
+                          saveDraft(true)
+                        }
+                      >
+                        <Icon
+                          name="save"
+                          size={15}
+                        />
+                        Salvar
+                      </button>
+                    )}
 
                     <button
                       type="button"
@@ -5353,7 +5440,7 @@ Candidaturas: ${
                         name="trash"
                         size={15}
                       />
-                      Limpar
+                      {isEditing ? "Descartar alterações" : "Limpar"}
                     </button>
                   </div>
 
@@ -5365,7 +5452,7 @@ Candidaturas: ${
                       name="send"
                       size={17}
                     />
-                    Revisar e publicar
+                    {isEditing ? "Revisar e atualizar" : "Revisar e publicar"}
                     <Icon
                       name="arrowRight"
                       size={16}
@@ -5560,14 +5647,22 @@ Candidaturas: ${
                   className="create-modal__title"
                 >
                   {modalMode === "reset"
-                    ? "Limpar todo o formulário?"
-                    : "Publicar esta oportunidade?"}
+                    ? isEditing
+                      ? "Descartar alterações desta edição?"
+                      : "Limpar todo o formulário?"
+                    : isEditing
+                      ? "Atualizar esta oportunidade?"
+                      : "Publicar esta oportunidade?"}
                 </h2>
 
                 <p className="create-modal__description">
                   {modalMode === "reset"
-                    ? "Todas as informações preenchidas e o rascunho salvo neste navegador serão removidos. Esta ação não poderá ser desfeita."
-                    : "Revise o resumo abaixo. Após a confirmação, a vaga será adicionada à sua lista de oportunidades publicadas."}
+                    ? isEditing
+                      ? "Os dados da vaga serão restaurados para o estado em que a edição foi aberta. Seu rascunho de criação continuará intacto."
+                      : "Todas as informações preenchidas e o rascunho salvo neste navegador serão removidos. Esta ação não poderá ser desfeita."
+                    : isEditing
+                      ? "Revise o resumo abaixo. Após a confirmação, as alterações serão salvas no servidor."
+                      : "Revise o resumo abaixo. Após a confirmação, a vaga será adicionada à sua lista de oportunidades publicadas."}
                 </p>
 
                 {modalMode === "publish" && (
@@ -5636,7 +5731,7 @@ Candidaturas: ${
                         name="trash"
                         size={15}
                       />
-                      Limpar formulário
+                      {isEditing ? "Restaurar dados" : "Limpar formulário"}
                     </button>
                   ) : (
                     <button
@@ -5648,7 +5743,7 @@ Candidaturas: ${
                       {isPublishing ? (
                         <>
                           <span className="create-loading-spinner" />
-                          Publicando...
+                          {isEditing ? "Atualizando..." : "Publicando..."}
                         </>
                       ) : (
                         <>
@@ -5656,7 +5751,7 @@ Candidaturas: ${
                             name="send"
                             size={15}
                           />
-                          Publicar vaga
+                          {isEditing ? "Atualizar vaga" : "Publicar vaga"}
                         </>
                       )}
                     </button>
