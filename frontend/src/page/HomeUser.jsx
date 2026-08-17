@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import CandidateHeader from "../components/CandidateHeader";
 import Footer from "../components/Footer";
@@ -417,7 +417,7 @@ export default function HomeUser() {
     const avatarFallback = createInitialsAvatar(displayName);
 
     return (
-        <div style={styles.container}>
+        <div className="candidate-page candidate-dashboard" style={styles.container}>
             <style>{homeUserAnimationStyles}</style>
             <CandidateHeader />
             <header style={styles.header}>
@@ -462,14 +462,53 @@ export default function HomeUser() {
 
             <main style={styles.main}>
                 <div style={styles.welcomeBox}>
+                    <span className="candidate-eyebrow">Seu espaço profissional</span>
                     <h2 style={styles.welcomeTitle}>
-                        Encontre sua próxima oportunidade 🚀
+                        Encontre seu próximo movimento.
                     </h2>
 
                     <p style={styles.welcomeText}>
                         Explore vagas disponíveis nas áreas de tecnologia,
                         design, marketing e muito mais.
                     </p>
+                </div>
+
+                <section className="candidate-journey" aria-label="Resumo da sua jornada">
+                    <Link className="candidate-journey__card candidate-journey__card--yellow" to="/createResume">
+                        <span>Currículo</span>
+                        <strong>{curriculo ? "Pronto para evoluir" : "Comece por aqui"}</strong>
+                        <small>{curriculo ? "Revise seus dados e mantenha tudo atualizado." : "Crie sua apresentação profissional."}</small>
+                        <b>{curriculo ? "Editar currículo →" : "Criar currículo →"}</b>
+                    </Link>
+
+                    <Link className="candidate-journey__card candidate-journey__card--blue" to="/candidaturas">
+                        <span>Processos</span>
+                        <strong>{candidaturas.length} candidatura{candidaturas.length === 1 ? "" : "s"}</strong>
+                        <small>Acompanhe cada etapa dos processos seletivos.</small>
+                        <b>Ver andamento →</b>
+                    </Link>
+
+                    <Link className="candidate-journey__card candidate-journey__card--pink" to="/vagas-salvas">
+                        <span>Radar pessoal</span>
+                        <strong>{savedJobIds.size} vaga{savedJobIds.size === 1 ? "" : "s"} salva{savedJobIds.size === 1 ? "" : "s"}</strong>
+                        <small>Retome oportunidades que combinam com você.</small>
+                        <b>Abrir coleção →</b>
+                    </Link>
+
+                    <Link className="candidate-journey__card candidate-journey__card--lime" to="/perfil">
+                        <span>Conta</span>
+                        <strong>Dados e segurança</strong>
+                        <small>Confira contato, acesso e preferências da sua conta.</small>
+                        <b>Gerenciar perfil →</b>
+                    </Link>
+                </section>
+
+                <div className="candidate-section-heading">
+                    <div>
+                        <span className="candidate-eyebrow">Oportunidades abertas</span>
+                        <h2>Seu radar de vagas</h2>
+                    </div>
+                    <p>{vagas.length} oportunidade{vagas.length === 1 ? "" : "s"} carregada{vagas.length === 1 ? "" : "s"}</p>
                 </div>
 
                 {feedback && (

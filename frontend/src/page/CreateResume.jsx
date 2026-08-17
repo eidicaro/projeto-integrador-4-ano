@@ -15,6 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import Logo from "./../assets/logo-invertida.png";
+import CandidateHeader from "../components/CandidateHeader";
+import "../styles/candidate-pages.css";
 
 const STORAGE_KEY = "point:curriculo:rascunho";
 
@@ -925,6 +927,8 @@ export default function CreateResume() {
       <style>
         {resumeStyles}
       </style>
+
+      <CandidateHeader />
 
       <main
         ref={pageRef}
