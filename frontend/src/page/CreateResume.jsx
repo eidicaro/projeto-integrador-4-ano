@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps */
 import {
   useEffect,
   useMemo,
@@ -7,7 +8,7 @@ import {
 
 import {
   AnimatePresence,
-  motion,
+  motion, // eslint-disable-line no-unused-vars -- usado como namespace JSX
   useReducedMotion,
 } from "framer-motion";
 

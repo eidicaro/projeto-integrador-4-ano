@@ -8,48 +8,13 @@ import {
 
 import {
   AnimatePresence,
-  motion, // eslint-disable-line no-unused-vars -- usado como namespace JSX
   motion as Motion,
   useReducedMotion,
 } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 
-const CATEGORIES = [
-  "Todas",
-  "Desenvolvimento",
-  "Design",
-  "Dados",
-  "Produto",
-  "Qualidade",
-];
-
-const WORK_MODES = ["Todos", "Remoto", "Híbrido"];
-const EXPERIENCE_LEVELS = [
-  "Todos",
-  "Júnior",
-  "Pleno",
-  "Sênior",
-];
-
-const JOBS = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    company: "Point Tech",
-    companyInitials: "PT",
-    location: "São Paulo, SP",
-    type: "Remoto",
-    level: "Júnior",
-    category: "Desenvolvimento",
-    salary: "R$ 4.500 — R$ 6.500",
-    postedAt: "Há 2 horas",
-    match: 96,
-    applicants: 18,
-
-import bgVideo from "../assets/bg.mp4";
 import { useAuth } from "../context/AuthContext";
-import useBackgroundVideoEnabled from "../hooks/useBackgroundVideoEnabled";
 import useDialogFocus from "../hooks/useDialogFocus";
 import api, { getApiErrorMessage } from "../lib/api";
 import {
@@ -61,6 +26,21 @@ import {
 const ALL_CATEGORIES = "Todas";
 const FALLBACK_CATEGORY = "Outras oportunidades";
 const EMPTY_SAVED_JOBS = new Set();
+const WORK_MODES = ["Todos", "Remoto", "Híbrido"];
+const EXPERIENCE_LEVELS = ["Todos", "Júnior", "Pleno", "Sênior"];
+
+const FALLBACK_FEATURED_JOB = {
+  id: "featured-placeholder",
+  title: "Novas oportunidades",
+  company: "Point",
+  location: "Confira o radar de vagas",
+  type: "Em atualização",
+  match: 0,
+  salary: "A consultar",
+  accent: "#ff4f8b",
+  softAccent: "#ffd5e4",
+  symbol: "✦",
+};
 
 const JOB_PALETTES = [
   { accent: "#ff4f8b", softAccent: "#ffd5e4" },
@@ -460,7 +440,6 @@ export default function Home() {
   const navigate = useNavigate();
   const { loading: authLoading, user } = useAuth();
   const reduceMotion = useReducedMotion();
-  const backgroundVideoEnabled = useBackgroundVideoEnabled();
   const isCandidate =
     String(user?.role || "").toLocaleLowerCase("pt-BR") ===
     "candidato";
@@ -481,6 +460,9 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState(
     ALL_CATEGORIES,
   );
+  const [workMode, setWorkMode] = useState("Todos");
+  const [experienceLevel, setExperienceLevel] = useState("Todos");
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [sortBy, setSortBy] = useState("recent");
   const [jobs, setJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -511,6 +493,8 @@ export default function Home() {
     : user
       ? EMPTY_SAVED_JOBS
       : guestSavedJobs;
+  const featuredJob = jobs[0] ?? FALLBACK_FEATURED_JOB;
+  const FEATURED_JOB = featuredJob;
 
   const showToast = useCallback((message) => {
     setToast(message);
@@ -647,6 +631,12 @@ export default function Home() {
         !normalizedSearch ||
         searchableContent.includes(normalizedSearch);
 
+      const matchesWorkMode =
+        workMode === "Todos" || job.type === workMode;
+      const matchesExperienceLevel =
+        experienceLevel === "Todos" || job.level === experienceLevel;
+      const matchesSaved = !showSavedOnly || savedJobs.has(job.id);
+
       return (
         matchesCategory &&
         matchesWorkMode &&
@@ -677,7 +667,16 @@ export default function Home() {
 
       return b.publishedTimestamp - a.publishedTimestamp;
     });
-  }, [jobs, search, selectedCategory, sortBy]);
+  }, [
+    experienceLevel,
+    jobs,
+    savedJobs,
+    search,
+    selectedCategory,
+    showSavedOnly,
+    sortBy,
+    workMode,
+  ]);
 
   const filteredCommands = useMemo(() => {
     const normalized = commandQuery.trim().toLowerCase();
@@ -1060,14 +1059,6 @@ export default function Home() {
     });
   }
 
-  function resetJobFilters() {
-    setSearch("");
-    setActiveCategory("Todas");
-    setWorkMode("Todos");
-    setExperienceLevel("Todos");
-    setShowSavedOnly(false);
-  }
-
   function viewSavedJobs() {
     setShowSavedOnly(true);
     window.setTimeout(scrollToJobs, 50);
@@ -1077,15 +1068,6 @@ export default function Home() {
     event.preventDefault();
     setShowSavedOnly(false);
     scrollToJobs();
-  }
-
-  function exploreCategory(category) {
-    setSearch("");
-    setActiveCategory(category);
-    setWorkMode("Todos");
-    setExperienceLevel("Todos");
-    setShowSavedOnly(false);
-    window.setTimeout(scrollToJobs, 50);
   }
 
   function handleShortcut(action) {
@@ -1645,19 +1627,28 @@ export default function Home() {
                 />
               </svg>
 
-              <div className="map-video-card">
-                {backgroundVideoEnabled && (
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="metadata"
-                    aria-hidden="true"
-                  >
-                    <source src={bgVideo} type="video/mp4" />
-                  </video>
-                )}
+              <button
+                type="button"
+                className="map-feature-card"
+                style={{
+                  "--feature-accent": FEATURED_JOB.accent,
+                  "--feature-soft-accent": FEATURED_JOB.softAccent,
+                }}
+                onClick={() => jobs[0] && openJob(jobs[0])}
+                disabled={!jobs[0]}
+                aria-label={`Ver vaga em destaque: ${FEATURED_JOB.title}`}
+              >
+                <span
+                  className="map-feature-pattern"
+                  aria-hidden="true"
+                />
+
+                <span
+                  className="map-feature-symbol"
+                  aria-hidden="true"
+                >
+                  {FEATURED_JOB.symbol}
+                </span>
 
                 <span className="map-feature-live">
                   <i />
@@ -2959,6 +2950,36 @@ function CommandPalette({
   const dialogRootRef = useRef(null);
   const paletteRef = useRef(null);
   const inputRef = useRef(null);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const safeHighlightedIndex = Math.min(
+    highlightedIndex,
+    Math.max(commands.length - 1, 0),
+  );
+  const highlightedCommand = commands[safeHighlightedIndex];
+
+  function handleCommandKeyDown(event) {
+    if (commands.length === 0) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setHighlightedIndex(
+        (current) => (current + 1) % commands.length,
+      );
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setHighlightedIndex(
+        (current) =>
+          (current - 1 + commands.length) % commands.length,
+      );
+    }
+
+    if (event.key === "Enter" && highlightedCommand) {
+      event.preventDefault();
+      onExecute(highlightedCommand.id);
+    }
+  }
 
   useDialogFocus({
     active: true,
@@ -3325,7 +3346,6 @@ function MapNode({
   detail,
   accent,
   icon,
-  onClick,
 }) {
   return (
     <Motion.div
