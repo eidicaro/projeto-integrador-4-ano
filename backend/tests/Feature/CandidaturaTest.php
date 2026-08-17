@@ -7,6 +7,8 @@ use App\Enums\VagaStatus;
 use App\Models\Candidatura;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -25,6 +27,43 @@ class CandidaturaTest extends TestCase
             ->assertJsonPath('message', 'Crie seu currículo antes de se candidatar.');
 
         $this->assertDatabaseCount('candidaturas', 0);
+    }
+
+    public function test_candidate_can_apply_with_a_private_pdf_instead_of_online_resume(): void
+    {
+        Storage::fake('local');
+        $candidate = $this->candidate();
+        $job = $this->vaga($this->recruiter());
+        Sanctum::actingAs($candidate, ['candidate']);
+
+        $response = $this->post("/api/vagas/{$job->id}/candidaturas", [
+            'curriculo_origem' => 'arquivo',
+            'curriculo_arquivo' => UploadedFile::fake()->create('curriculo.pdf', 180, 'application/pdf'),
+        ], ['Accept' => 'application/json']);
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath('data.resumeId', null)
+            ->assertJsonPath('data.resumeSource', 'arquivo');
+
+        $application = Candidatura::firstOrFail();
+        $this->assertNull($application->curriculo_id);
+        Storage::disk('local')->assertExists($application->curriculo_arquivo);
+    }
+
+    public function test_uploaded_resume_must_be_a_pdf(): void
+    {
+        Storage::fake('local');
+        $candidate = $this->candidate();
+        $job = $this->vaga($this->recruiter());
+        Sanctum::actingAs($candidate, ['candidate']);
+
+        $this->post("/api/vagas/{$job->id}/candidaturas", [
+            'curriculo_origem' => 'arquivo',
+            'curriculo_arquivo' => UploadedFile::fake()->create('curriculo.txt', 10, 'text/plain'),
+        ], ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('curriculo_arquivo');
     }
 
     public function test_candidate_cannot_apply_to_paused_archived_or_expired_job(): void

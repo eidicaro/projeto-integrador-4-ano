@@ -18,6 +18,10 @@ class CandidaturaResource extends JsonResource
             'jobId' => $this->vaga_id,
             'resumeId' => $this->curriculo_id,
             'resumeSnapshot' => $this->curriculo_snapshot,
+            'resumeSource' => $this->curriculo_origem ?? 'online',
+            'resumeFileUrl' => $this->curriculo_arquivo
+                ? url("/api/candidaturas/{$this->id}/curriculo-arquivo")
+                : null,
             'name' => $this->nome_candidato,
             'email' => $this->email_candidato,
             'phone' => $this->telefone_candidato,

@@ -269,8 +269,8 @@ export default function HomeUser() {
         });
     }
 
-    async function handleApply(vaga) {
-        if (!curriculo?.id) {
+    async function handleApply(vaga, resumeChoice = { source: "online" }) {
+        if (resumeChoice.source === "online" && !curriculo?.id) {
             closeJob();
             goToResume(vaga.id);
             return;
@@ -287,8 +287,16 @@ export default function HomeUser() {
         setApplyError("");
 
         try {
+            const formData = new FormData();
+            formData.append("curriculo_origem", resumeChoice.source);
+            if (resumeChoice.source === "online") {
+                formData.append("curriculo_id", curriculo.id);
+            } else if (resumeChoice.file) {
+                formData.append("curriculo_arquivo", resumeChoice.file);
+            }
             const response = await api.post(
                 `/vagas/${encodeURIComponent(vaga.id)}/candidaturas`,
+                formData,
             );
             const responseApplication = unwrapApiData(response);
             const application =
@@ -731,6 +739,7 @@ export default function HomeUser() {
                     }
                     saved={selectedJobSaved}
                     saveError={saveError}
+                    hasOnlineResume={Boolean(curriculo?.id)}
                 />
             </main>
 

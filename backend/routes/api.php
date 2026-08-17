@@ -35,6 +35,7 @@ Route::middleware('throttle:api')->group(function (): void {
             Route::get('/curriculos/{curriculo}/foto', [CurriculoController::class, 'foto']);
             Route::post('/curriculos/{curriculo}/foto', [CurriculoController::class, 'uploadFoto'])->middleware('role:candidato');
             Route::delete('/curriculos/{curriculo}/foto', [CurriculoController::class, 'destroyFoto'])->middleware('role:candidato');
+            Route::get('/candidaturas/{candidatura}/curriculo-arquivo', [CandidaturaController::class, 'resumeFile']);
 
             Route::middleware('role:candidato')->group(function (): void {
                 Route::get('/vagas-salvas', [VagaSalvaController::class, 'index']);

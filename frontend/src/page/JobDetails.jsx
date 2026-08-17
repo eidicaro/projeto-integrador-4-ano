@@ -55,6 +55,8 @@ export default function JobDetails() {
   const [applying, setApplying] = useState(false);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [resumeSource, setResumeSource] = useState("online");
+  const [resumeFile, setResumeFile] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -150,7 +152,7 @@ export default function JobDetails() {
   async function handleApply() {
     if (!requireCandidate() || applying || applied || candidateBusy) return;
 
-    if (!resume?.id) {
+    if (resumeSource === "online" && !resume?.id) {
       navigate("/createResume", {
         state: {
           redirectTo: `/vagas/${id}`,
@@ -165,7 +167,11 @@ export default function JobDetails() {
     setFeedback("");
 
     try {
-      await api.post(`/vagas/${encodeURIComponent(id)}/candidaturas`);
+      const formData = new FormData();
+      formData.append("curriculo_origem", resumeSource);
+      if (resumeSource === "online") formData.append("curriculo_id", resume.id);
+      if (resumeSource === "arquivo" && resumeFile) formData.append("curriculo_arquivo", resumeFile);
+      await api.post(`/vagas/${encodeURIComponent(id)}/candidaturas`, formData);
       setApplied(true);
       setFeedback("Candidatura enviada com sucesso.");
     } catch (requestError) {
@@ -238,7 +244,13 @@ export default function JobDetails() {
                   className="candidate-button"
                   type="button"
                   onClick={handleApply}
-                  disabled={applying || applied || candidateBusy || job.isOpen === false}
+                  disabled={
+                    applying ||
+                    applied ||
+                    candidateBusy ||
+                    job.isOpen === false ||
+                    (resumeSource === "arquivo" && !resumeFile)
+                  }
                 >
                   {applying
                     ? "Enviando…"
@@ -256,6 +268,41 @@ export default function JobDetails() {
               <div className="candidate-alert candidate-alert--success" role="status">
                 {feedback}
               </div>
+            )}
+
+            {user?.role === "candidato" && !applied && (
+              <section className="candidate-panel job-resume-choice">
+                <div>
+                  <span className="candidate-eyebrow">Documento da candidatura</span>
+                  <h2>Escolha seu currículo</h2>
+                </div>
+                <label>
+                  <input
+                    type="radio"
+                    name="detail-resume-source"
+                    checked={resumeSource === "online"}
+                    disabled={!resume?.id}
+                    onChange={() => setResumeSource("online")}
+                  />
+                  Usar meu currículo online
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="detail-resume-source"
+                    checked={resumeSource === "arquivo"}
+                    onChange={() => setResumeSource("arquivo")}
+                  />
+                  Enviar meu próprio PDF
+                </label>
+                {resumeSource === "arquivo" && (
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={(event) => setResumeFile(event.target.files?.[0] || null)}
+                  />
+                )}
+              </section>
             )}
 
             <section className="job-detail__facts" aria-label="Resumo da vaga">

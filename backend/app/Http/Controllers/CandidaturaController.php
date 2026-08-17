@@ -16,8 +16,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CandidaturaController extends Controller
 {
@@ -32,6 +34,7 @@ class CandidaturaController extends Controller
             ], Response::HTTP_CONFLICT);
         }
 
+        $source = $data['curriculo_origem'] ?? 'online';
         $curriculo = $request->user()->curriculo()->with([
             'habilidades',
             'experiencias',
@@ -39,31 +42,37 @@ class CandidaturaController extends Controller
             'cursos',
             'idiomas',
         ])->first();
-        if (! $curriculo) {
+        if ($source === 'online' && ! $curriculo) {
             return response()->json([
                 'message' => 'Crie seu currículo antes de se candidatar.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if (isset($data['curriculo_id']) && (int) $data['curriculo_id'] !== $curriculo->id) {
+        if ($source === 'online' && isset($data['curriculo_id']) && (int) $data['curriculo_id'] !== $curriculo->id) {
             return response()->json([
                 'message' => 'O currículo informado não pertence ao usuário autenticado.',
             ], Response::HTTP_FORBIDDEN);
         }
 
         try {
-            $candidatura = DB::transaction(function () use ($request, $vaga, $curriculo): Candidatura {
+            $resumePath = $source === 'arquivo'
+                ? $request->file('curriculo_arquivo')->store('candidaturas/curriculos', 'local')
+                : null;
+
+            $candidatura = DB::transaction(function () use ($request, $vaga, $curriculo, $source, $resumePath): Candidatura {
                 $candidatura = Candidatura::create([
                     'user_id' => $request->user()->id,
                     'vaga_id' => $vaga->id,
-                    'curriculo_id' => $curriculo->id,
-                    'curriculo_snapshot' => $this->resumeSnapshot($curriculo),
-                    'nome_candidato' => $curriculo->nome_completo ?: $request->user()->name,
-                    'email_candidato' => $curriculo->email ?: $request->user()->email,
-                    'telefone_candidato' => $curriculo->telefone ?: $request->user()->telefone,
-                    'localizacao_candidato' => $curriculo->cidade_estado,
-                    'experiencia_resumo' => $curriculo->area_atuacao,
-                    'habilidades' => $curriculo->habilidades->pluck('nome')->values()->all(),
+                    'curriculo_id' => $source === 'online' ? $curriculo?->id : null,
+                    'curriculo_snapshot' => $source === 'online' ? $this->resumeSnapshot($curriculo) : null,
+                    'curriculo_arquivo' => $resumePath,
+                    'curriculo_origem' => $source,
+                    'nome_candidato' => $curriculo?->nome_completo ?: $request->user()->name,
+                    'email_candidato' => $curriculo?->email ?: $request->user()->email,
+                    'telefone_candidato' => $curriculo?->telefone ?: $request->user()->telefone,
+                    'localizacao_candidato' => $curriculo?->cidade_estado,
+                    'experiencia_resumo' => $curriculo?->area_atuacao,
+                    'habilidades' => $curriculo?->habilidades->pluck('nome')->values()->all() ?? [],
                     'status' => CandidaturaStatus::New,
                     'origem' => 'plataforma',
                     'status_atualizado_em' => now(),
@@ -82,6 +91,24 @@ class CandidaturaController extends Controller
             'message' => 'Candidatura enviada com sucesso.',
             'data' => new CandidaturaResource($candidatura->load(['vaga', 'curriculo.habilidades', 'user'])),
         ], Response::HTTP_CREATED);
+    }
+
+    public function resumeFile(Request $request, Candidatura $candidatura): StreamedResponse
+    {
+        $candidatura->load('vaga');
+        $this->authorize('view', $candidatura);
+
+        abort_unless(
+            $candidatura->curriculo_arquivo
+                && Storage::disk('local')->exists($candidatura->curriculo_arquivo),
+            Response::HTTP_NOT_FOUND,
+        );
+
+        return Storage::disk('local')->download(
+            $candidatura->curriculo_arquivo,
+            'curriculo-'.$candidatura->id.'.pdf',
+            ['Content-Type' => 'application/pdf', 'X-Content-Type-Options' => 'nosniff'],
+        );
     }
 
     public function minhas(Request $request)

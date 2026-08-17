@@ -18,6 +18,8 @@ class Candidatura extends Model
         'vaga_id',
         'curriculo_id',
         'curriculo_snapshot',
+        'curriculo_arquivo',
+        'curriculo_origem',
         'nome_candidato',
         'email_candidato',
         'telefone_candidato',

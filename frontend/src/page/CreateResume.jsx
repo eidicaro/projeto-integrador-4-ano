@@ -16,9 +16,75 @@ import { useNavigate } from "react-router-dom";
 
 import Logo from "./../assets/logo-invertida.png";
 import CandidateHeader from "../components/CandidateHeader";
+import api, { getApiErrorMessage } from "../lib/api";
+import { unwrapApiData } from "../lib/candidate";
 import "../styles/candidate-pages.css";
 
 const STORAGE_KEY = "point:curriculo:rascunho";
+
+function onlyComplete(items, fields) {
+  return items
+    .filter((item) => fields.every((field) => String(item[field] || "").trim()))
+    .map((item) => {
+      const sanitized = { ...item };
+      delete sanitized.id;
+      return sanitized;
+    });
+}
+
+function toApiPayload(data) {
+  const periodo = (item) => [item.inicio, item.fim || (item.atual ? "Atual" : "")]
+    .filter(Boolean)
+    .join(" — ");
+
+  return {
+    nome_completo: data.pessoal.nome.trim(),
+    area_atuacao: data.pessoal.area.trim() || null,
+    telefone: data.pessoal.telefone.trim() || null,
+    email: data.pessoal.email.trim() || null,
+    cidade_estado: data.pessoal.cidade.trim() || null,
+    links: [data.pessoal.linkedin, data.pessoal.github, data.pessoal.portfolio]
+      .map((value) => value.trim())
+      .filter(Boolean),
+    resumo: data.resumo.trim() || null,
+    experiencias: onlyComplete(data.experiencias, ["cargo", "empresa", "inicio"])
+      .map((item) => ({ cargo: item.cargo, empresa: item.empresa, periodo: periodo(item), descricao: item.descricao || null })),
+    formacoes: onlyComplete(data.formacoes, ["curso", "instituicao", "inicio"])
+      .map((item) => ({ curso: item.curso, instituicao: item.instituicao, periodo: periodo(item) })),
+    cursos: onlyComplete(data.cursos, ["nome", "instituicao", "ano"])
+      .map((item) => ({ nome: item.nome, instituicao: item.instituicao, periodo: [item.ano, item.carga].filter(Boolean).join(" · ") })),
+    habilidades: data.habilidades.map((nome) => ({ nome })),
+    idiomas: onlyComplete(data.idiomas, ["idioma", "nivel"])
+      .map((item) => ({ idioma: item.idioma, nivel: item.nivel })),
+  };
+}
+
+function fromApiResume(resume) {
+  const links = Array.isArray(resume.links) ? resume.links : [];
+  const experiencias = (resume.experiencias || []).map((item) => ({ ...item, id: criarId(), inicio: item.periodo || "", fim: "", atual: false }));
+  const formacoes = (resume.formacoes || []).map((item) => ({ ...item, id: criarId(), inicio: item.periodo || "", fim: "" }));
+  const cursos = (resume.cursos || []).map((item) => ({ ...item, id: criarId(), ano: item.periodo || "", carga: "" }));
+  const idiomas = (resume.idiomas || []).map((item) => ({ ...item, id: criarId() }));
+
+  return {
+    pessoal: {
+      nome: resume.nome_completo || "",
+      telefone: resume.telefone || "",
+      cidade: resume.cidade_estado || "",
+      area: resume.area_atuacao || "",
+      email: resume.email || "",
+      linkedin: links.find((link) => link.includes("linkedin")) || "",
+      github: links.find((link) => link.includes("github")) || "",
+      portfolio: links.find((link) => !link.includes("linkedin") && !link.includes("github")) || "",
+    },
+    resumo: resume.resumo || "",
+    experiencias: experiencias.length ? experiencias : INITIAL_DATA.experiencias,
+    formacoes: formacoes.length ? formacoes : INITIAL_DATA.formacoes,
+    cursos: cursos.length ? cursos : INITIAL_DATA.cursos,
+    habilidades: (resume.habilidades || []).map((item) => item.nome).filter(Boolean),
+    idiomas: idiomas.length ? idiomas : INITIAL_DATA.idiomas,
+  };
+}
 
 const NIVEL_IDIOMA = [
   "Básico",
@@ -138,6 +204,7 @@ export default function CreateResume() {
   const navigationRef = useRef(null);
 
   const [data, setData] = useState(INITIAL_DATA);
+  const [onlineResumeId, setOnlineResumeId] = useState(null);
 
   const [foto, setFoto] = useState("");
   const [skillInput, setSkillInput] = useState("");
@@ -181,31 +248,42 @@ export default function CreateResume() {
   ===================================== */
 
   useEffect(() => {
-    try {
-      const draft =
-        localStorage.getItem(STORAGE_KEY);
+    let active = true;
 
-      if (!draft) return;
+    api.get("/curriculos/me")
+      .then((response) => {
+        if (!active) return;
+        const resume = unwrapApiData(response);
 
-      const parsed = JSON.parse(draft);
-
-      if (parsed?.data) {
-        setData(parsed.data);
-
-        if (parsed.foto) {
-          setFoto(parsed.foto);
+        if (resume?.id) {
+          setOnlineResumeId(resume.id);
+          setData(fromApiResume(resume));
+          setFoto(resume.foto || "");
+          showToast("Seu currículo online foi carregado.");
+          return;
         }
 
-        showToast(
-          "Seu último rascunho foi recuperado.",
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Erro ao recuperar currículo:",
-        error,
-      );
-    }
+        const draft = localStorage.getItem(STORAGE_KEY);
+        if (!draft) return;
+        const parsed = JSON.parse(draft);
+        if (parsed?.data) setData(parsed.data);
+        if (parsed?.foto) setFoto(parsed.foto);
+        showToast("Seu último rascunho local foi recuperado.");
+      })
+      .catch((error) => {
+        console.error("Erro ao recuperar currículo:", error);
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (active && parsed?.data) setData(parsed.data);
+          if (active && parsed?.foto) setFoto(parsed.foto);
+        } catch (parseError) {
+          console.error("Erro ao recuperar rascunho local:", parseError);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   /* =====================================
@@ -629,12 +707,25 @@ export default function CreateResume() {
     }
   }
 
-  function salvarRascunho() {
+  async function salvarRascunho() {
     salvarRascunhoSilencioso();
+    setSavedState("saving");
 
-    showToast(
-      "Rascunho salvo com sucesso.",
-    );
+    try {
+      const payload = toApiPayload(data);
+      const response = onlineResumeId
+        ? await api.put(`/curriculos/${onlineResumeId}`, payload)
+        : await api.post("/curriculos", payload);
+      const savedResume = unwrapApiData(response);
+      setOnlineResumeId(savedResume?.id || onlineResumeId);
+      setSavedState("saved");
+      showToast("Currículo salvo na sua conta.");
+      return savedResume;
+    } catch (error) {
+      setSavedState("error");
+      showToast(getApiErrorMessage(error, "Não foi possível salvar o currículo online."));
+      return null;
+    }
   }
 
   /* =====================================
@@ -793,24 +884,29 @@ export default function CreateResume() {
     return true;
   }
 
-  function finalizarCurriculo() {
+  async function finalizarCurriculo() {
     if (!validarCurriculo()) {
       return;
     }
 
-    salvarRascunhoSilencioso();
-
-    showToast(
-      "Currículo pronto para exportar!",
-    );
+    try {
+      await salvarRascunho();
+      showToast("Currículo online pronto para candidaturas.");
+    } catch {
+      // A mensagem de erro já foi apresentada por salvarRascunho.
+    }
   }
 
-  function imprimirCurriculo() {
+  async function imprimirCurriculo() {
     if (!validarCurriculo()) {
       return;
     }
 
-    salvarRascunhoSilencioso();
+    try {
+      await salvarRascunho();
+    } catch {
+      return;
+    }
 
     window.setTimeout(() => {
       window.print();
@@ -7094,6 +7190,12 @@ input:checked + span svg {
 /* PRINT */
 
 @media print {
+  .resume-preview-column,
+  .preview-sticky {
+    display: block !important;
+    position: static !important;
+  }
+
   body * {
     visibility:
       hidden !important;

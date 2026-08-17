@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 function asParagraph(value) {
     if (Array.isArray(value)) {
@@ -37,11 +37,14 @@ export default function JobModal({
     saving = false,
     saved = false,
     saveError = "",
+    hasOnlineResume = false,
 }) {
     const modalRef = useRef(null);
     const closeButtonRef = useRef(null);
     const titleId = useId();
     const descriptionId = useId();
+    const [resumeSource, setResumeSource] = useState(hasOnlineResume ? "online" : "arquivo");
+    const [resumeFile, setResumeFile] = useState(null);
 
     useEffect(() => {
         if (!aberto) return undefined;
@@ -112,7 +115,9 @@ export default function JobModal({
         saving ||
         applied ||
         isUnavailable ||
-        typeof onApply !== "function";
+        typeof onApply !== "function" ||
+        (resumeSource === "online" && !hasOnlineResume) ||
+        (resumeSource === "arquivo" && !resumeFile);
     const applyLabel = applying
         ? "Enviando currículo..."
         : applied
@@ -222,6 +227,41 @@ export default function JobModal({
                             </p>
                         )}
 
+                        {!applied && (
+                            <fieldset style={styles.resumePicker}>
+                                <legend style={styles.resumePickerLegend}>Qual currículo deseja enviar?</legend>
+                                <label style={styles.resumeOption}>
+                                    <input
+                                        type="radio"
+                                        name="resume-source"
+                                        value="online"
+                                        checked={resumeSource === "online"}
+                                        disabled={!hasOnlineResume}
+                                        onChange={() => setResumeSource("online")}
+                                    />
+                                    <span><strong>Currículo da Point</strong><small>{hasOnlineResume ? "Usar a versão online salva na sua conta." : "Crie e salve seu currículo online para habilitar."}</small></span>
+                                </label>
+                                <label style={styles.resumeOption}>
+                                    <input
+                                        type="radio"
+                                        name="resume-source"
+                                        value="arquivo"
+                                        checked={resumeSource === "arquivo"}
+                                        onChange={() => setResumeSource("arquivo")}
+                                    />
+                                    <span><strong>Enviar meu próprio PDF</strong><small>Arquivo PDF privado de até 5 MB.</small></span>
+                                </label>
+                                {resumeSource === "arquivo" && (
+                                    <input
+                                        type="file"
+                                        accept="application/pdf,.pdf"
+                                        style={styles.resumeFile}
+                                        onChange={(event) => setResumeFile(event.target.files?.[0] || null)}
+                                    />
+                                )}
+                            </fieldset>
+                        )}
+
                         <div style={styles.footerActions}>
                             <button
                                 type="button"
@@ -251,7 +291,7 @@ export default function JobModal({
                                 }}
                                 disabled={applyDisabled}
                                 aria-busy={applying}
-                                onClick={() => onApply(vaga)}
+                                onClick={() => onApply(vaga, { source: resumeSource, file: resumeFile })}
                                 onMouseEnter={(event) => {
                                     if (applyDisabled) return;
                                     event.currentTarget.style.transform =
@@ -442,6 +482,19 @@ const styles = {
         gap: "12px",
         flexWrap: "wrap",
     },
+    resumePicker: {
+        width: "100%",
+        maxWidth: "620px",
+        display: "grid",
+        gap: "10px",
+        padding: "18px",
+        border: "2px solid #141622",
+        borderRadius: "18px",
+        background: "#fffdf8",
+    },
+    resumePickerLegend: { padding: "0 8px", fontWeight: "900" },
+    resumeOption: { display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" },
+    resumeFile: { width: "100%", padding: "12px", border: "1px dashed #9183ff", borderRadius: "12px", background: "#f5f3ff" },
     saveButton: {
         width: "100%",
         maxWidth: "220px",
