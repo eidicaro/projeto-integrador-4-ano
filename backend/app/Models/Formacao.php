@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Formacao extends Model
 {
     protected $table = 'formacoes';
+
     protected $fillable = [
-        'curriculo_id',
         'curso',
         'instituicao',
-        'periodo'
+        'periodo',
     ];
-    
+
     public function curriculo()
     {
         return $this->belongsTo(Curriculo::class);

@@ -1,18 +1,15 @@
-# React + Vite
+# Frontend Point Media Talentos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Cliente React/Vite integrado à API Laravel. Consulte o [README principal](../README.md) para instalar o projeto completo.
 
-Currently, two official plugins are available:
+```powershell
+npm ci
+Copy-Item .env.example .env
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+`VITE_API_URL` deve apontar para a origem do Laravel, sem o sufixo `/api` (por exemplo, `http://localhost:8000`).
 
-## React Compiler
+O cliente usa sessão Sanctum/CSRF com cookies; mantenha frontend e backend usando hosts compatíveis (`localhost` com `localhost`, por exemplo). As páginas são carregadas sob demanda por rota.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Em produção, defina `VITE_API_URL` antes do build e configure fallback SPA para `index.html`. O diretório `public` já fornece `_redirects` para plataformas compatíveis; no Nginx, use `try_files $uri $uri/ /index.html;`.

@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('candidaturas', function (Blueprint $table) {
             $table->id();
-        
+
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('vaga_id')->constrained()->onDelete('cascade');
             $table->foreignId('curriculo_id')->constrained()->onDelete('cascade');
-        
+
             $table->string('status')->default('pendente');
-        
+
             $table->timestamps();
         });
     }

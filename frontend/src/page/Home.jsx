@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -8,6 +9,7 @@ import {
 import {
   AnimatePresence,
   motion, // eslint-disable-line no-unused-vars -- usado como namespace JSX
+  motion as Motion,
   useReducedMotion,
 } from "framer-motion";
 
@@ -44,192 +46,327 @@ const JOBS = [
     postedAt: "Há 2 horas",
     match: 96,
     applicants: 18,
-    accent: "#ff4f8b",
-    softAccent: "#ffd5e4",
-    symbol: "</>",
-    featured: true,
-    isNew: true,
-    description:
-      "Faça parte de um time que cria experiências digitais rápidas, acessíveis e visualmente marcantes para milhares de pessoas.",
-    requirements: [
-      "React e JavaScript moderno",
-      "HTML semântico e CSS responsivo",
-      "Consumo de APIs REST",
-      "Git e trabalho colaborativo",
-    ],
-    skills: ["React", "JavaScript", "CSS", "REST API"],
-  },
-  {
-    id: 2,
-    title: "Product Designer",
-    company: "Creative Studio",
-    companyInitials: "CS",
-    location: "Campinas, SP",
-    type: "Híbrido",
-    level: "Pleno",
-    category: "Design",
-    salary: "R$ 6.000 — R$ 8.500",
-    postedAt: "Hoje",
-    match: 91,
-    applicants: 27,
-    accent: "#9183ff",
-    softAccent: "#ddd8ff",
-    symbol: "✦",
-    featured: true,
-    isNew: true,
-    description:
-      "Transforme problemas complexos em jornadas simples, bonitas e funcionais, trabalhando ao lado de produto e tecnologia.",
-    requirements: [
-      "Figma e prototipação",
-      "Pesquisa com usuários",
-      "Design systems",
-      "Comunicação e documentação",
-    ],
-    skills: ["Figma", "UX Research", "UI", "Design System"],
-  },
-  {
-    id: 3,
-    title: "Backend Developer",
-    company: "Cloud System",
-    companyInitials: "CL",
-    location: "Curitiba, PR",
-    type: "Remoto",
-    level: "Pleno",
-    category: "Desenvolvimento",
-    salary: "R$ 7.000 — R$ 10.000",
-    postedAt: "Há 1 dia",
-    match: 88,
-    applicants: 34,
-    accent: "#64c7ee",
-    softAccent: "#d5f3ff",
-    symbol: "{ }",
-    featured: false,
-    isNew: false,
-    description:
-      "Construa serviços escaláveis, APIs seguras e integrações críticas para uma plataforma em crescimento acelerado.",
-    requirements: [
-      "Node.js ou NestJS",
-      "PostgreSQL",
-      "APIs REST",
-      "Testes automatizados",
-    ],
-    skills: ["Node.js", "PostgreSQL", "Docker", "Redis"],
-  },
-  {
-    id: 4,
-    title: "Analista de Dados",
-    company: "Data Bloom",
-    companyInitials: "DB",
-    location: "Belo Horizonte, MG",
-    type: "Híbrido",
-    level: "Júnior",
-    category: "Dados",
-    salary: "R$ 4.000 — R$ 5.800",
-    postedAt: "Há 1 dia",
-    match: 84,
-    applicants: 22,
-    accent: "#baf26d",
-    softAccent: "#e6ffc4",
-    symbol: "↗",
-    featured: false,
-    isNew: true,
-    description:
-      "Transforme dados em histórias claras e decisões melhores por meio de análises, dashboards e indicadores.",
-    requirements: [
-      "SQL",
-      "Excel ou Google Sheets",
-      "Power BI ou ferramenta similar",
-      "Raciocínio analítico",
-    ],
-    skills: ["SQL", "Power BI", "Excel", "Python"],
-  },
-  {
-    id: 5,
-    title: "Product Manager",
-    company: "Next Wave",
-    companyInitials: "NW",
-    location: "Rio de Janeiro, RJ",
-    type: "Remoto",
-    level: "Sênior",
-    category: "Produto",
-    salary: "R$ 11.000 — R$ 15.000",
-    postedAt: "Há 2 dias",
-    match: 79,
-    applicants: 41,
-    accent: "#ffd447",
-    softAccent: "#fff2b3",
-    symbol: "◎",
-    featured: false,
-    isNew: false,
-    description:
-      "Lidere a evolução de produtos digitais, conectando estratégia, experiência do usuário e execução técnica.",
-    requirements: [
-      "Discovery de produto",
-      "Priorização e roadmap",
-      "Análise de métricas",
-      "Liderança multidisciplinar",
-    ],
-    skills: ["Produto", "Discovery", "Métricas", "Roadmap"],
-  },
-  {
-    id: 6,
-    title: "QA Engineer",
-    company: "Reliable Apps",
-    companyInitials: "RA",
-    location: "Florianópolis, SC",
-    type: "Remoto",
-    level: "Pleno",
-    category: "Qualidade",
-    salary: "R$ 6.000 — R$ 8.000",
-    postedAt: "Há 3 dias",
-    match: 76,
-    applicants: 16,
-    accent: "#ff9466",
-    softAccent: "#ffe0d2",
-    symbol: "✓",
-    featured: false,
-    isNew: false,
-    description:
-      "Eleve a confiabilidade de produtos digitais por meio de estratégias de qualidade, automação e testes bem planejados.",
-    requirements: [
-      "Testes manuais e automatizados",
-      "Cypress ou Playwright",
-      "Documentação de cenários",
-      "Integração contínua",
-    ],
-    skills: ["Cypress", "Playwright", "CI/CD", "Testes"],
-  },
+
+import bgVideo from "../assets/bg.mp4";
+import { useAuth } from "../context/AuthContext";
+import useBackgroundVideoEnabled from "../hooks/useBackgroundVideoEnabled";
+import useDialogFocus from "../hooks/useDialogFocus";
+import api, { getApiErrorMessage } from "../lib/api";
+import {
+  collectPaginatedItems,
+  mergeUniqueById,
+  readPaginatedResponse,
+} from "../lib/pagination";
+
+const ALL_CATEGORIES = "Todas";
+const FALLBACK_CATEGORY = "Outras oportunidades";
+const EMPTY_SAVED_JOBS = new Set();
+
+const JOB_PALETTES = [
+  { accent: "#ff4f8b", softAccent: "#ffd5e4" },
+  { accent: "#9183ff", softAccent: "#ddd8ff" },
+  { accent: "#64c7ee", softAccent: "#d5f3ff" },
+  { accent: "#baf26d", softAccent: "#e6ffc4" },
+  { accent: "#ffd447", softAccent: "#fff2b3" },
+  { accent: "#ff9466", softAccent: "#ffe0d2" },
 ];
 
-const FEATURED_JOB =
-  JOBS.find((job) => job.featured) ?? JOBS[0];
-
-const ACTIVITIES = [
+const MAP_NODE_SLOTS = [
   {
-    title: "Nova vaga publicada",
-    detail: "Frontend Developer · Point Tech",
-    time: "Agora",
+    className: "map-node--development",
+    accent: "#ff4f8b",
     icon: "briefcase",
   },
   {
-    title: "Talento contratado",
-    detail: "Uma nova jornada começou em Campinas",
-    time: "Há 4 min",
+    className: "map-node--design",
+    accent: "#9183ff",
     icon: "sparkles",
   },
   {
-    title: "Empresa verificada",
-    detail: "Creative Studio entrou para a plataforma",
-    time: "Há 12 min",
-    icon: "shield",
+    className: "map-node--data",
+    accent: "#64c7ee",
+    icon: "search",
   },
   {
-    title: "Novo match realizado",
-    detail: "Perfil e oportunidade com 96% de compatibilidade",
-    time: "Há 18 min",
+    className: "map-node--product",
+    accent: "#baf26d",
     icon: "target",
   },
 ];
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  maximumFractionDigits: 0,
+});
+
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
+function cleanText(value, fallback = "") {
+  return typeof value === "string" && value.trim()
+    ? value.trim()
+    : fallback;
+}
+
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizeList(value) {
+  const entries = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/\r?\n|[;•]/)
+      : [];
+
+  return [
+    ...new Set(
+      entries
+        .map((entry) =>
+          (typeof entry === "string" ||
+          typeof entry === "number"
+            ? cleanText(String(entry))
+            : ""
+          ).replace(/^[-–—*•]\s*/, ""),
+        )
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function normalizeSearchValue(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+}
+
+function getCompanyInitials(company) {
+  const initials = company
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toLocaleUpperCase("pt-BR");
+
+  return initials || "?";
+}
+
+function getPalette(key) {
+  const hash = String(key)
+    .split("")
+    .reduce(
+      (total, character) =>
+        (total * 31 + character.charCodeAt(0)) | 0,
+      0,
+    );
+
+  return JOB_PALETTES[Math.abs(hash) % JOB_PALETTES.length];
+}
+
+function formatSalary(rawJob) {
+  if (!rawJob.salaryVisible) {
+    return {
+      label: "Faixa não divulgada",
+      value: -1,
+    };
+  }
+
+  const minimum = toOptionalNumber(rawJob.salaryMin);
+  const maximum = toOptionalNumber(rawJob.salaryMax);
+
+  if (minimum !== null && maximum !== null) {
+    return {
+      label:
+        minimum === maximum
+          ? currencyFormatter.format(minimum)
+          : `${currencyFormatter.format(minimum)} — ${currencyFormatter.format(maximum)}`,
+      value: maximum,
+    };
+  }
+
+  if (minimum !== null) {
+    return {
+      label: `A partir de ${currencyFormatter.format(minimum)}`,
+      value: minimum,
+    };
+  }
+
+  if (maximum !== null) {
+    return {
+      label: `Até ${currencyFormatter.format(maximum)}`,
+      value: maximum,
+    };
+  }
+
+  return {
+    label: "Faixa não divulgada",
+    value: -1,
+  };
+}
+
+function getPublicationDetails(value) {
+  const timestamp = Date.parse(value);
+
+  if (!Number.isFinite(timestamp)) {
+    return {
+      label: "Data não informada",
+      timestamp: 0,
+      isNew: false,
+    };
+  }
+
+  const elapsed = Math.max(0, Date.now() - timestamp);
+  const hours = Math.floor(elapsed / 3_600_000);
+  const days = Math.floor(elapsed / 86_400_000);
+  let label;
+
+  if (hours < 1) {
+    label = "Agora";
+  } else if (hours < 24) {
+    label = `Há ${hours} ${hours === 1 ? "hora" : "horas"}`;
+  } else if (days < 7) {
+    label = `Há ${days} ${days === 1 ? "dia" : "dias"}`;
+  } else {
+    label = dateFormatter.format(timestamp);
+  }
+
+  return {
+    label,
+    timestamp,
+    isNew: elapsed <= 72 * 3_600_000,
+  };
+}
+
+function formatDeadline(value) {
+  const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(
+    String(value || ""),
+  )
+    ? `${value}T12:00:00`
+    : value;
+  const timestamp = Date.parse(normalizedValue);
+  return Number.isFinite(timestamp)
+    ? dateFormatter.format(timestamp)
+    : "Não informada";
+}
+
+function normalizeJob(rawJob) {
+  if (
+    !rawJob ||
+    (rawJob.id === null || rawJob.id === undefined)
+  ) {
+    return null;
+  }
+
+  const company = cleanText(
+    rawJob.company,
+    "Empresa não informada",
+  );
+  const category = cleanText(
+    rawJob.department,
+    FALLBACK_CATEGORY,
+  );
+  const employmentType = cleanText(rawJob.employmentType);
+  const workMode = cleanText(rawJob.workMode);
+  const seniority = cleanText(rawJob.seniority);
+  const salary = formatSalary(rawJob);
+  const publication = getPublicationDetails(
+    rawJob.publishedAt || rawJob.createdAt,
+  );
+  const palette = getPalette(`${rawJob.id}:${category}`);
+  const applicants = toOptionalNumber(rawJob.applicantsCount);
+  const openings = toOptionalNumber(rawJob.openings);
+
+  return {
+    id: rawJob.id,
+    slug: cleanText(rawJob.slug),
+    title: cleanText(
+      rawJob.title,
+      "Oportunidade sem título",
+    ),
+    company,
+    companyInitials: getCompanyInitials(company),
+    location: cleanText(
+      rawJob.location,
+      "Localização não informada",
+    ),
+    employmentType,
+    workMode,
+    type:
+      workMode || employmentType || "Formato não informado",
+    level: seniority || "Nível não informado",
+    category,
+    salary: salary.label,
+    salaryValue: salary.value,
+    postedAt: publication.label,
+    publishedTimestamp: publication.timestamp,
+    applicants:
+      applicants === null
+        ? 0
+        : Math.max(0, Math.trunc(applicants)),
+    openings:
+      openings === null
+        ? null
+        : Math.max(0, Math.trunc(openings)),
+    accent: palette.accent,
+    softAccent: palette.softAccent,
+    symbol: getCompanyInitials(category),
+    isNew: publication.isNew,
+    description: cleanText(
+      rawJob.description,
+      "Descrição não informada.",
+    ),
+    responsibilities: normalizeList(rawJob.responsibilities),
+    requirements: normalizeList(rawJob.requirements),
+    skills: normalizeList(rawJob.tags),
+    benefits: normalizeList(rawJob.benefits),
+    applicationDeadline: formatDeadline(
+      rawJob.applicationDeadline,
+    ),
+  };
+}
+
+function loadSavedJobs() {
+  if (typeof window === "undefined") return new Set();
+
+  try {
+    const stored = window.localStorage.getItem(
+      "point:saved-jobs",
+    );
+    const parsed = stored ? JSON.parse(stored) : [];
+
+    return Array.isArray(parsed)
+      ? new Set(parsed.map(String))
+      : new Set();
+  } catch (error) {
+    console.error(
+      "Não foi possível recuperar as vagas salvas:",
+      error,
+    );
+    return new Set();
+  }
+}
+
+function storeGuestSavedJobs(savedJobIds) {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(
+    "point:saved-jobs",
+    JSON.stringify(Array.from(savedJobIds)),
+  );
+}
+
+
 
 const SHORTCUTS = [
   {
@@ -321,7 +458,12 @@ const COMMANDS = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { loading: authLoading, user } = useAuth();
   const reduceMotion = useReducedMotion();
+  const backgroundVideoEnabled = useBackgroundVideoEnabled();
+  const isCandidate =
+    String(user?.role || "").toLocaleLowerCase("pt-BR") ===
+    "candidato";
 
   const pageRef = useRef(null);
   const jobsRef = useRef(null);
@@ -336,51 +478,170 @@ export default function Home() {
   const [commandQuery, setCommandQuery] = useState("");
 
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Todas");
-  const [workMode, setWorkMode] = useState("Todos");
-  const [experienceLevel, setExperienceLevel] =
-    useState("Todos");
-  const [sortBy, setSortBy] = useState("match");
-  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(
+    ALL_CATEGORIES,
+  );
+  const [sortBy, setSortBy] = useState("recent");
+  const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobsError, setJobsError] = useState("");
+  const [jobsTotal, setJobsTotal] = useState(0);
+  const [jobsReloadKey, setJobsReloadKey] = useState(0);
+  const [jobsPage, setJobsPage] = useState(1);
+  const [jobsHasMore, setJobsHasMore] = useState(false);
+  const [jobsLoadingMore, setJobsLoadingMore] = useState(false);
+  const [jobsMoreError, setJobsMoreError] = useState("");
 
   const [selectedJob, setSelectedJob] = useState(null);
-  const [savedJobs, setSavedJobs] = useState(new Set());
-  const [savedHydrated, setSavedHydrated] = useState(false);
+  const [guestSavedJobs, setGuestSavedJobs] = useState(loadSavedJobs);
+  const [candidateSavedJobs, setCandidateSavedJobs] = useState(
+    () => new Set(),
+  );
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [savingJobIds, setSavingJobIds] = useState(
+    () => new Set(),
+  );
 
   const [toast, setToast] = useState("");
   const [activityIndex, setActivityIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [headerCompact, setHeaderCompact] = useState(false);
+  const savedJobs = isCandidate
+    ? candidateSavedJobs
+    : user
+      ? EMPTY_SAVED_JOBS
+      : guestSavedJobs;
+
+  const showToast = useCallback((message) => {
+    setToast(message);
+
+    window.clearTimeout(toastTimerRef.current);
+
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast("");
+    }, 2600);
+  }, []);
+
+  useEffect(
+    () => () => window.clearTimeout(toastTimerRef.current),
+    [],
+  );
+
+  const categoryCounts = useMemo(() => {
+    const counts = new Map();
+
+    jobs.forEach((job) => {
+      counts.set(
+        job.category,
+        (counts.get(job.category) || 0) + 1,
+      );
+    });
+
+    return counts;
+  }, [jobs]);
+
+  const categories = useMemo(
+    () => [
+      ALL_CATEGORIES,
+      ...Array.from(categoryCounts.keys()).sort((a, b) =>
+        a.localeCompare(b, "pt-BR"),
+      ),
+    ],
+    [categoryCounts],
+  );
+
+  const categoryHighlights = useMemo(
+    () =>
+      Array.from(categoryCounts, ([category, count]) => ({
+        category,
+        count,
+      }))
+        .sort(
+          (a, b) =>
+            b.count - a.count ||
+            a.category.localeCompare(b.category, "pt-BR"),
+        )
+        .slice(0, MAP_NODE_SLOTS.length),
+    [categoryCounts],
+  );
+
+  const activities = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs.slice(0, 4).map((job) => ({
+        id: job.id,
+        title: "Vaga publicada",
+        detail: `${job.title} · ${job.company}`,
+        time: job.postedAt,
+        icon: "briefcase",
+      }));
+    }
+
+    if (jobsLoading) {
+      return [
+        {
+          id: "loading",
+          title: "Atualizando oportunidades",
+          detail: "Consultando as vagas publicadas",
+          time: "Agora",
+          icon: "search",
+        },
+      ];
+    }
+
+    if (jobsError) {
+      return [
+        {
+          id: "error",
+          title: "Atualização indisponível",
+          detail: "Tente novamente no radar de vagas",
+          time: "",
+          icon: "shield",
+        },
+      ];
+    }
+
+    return [
+      {
+        id: "empty",
+        title: "Radar atualizado",
+        detail: "Aguardando novas vagas publicadas",
+        time: "Agora",
+        icon: "briefcase",
+      },
+    ];
+  }, [jobs, jobsError, jobsLoading]);
+
+  const currentActivityIndex =
+    activityIndex % activities.length;
+  const currentActivity = activities[currentActivityIndex];
+
+  const selectedCategory = categories.includes(activeCategory)
+    ? activeCategory
+    : ALL_CATEGORIES;
 
   const filteredJobs = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedSearch = normalizeSearchValue(search.trim());
 
-    const result = JOBS.filter((job) => {
+    const result = jobs.filter((job) => {
       const matchesCategory =
-        activeCategory === "Todas" ||
-        job.category === activeCategory;
+        selectedCategory === ALL_CATEGORIES ||
+        job.category === selectedCategory;
 
-      const matchesWorkMode =
-        workMode === "Todos" || job.type === workMode;
-
-      const matchesExperienceLevel =
-        experienceLevel === "Todos" ||
-        job.level === experienceLevel;
-
-      const matchesSaved =
-        !showSavedOnly || savedJobs.has(job.id);
-
-      const searchableContent = [
-        job.title,
-        job.company,
-        job.location,
-        job.type,
-        job.level,
-        job.category,
-        ...job.skills,
-      ]
-        .join(" ")
-        .toLowerCase();
+      const searchableContent = normalizeSearchValue(
+        [
+          job.title,
+          job.company,
+          job.location,
+          job.type,
+          job.level,
+          job.employmentType,
+          job.workMode,
+          job.category,
+          job.description,
+          ...job.requirements,
+          ...job.skills,
+        ].join(" "),
+      );
 
       const matchesSearch =
         !normalizedSearch ||
@@ -396,53 +657,27 @@ export default function Home() {
     });
 
     return [...result].sort((a, b) => {
-      if (sortBy === "recent") {
-        return Number(b.isNew) - Number(a.isNew);
-      }
-
       if (sortBy === "salary") {
-        return extractInitialSalary(b.salary) -
-          extractInitialSalary(a.salary);
+        return (
+          b.salaryValue - a.salaryValue ||
+          b.publishedTimestamp - a.publishedTimestamp
+        );
       }
 
-      return b.match - a.match;
+      if (sortBy === "popular") {
+        return (
+          b.applicants - a.applicants ||
+          b.publishedTimestamp - a.publishedTimestamp
+        );
+      }
+
+      if (sortBy === "title") {
+        return a.title.localeCompare(b.title, "pt-BR");
+      }
+
+      return b.publishedTimestamp - a.publishedTimestamp;
     });
-  }, [
-    activeCategory,
-    experienceLevel,
-    savedJobs,
-    search,
-    showSavedOnly,
-    sortBy,
-    workMode,
-  ]);
-
-  const resultSummary = useMemo(() => {
-    if (filteredJobs.length === 0) {
-      return { averageMatch: 0, newJobs: 0, remoteJobs: 0 };
-    }
-
-    const matchTotal = filteredJobs.reduce(
-      (total, job) => total + job.match,
-      0,
-    );
-
-    return {
-      averageMatch: Math.round(matchTotal / filteredJobs.length),
-      newJobs: filteredJobs.filter((job) => job.isNew).length,
-      remoteJobs: filteredJobs.filter(
-        (job) => job.type === "Remoto",
-      ).length,
-    };
-  }, [filteredJobs]);
-
-  const hasActiveJobFilters = Boolean(
-    search ||
-      activeCategory !== "Todas" ||
-      workMode !== "Todos" ||
-      experienceLevel !== "Todos" ||
-      showSavedOnly,
-  );
+  }, [jobs, search, selectedCategory, sortBy]);
 
   const filteredCommands = useMemo(() => {
     const normalized = commandQuery.trim().toLowerCase();
@@ -462,58 +697,209 @@ export default function Home() {
   }, [commandQuery]);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(
-        "point:saved-jobs",
-      );
+    const controller = new AbortController();
 
-      if (stored) {
-        const parsed = JSON.parse(stored);
+    api
+      .get("/vagas", {
+        params: { page: 1, per_page: 50 },
+        signal: controller.signal,
+      })
+      .then((response) => {
+        if (controller.signal.aborted) return;
 
-        if (Array.isArray(parsed)) {
-          setSavedJobs(new Set(parsed));
+        const page = readPaginatedResponse(response);
+
+        if (!Array.isArray(response?.data?.data)) {
+          throw new Error(
+            "A API retornou uma lista de vagas inválida.",
+          );
         }
-      }
-    } catch (error) {
-      console.error(
-        "Não foi possível recuperar as vagas salvas:",
-        error,
-      );
-    } finally {
-      setSavedHydrated(true);
-    }
-  }, []);
+
+        const normalizedJobs = page.items
+          .map(normalizeJob)
+          .filter(Boolean);
+
+        setJobs(normalizedJobs);
+        setJobsPage(page.currentPage);
+        setJobsHasMore(page.hasMore);
+        setJobsTotal(Math.max(normalizedJobs.length, page.total));
+        setJobsError("");
+        setJobsLoading(false);
+      })
+      .catch((error) => {
+        if (
+          controller.signal.aborted ||
+          error?.code === "ERR_CANCELED"
+        ) {
+          return;
+        }
+
+        setJobs([]);
+        setJobsTotal(0);
+        setJobsPage(1);
+        setJobsHasMore(false);
+        setJobsError(
+          error?.response
+            ? getApiErrorMessage(
+                error,
+                "Não foi possível carregar as vagas.",
+              )
+            : "Não foi possível conectar à API de vagas.",
+        );
+        setJobsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [jobsReloadKey]);
 
   useEffect(() => {
-    if (!savedHydrated) return;
+    if (authLoading) return undefined;
 
-    try {
-      window.localStorage.setItem(
-        "point:saved-jobs",
-        JSON.stringify(Array.from(savedJobs)),
-      );
-    } catch (error) {
-      console.error(
-        "Não foi possível salvar os favoritos:",
-        error,
-      );
+    if (!isCandidate) {
+      return undefined;
     }
-  }, [savedHydrated, savedJobs]);
 
-  useEffect(
-    () => () => window.clearTimeout(toastTimerRef.current),
-    [],
-  );
+    const controller = new AbortController();
+    let active = true;
+
+    async function syncCandidateFavorites() {
+      setFavoritesLoading(true);
+
+      const storedJobIds = Array.from(loadSavedJobs()).filter((jobId) =>
+        /^\d+$/.test(jobId),
+      );
+      const localJobIds = storedJobIds.slice(0, 500);
+      const remainingLocalIds = new Set(storedJobIds);
+      let migratedCount = 0;
+      let pendingMigrationCount = Math.max(
+        0,
+        storedJobIds.length - localJobIds.length,
+      );
+
+      try {
+        const migrations = [];
+
+        for (let start = 0; start < localJobIds.length; start += 10) {
+          const batch = localJobIds.slice(start, start + 10);
+          const batchResults = await Promise.all(
+            batch.map(async (jobId) => {
+              try {
+                await api.put(
+                  `/vagas/${encodeURIComponent(jobId)}/salvar`,
+                  undefined,
+                  { signal: controller.signal },
+                );
+
+                return { jobId, migrated: true, discard: true };
+              } catch (error) {
+                if (
+                  controller.signal.aborted ||
+                  error?.code === "ERR_CANCELED"
+                ) {
+                  throw error;
+                }
+
+                return {
+                  jobId,
+                  migrated: false,
+                  discard: [404, 409, 422].includes(
+                    error?.response?.status,
+                  ),
+                };
+              }
+            }),
+          );
+
+          migrations.push(...batchResults);
+        }
+
+        migrations.forEach(({ jobId, migrated, discard }) => {
+          if (migrated) migratedCount += 1;
+          if (!migrated && !discard) pendingMigrationCount += 1;
+          if (discard) remainingLocalIds.delete(jobId);
+        });
+
+        try {
+          storeGuestSavedJobs(remainingLocalIds);
+        } catch (storageError) {
+          console.error(
+            "Não foi possível concluir a migração dos favoritos:",
+            storageError,
+          );
+        }
+
+        if (active) {
+          setGuestSavedJobs(new Set(remainingLocalIds));
+        }
+
+        const apiSavedJobs = await collectPaginatedItems((page) =>
+          api.get("/vagas-salvas", {
+            params: { page, per_page: 50 },
+            signal: controller.signal,
+          }),
+        );
+
+        if (!active) return;
+
+        setCandidateSavedJobs(
+          new Set(
+            apiSavedJobs
+              .map((job) => job?.id)
+              .filter(
+                (jobId) => jobId !== null && jobId !== undefined,
+              )
+              .map(String),
+          ),
+        );
+
+        if (pendingMigrationCount > 0) {
+          showToast(
+            "Algumas vagas salvas continuam neste dispositivo e serão sincronizadas novamente.",
+          );
+        } else if (migratedCount > 0) {
+          showToast(
+            migratedCount === 1
+              ? "Uma vaga salva neste dispositivo foi vinculada à sua conta."
+              : `${migratedCount} vagas salvas neste dispositivo foram vinculadas à sua conta.`,
+          );
+        }
+      } catch (error) {
+        if (
+          !active ||
+          controller.signal.aborted ||
+          error?.code === "ERR_CANCELED"
+        ) {
+          return;
+        }
+
+        showToast(
+          getApiErrorMessage(
+            error,
+            "Não foi possível sincronizar suas vagas salvas.",
+          ),
+        );
+      } finally {
+        if (active) setFavoritesLoading(false);
+      }
+    }
+
+    syncCandidateFavorites();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [authLoading, isCandidate, showToast, user?.id]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActivityIndex(
-        (current) => (current + 1) % ACTIVITIES.length,
+        (current) => (current + 1) % activities.length,
       );
     }, 3600);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [activities.length]);
 
   useEffect(() => {
     function handleScroll() {
@@ -725,36 +1111,100 @@ export default function Home() {
     }
   }
 
-  function toggleSaved(jobId) {
-    const isCurrentlySaved = savedJobs.has(jobId);
+  async function toggleSaved(jobId) {
+    const normalizedJobId = String(jobId);
 
-    setSavedJobs((current) => {
-      const next = new Set(current);
+    if (
+      authLoading ||
+      (isCandidate && favoritesLoading) ||
+      savingJobIds.has(normalizedJobId)
+    ) {
+      return;
+    }
 
-      if (next.has(jobId)) {
-        next.delete(jobId);
+    const isCurrentlySaved = savedJobs.has(normalizedJobId);
+
+    if (user && !isCandidate) {
+      showToast("Apenas candidatos podem salvar oportunidades.");
+      return;
+    }
+
+    if (!user) {
+      const next = new Set(savedJobs);
+
+      if (next.has(normalizedJobId)) {
+        next.delete(normalizedJobId);
       } else {
-        next.add(jobId);
+        next.add(normalizedJobId);
       }
 
+      setGuestSavedJobs(next);
+      let storageFailed = false;
+
+      try {
+        storeGuestSavedJobs(next);
+      } catch (error) {
+        storageFailed = true;
+        console.error(
+          "Não foi possível salvar os favoritos:",
+          error,
+        );
+      }
+
+      showToast(
+        storageFailed
+          ? "Favorito atualizado nesta sessão, mas o navegador bloqueou o armazenamento."
+          : isCurrentlySaved
+            ? "Vaga removida dos seus favoritos."
+            : "Vaga salva no seu radar!",
+      );
+      return;
+    }
+
+    setSavingJobIds((current) => {
+      const next = new Set(current);
+      next.add(normalizedJobId);
       return next;
     });
 
-    showToast(
-      isCurrentlySaved
-        ? "Vaga removida dos seus favoritos."
-        : "Vaga salva no seu radar!",
-    );
-  }
+    try {
+      if (isCurrentlySaved) {
+        await api.delete(
+          `/vagas/${encodeURIComponent(jobId)}/salvar`,
+        );
+      } else {
+        await api.put(
+          `/vagas/${encodeURIComponent(jobId)}/salvar`,
+        );
+      }
 
-  function showToast(message) {
-    setToast(message);
+      setCandidateSavedJobs((current) => {
+        const next = new Set(current);
 
-    window.clearTimeout(toastTimerRef.current);
+        if (isCurrentlySaved) next.delete(normalizedJobId);
+        else next.add(normalizedJobId);
 
-    toastTimerRef.current = window.setTimeout(() => {
-      setToast("");
-    }, 2600);
+        return next;
+      });
+      showToast(
+        isCurrentlySaved
+          ? "Vaga removida dos seus favoritos."
+          : "Vaga salva no seu radar!",
+      );
+    } catch (error) {
+      showToast(
+        getApiErrorMessage(
+          error,
+          "Não foi possível atualizar suas vagas salvas.",
+        ),
+      );
+    } finally {
+      setSavingJobIds((current) => {
+        const next = new Set(current);
+        next.delete(normalizedJobId);
+        return next;
+      });
+    }
   }
 
   function executeCommand(commandId) {
@@ -796,6 +1246,53 @@ export default function Home() {
 
   function openJob(job) {
     setSelectedJob(job);
+  }
+
+  function retryJobs() {
+    setJobsLoading(true);
+    setJobsError("");
+    setJobsMoreError("");
+    setJobsReloadKey((current) => current + 1);
+  }
+
+  async function loadMoreJobs() {
+    if (jobsLoadingMore || !jobsHasMore) return;
+
+    setJobsLoadingMore(true);
+    setJobsMoreError("");
+
+    try {
+      const response = await api.get("/vagas", {
+        params: { page: jobsPage + 1, per_page: 50 },
+      });
+      const page = readPaginatedResponse(response);
+
+      if (!Array.isArray(response?.data?.data)) {
+        throw new Error("A API retornou uma lista de vagas inválida.");
+      }
+
+      const normalizedJobs = page.items
+        .map(normalizeJob)
+        .filter(Boolean);
+
+      setJobs((current) =>
+        mergeUniqueById(current, normalizedJobs),
+      );
+      setJobsPage(page.currentPage);
+      setJobsHasMore(page.hasMore);
+      setJobsTotal((currentTotal) =>
+        Math.max(currentTotal, page.total),
+      );
+    } catch (error) {
+      setJobsMoreError(
+        getApiErrorMessage(
+          error,
+          "Não foi possível carregar mais oportunidades.",
+        ),
+      );
+    } finally {
+      setJobsLoadingMore(false);
+    }
   }
 
   return (
@@ -967,7 +1464,7 @@ export default function Home() {
         </AnimatePresence>
 
         <section className="home-hero">
-          <motion.div
+          <Motion.div
             className="hero-copy"
             initial={{ opacity: 0, x: -36 }}
             animate={{ opacity: 1, x: 0 }}
@@ -1074,9 +1571,9 @@ export default function Home() {
                 <span>já estão construindo novos caminhos.</span>
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div
+          <Motion.div
             className="opportunity-map"
             initial={{ opacity: 0, x: 42, rotate: 2 }}
             animate={{ opacity: 1, x: 0, rotate: 0 }}
@@ -1108,7 +1605,7 @@ export default function Home() {
                 fill="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M74 106C196 55 213 195 311 176C413 155 373 68 526 98"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -1121,7 +1618,7 @@ export default function Home() {
                   }}
                 />
 
-                <motion.path
+                <Motion.path
                   d="M94 431C190 388 178 288 309 300C449 313 426 437 542 410"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -1134,7 +1631,7 @@ export default function Home() {
                   }}
                 />
 
-                <motion.path
+                <Motion.path
                   d="M306 176C264 224 273 264 309 300"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -1148,28 +1645,19 @@ export default function Home() {
                 />
               </svg>
 
-              <button
-                type="button"
-                className="map-feature-card"
-                style={{
-                  "--feature-accent": FEATURED_JOB.accent,
-                  "--feature-soft-accent":
-                    FEATURED_JOB.softAccent,
-                }}
-                onClick={() => openJob(FEATURED_JOB)}
-                aria-label={`Ver vaga em destaque: ${FEATURED_JOB.title}`}
-              >
-                <span
-                  className="map-feature-pattern"
-                  aria-hidden="true"
-                />
-
-                <span
-                  className="map-feature-symbol"
-                  aria-hidden="true"
-                >
-                  {FEATURED_JOB.symbol}
-                </span>
+              <div className="map-video-card">
+                {backgroundVideoEnabled && (
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-hidden="true"
+                  >
+                    <source src={bgVideo} type="video/mp4" />
+                  </video>
+                )}
 
                 <span className="map-feature-live">
                   <i />
@@ -1202,41 +1690,22 @@ export default function Home() {
                 </span>
               </button>
 
-              <MapNode
-                className="map-node--development"
-                label="Desenvolvimento"
-                detail={formatJobCount("Desenvolvimento")}
-                accent="#ff4f8b"
-                icon={<CodeIcon />}
-                onClick={() => exploreCategory("Desenvolvimento")}
-              />
+              {categoryHighlights.map((highlight, index) => {
+                const slot = MAP_NODE_SLOTS[index];
 
-              <MapNode
-                className="map-node--design"
-                label="Design"
-                detail={formatJobCount("Design")}
-                accent="#9183ff"
-                icon={<PenToolIcon />}
-                onClick={() => exploreCategory("Design")}
-              />
-
-              <MapNode
-                className="map-node--data"
-                label="Dados"
-                detail={formatJobCount("Dados")}
-                accent="#64c7ee"
-                icon={<ChartIcon />}
-                onClick={() => exploreCategory("Dados")}
-              />
-
-              <MapNode
-                className="map-node--product"
-                label="Produto"
-                detail={formatJobCount("Produto")}
-                accent="#baf26d"
-                icon={<TargetIcon />}
-                onClick={() => exploreCategory("Produto")}
-              />
+                return (
+                  <MapNode
+                    key={highlight.category}
+                    className={slot.className}
+                    label={highlight.category}
+                    detail={`${highlight.count} ${
+                      highlight.count === 1 ? "vaga" : "vagas"
+                    }`}
+                    accent={slot.accent}
+                    icon={<DynamicIcon name={slot.icon} />}
+                  />
+                );
+              })}
 
               <div
                 className="map-match-card"
@@ -1247,19 +1716,33 @@ export default function Home() {
                     <SparklesIcon />
                   </span>
 
-                  <span>
-                    Match encontrado
-                  </span>
+                  <span>Oportunidades abertas</span>
                 </div>
 
-                <strong>96%</strong>
+                <strong>
+                  {jobsLoading ? "…" : jobsError ? "—" : jobsTotal}
+                </strong>
 
                 <div className="match-progress">
-                  <span />
+                  <span
+                    style={{
+                      width: jobsLoading
+                        ? "42%"
+                        : jobsError
+                          ? "0%"
+                          : "100%",
+                    }}
+                  />
                 </div>
 
                 <small>
-                  Seu perfil combina muito com esta oportunidade.
+                  {jobsLoading
+                    ? "Atualizando o radar com dados da plataforma."
+                    : jobsError
+                      ? "A atualização será retomada ao tentar novamente."
+                      : jobsTotal === 1
+                        ? "Uma vaga publicada disponível agora."
+                        : "Vagas publicadas disponíveis agora."}
                 </small>
               </div>
 
@@ -1285,7 +1768,7 @@ export default function Home() {
                 <ArrowUpRightIcon />
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
         </section>
 
         <section
@@ -1309,7 +1792,7 @@ export default function Home() {
 
           <div className="shortcut-grid">
             {SHORTCUTS.map((shortcut, index) => (
-              <motion.button
+              <Motion.button
                 key={shortcut.title}
                 type="button"
                 className={`shortcut-card ${shortcut.className}`}
@@ -1344,7 +1827,7 @@ export default function Home() {
                   <span>{shortcut.tag}</span>
                   <ArrowUpRightIcon />
                 </span>
-              </motion.button>
+              </Motion.button>
             ))}
           </div>
         </section>
@@ -1374,6 +1857,7 @@ export default function Home() {
                 }
                 placeholder="Buscar vaga, empresa ou tecnologia..."
                 aria-label="Filtrar vagas"
+                disabled={jobsLoading}
               />
 
               {search && (
@@ -1433,10 +1917,12 @@ export default function Home() {
                 onChange={(event) =>
                   setSortBy(event.target.value)
                 }
+                disabled={jobsLoading}
               >
-                <option value="match">Melhor combinação</option>
                 <option value="recent">Mais recentes</option>
                 <option value="salary">Maior salário</option>
+                <option value="popular">Mais candidaturas</option>
+                <option value="title">Título (A–Z)</option>
               </select>
 
               <ChevronDownIcon />
@@ -1447,26 +1933,23 @@ export default function Home() {
             className="category-filters"
             aria-label="Filtrar por categoria"
           >
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <button
                 key={category}
                 type="button"
                 className={
-                  activeCategory === category
+                  selectedCategory === category
                     ? "category-filter category-filter--active"
                     : "category-filter"
                 }
                 onClick={() => setActiveCategory(category)}
+                disabled={jobsLoading}
               >
                 {category}
 
-                {category !== "Todas" && (
+                {category !== ALL_CATEGORIES && (
                   <span>
-                    {
-                      JOBS.filter(
-                        (job) => job.category === category,
-                      ).length
-                    }
+                    {categoryCounts.get(category) || 0}
                   </span>
                 )}
               </button>
@@ -1489,37 +1972,35 @@ export default function Home() {
           </div>
 
           <div className="jobs-result-header">
-            <div className="jobs-result-copy" aria-live="polite">
-              <span>
-                <strong>{filteredJobs.length}</strong>{" "}
-                {filteredJobs.length === 1
-                  ? "oportunidade encontrada"
-                  : "oportunidades encontradas"}
-              </span>
-
-              {filteredJobs.length > 0 && (
-                <span className="jobs-result-insights">
-                  <span>
-                    {resultSummary.remoteJobs}{" "}
-                    {resultSummary.remoteJobs === 1
-                      ? "remota"
-                      : "remotas"}
-                  </span>
-                  <span>
-                    {resultSummary.newJobs}{" "}
-                    {resultSummary.newJobs === 1 ? "nova" : "novas"}
-                  </span>
-                  <span>
-                    {resultSummary.averageMatch}% match médio
-                  </span>
-                </span>
+            <span>
+              {jobsLoading ? (
+                "Carregando oportunidades..."
+              ) : jobsError ? (
+                "Não foi possível atualizar o radar"
+              ) : (
+                <>
+                  <strong>{filteredJobs.length}</strong>{" "}
+                  {filteredJobs.length === 1
+                    ? "oportunidade encontrada"
+                    : "oportunidades encontradas"}
+                  {jobsTotal > jobs.length &&
+                    selectedCategory === ALL_CATEGORIES &&
+                    !search && (
+                      <small> de {jobsTotal} publicadas</small>
+                    )}
+                </>
               )}
-            </div>
+            </span>
 
-            {hasActiveJobFilters && (
+            {(search ||
+              selectedCategory !== ALL_CATEGORIES) &&
+              !jobsLoading && (
               <button
                 type="button"
-                onClick={resetJobFilters}
+                onClick={() => {
+                  setSearch("");
+                  setActiveCategory(ALL_CATEGORIES);
+                }}
               >
                 Limpar todos os filtros
               </button>
@@ -1527,8 +2008,17 @@ export default function Home() {
           </div>
 
           <AnimatePresence mode="popLayout">
-            {filteredJobs.length > 0 ? (
-              <motion.div
+            {jobsLoading ? (
+              <JobsFeedback key="loading" type="loading" />
+            ) : jobsError ? (
+              <JobsFeedback
+                key="error"
+                type="error"
+                message={jobsError}
+                onAction={retryJobs}
+              />
+            ) : filteredJobs.length > 0 ? (
+              <Motion.div
                 layout
                 className="jobs-grid"
               >
@@ -1537,30 +2027,57 @@ export default function Home() {
                     key={job.id}
                     job={job}
                     index={index}
-                    saved={savedJobs.has(job.id)}
+                    saved={savedJobs.has(String(job.id))}
+                    saving={
+                      authLoading ||
+                      (isCandidate && favoritesLoading) ||
+                      savingJobIds.has(String(job.id))
+                    }
                     onSave={() => toggleSaved(job.id)}
                     onOpen={() => openJob(job)}
                   />
                 ))}
-              </motion.div>
+              </Motion.div>
+            ) : jobs.length === 0 ? (
+              <JobsFeedback
+                key="empty"
+                type="empty"
+                onAction={retryJobs}
+              />
             ) : (
-              <EmptyJobs
-                savedOnly={showSavedOnly}
-                onReset={resetJobFilters}
+              <JobsFeedback
+                key="filtered-empty"
+                type="filtered"
+                onAction={() => {
+                  setSearch("");
+                  setActiveCategory(ALL_CATEGORIES);
+                }}
               />
             )}
           </AnimatePresence>
 
-          <div className="jobs-more-wrapper">
-            <button
-              type="button"
-              className="jobs-more-button"
-              onClick={() => navigate("/cadastro")}
-            >
-              Criar perfil e receber novos matches
-              <ArrowRightIcon />
-            </button>
-          </div>
+          {jobsMoreError && (
+            <p className="jobs-more-error" role="alert">
+              {jobsMoreError}
+            </p>
+          )}
+
+          {!jobsLoading && !jobsError && jobsHasMore && (
+            <div className="jobs-more-wrapper">
+              <button
+                type="button"
+                className="jobs-more-button"
+                onClick={loadMoreJobs}
+                disabled={jobsLoadingMore}
+                aria-busy={jobsLoadingMore}
+              >
+                {jobsLoadingMore
+                  ? "Carregando oportunidades..."
+                  : `Carregar mais oportunidades (${jobs.length} de ${jobsTotal})`}
+                <ArrowRightIcon />
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="experience-section">
@@ -1571,7 +2088,7 @@ export default function Home() {
           />
 
           <div className="experience-bento">
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--profile"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1616,9 +2133,9 @@ export default function Home() {
                 Completar meu perfil
                 <ArrowUpRightIcon />
               </button>
-            </motion.article>
+            </Motion.article>
 
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--tracking"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1656,9 +2173,9 @@ export default function Home() {
                   status="waiting"
                 />
               </div>
-            </motion.article>
+            </Motion.article>
 
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--match"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1682,7 +2199,7 @@ export default function Home() {
                     className="match-ring-background"
                   />
 
-                  <motion.circle
+                  <Motion.circle
                     cx="60"
                     cy="60"
                     r="48"
@@ -1711,9 +2228,9 @@ export default function Home() {
                 Entenda por que uma oportunidade combina com o seu
                 perfil antes mesmo de se candidatar.
               </p>
-            </motion.article>
+            </Motion.article>
 
-            <motion.article
+            <Motion.article
               className="bento-card bento-card--activity"
               initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1732,8 +2249,8 @@ export default function Home() {
               </div>
 
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activityIndex}
+                <Motion.div
+                  key={currentActivity.id}
                   className="activity-current"
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1742,33 +2259,27 @@ export default function Home() {
                 >
                   <span className="activity-current-icon">
                     <DynamicIcon
-                      name={ACTIVITIES[activityIndex].icon}
+                      name={currentActivity.icon}
                     />
                   </span>
 
                   <span>
-                    <strong>
-                      {ACTIVITIES[activityIndex].title}
-                    </strong>
+                    <strong>{currentActivity.title}</strong>
 
-                    <small>
-                      {ACTIVITIES[activityIndex].detail}
-                    </small>
+                    <small>{currentActivity.detail}</small>
                   </span>
 
-                  <time>
-                    {ACTIVITIES[activityIndex].time}
-                  </time>
-                </motion.div>
+                  <time>{currentActivity.time}</time>
+                </Motion.div>
               </AnimatePresence>
 
               <div className="activity-dots">
-                {ACTIVITIES.map((activity, index) => (
+                {activities.map((activity, index) => (
                   <button
-                    key={activity.title}
+                    key={activity.id}
                     type="button"
                     className={
-                      index === activityIndex
+                      index === currentActivityIndex
                         ? "activity-dot activity-dot--active"
                         : "activity-dot"
                     }
@@ -1777,14 +2288,14 @@ export default function Home() {
                   />
                 ))}
               </div>
-            </motion.article>
+            </Motion.article>
           </div>
         </section>
 
         <section className="home-cta">
           <div className="home-cta-back" aria-hidden="true" />
 
-          <motion.div
+          <Motion.div
             className="home-cta-card"
             initial={{ opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -1847,7 +2358,7 @@ export default function Home() {
                 Novas vagas diariamente
               </span>
             </div>
-          </motion.div>
+          </Motion.div>
         </section>
 
         <footer className="home-footer">
@@ -2026,16 +2537,26 @@ export default function Home() {
           {selectedJob && (
             <JobModal
               job={selectedJob}
-              saved={savedJobs.has(selectedJob.id)}
+              saved={savedJobs.has(String(selectedJob.id))}
+              saving={
+                authLoading ||
+                (isCandidate && favoritesLoading) ||
+                savingJobIds.has(String(selectedJob.id))
+              }
               onClose={() => setSelectedJob(null)}
               onSave={() => toggleSaved(selectedJob.id)}
-              onApply={() =>
+              onApply={() => {
+                const destination = `/vagas/${selectedJob.id}`;
+
+                if (authLoading || isCandidate || user) {
+                  navigate(destination);
+                  return;
+                }
+
                 navigate("/login", {
-                  state: {
-                    redirectTo: `/vagas/${selectedJob.id}`,
-                  },
-                })
-              }
+                  state: { redirectTo: destination },
+                });
+              }}
             />
           )}
         </AnimatePresence>
@@ -2057,7 +2578,7 @@ export default function Home() {
 
         <AnimatePresence>
           {toast && (
-            <motion.div
+            <Motion.div
               className="home-toast"
               role="status"
               initial={{ opacity: 0, y: 24, scale: 0.94 }}
@@ -2069,7 +2590,7 @@ export default function Home() {
               </span>
 
               {toast}
-            </motion.div>
+            </Motion.div>
           )}
         </AnimatePresence>
       </main>
@@ -2081,15 +2602,14 @@ function JobCard({
   job,
   index,
   saved,
+  saving,
   onSave,
   onOpen,
 }) {
   return (
-    <motion.article
+    <Motion.article
       layout
-      className={`job-card ${
-        job.featured ? "job-card--featured" : ""
-      }`}
+      className="job-card"
       style={{
         "--job-accent": job.accent,
         "--job-soft-accent": job.softAccent,
@@ -2115,13 +2635,6 @@ function JobCard({
         </span>
 
         <div className="job-card-badges">
-          {job.featured && (
-            <span className="job-featured-badge">
-              <SparklesIcon />
-              Destaque
-            </span>
-          )}
-
           {job.isNew && (
             <span className="job-new-badge">
               Nova
@@ -2136,22 +2649,29 @@ function JobCard({
               ? "job-save-button job-save-button--saved"
               : "job-save-button"
           }
+          disabled={saving}
+          aria-busy={saving}
+          aria-pressed={saved}
           onClick={(event) => {
             event.stopPropagation();
             onSave();
           }}
           aria-label={
-            saved
-              ? "Remover vaga dos favoritos"
-              : "Salvar vaga"
+            saving
+              ? `Atualizando favoritos para ${job.title}`
+              : saved
+                ? `Remover ${job.title} dos favoritos`
+                : `Salvar ${job.title}`
           }
         >
           <BookmarkIcon filled={saved} />
         </button>
 
         <div className="job-match-pill">
-          <span>{job.match}%</span>
-          de combinação
+          <span>{job.applicants}</span>
+          {job.applicants === 1
+            ? " candidatura"
+            : " candidaturas"}
         </div>
       </div>
 
@@ -2171,11 +2691,13 @@ function JobCard({
           <span>{job.location}</span>
         </p>
 
-        <div className="job-skills">
-          {job.skills.slice(0, 3).map((skill) => (
-            <span key={skill}>{skill}</span>
-          ))}
-        </div>
+        {job.skills.length > 0 && (
+          <div className="job-skills">
+            {job.skills.slice(0, 3).map((skill) => (
+              <span key={skill}>{skill}</span>
+            ))}
+          </div>
+        )}
 
         <div className="job-card-footer">
           <div>
@@ -2195,19 +2717,33 @@ function JobCard({
           </button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
 function JobModal({
   job,
   saved,
+  saving,
   onClose,
   onSave,
   onApply,
 }) {
+  const dialogRootRef = useRef(null);
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useDialogFocus({
+    active: true,
+    containerRef: modalRef,
+    initialFocusRef: closeButtonRef,
+    onClose,
+    rootRef: dialogRootRef,
+  });
+
   return (
-    <motion.div
+    <Motion.div
+      ref={dialogRootRef}
       className="modal-overlay"
       role="dialog"
       aria-modal="true"
@@ -2221,8 +2757,10 @@ function JobModal({
         }
       }}
     >
-      <motion.article
+      <Motion.article
+        ref={modalRef}
         className="job-modal"
+        tabIndex={-1}
         style={{
           "--job-accent": job.accent,
           "--job-soft-accent": job.softAccent,
@@ -2251,6 +2789,7 @@ function JobModal({
         }}
       >
         <button
+          ref={closeButtonRef}
           type="button"
           className="modal-close-button"
           onClick={onClose}
@@ -2286,9 +2825,19 @@ function JobModal({
                 : "modal-save-button"
             }
             onClick={onSave}
+            disabled={saving}
+            aria-busy={saving}
+            aria-pressed={saved}
+            aria-label={
+              saving
+                ? `Atualizando favoritos para ${job.title}`
+                : saved
+                  ? `Remover ${job.title} dos favoritos`
+                  : `Salvar ${job.title}`
+            }
           >
             <BookmarkIcon filled={saved} />
-            {saved ? "Salva" : "Salvar"}
+            {saving ? "Salvando..." : saved ? "Salva" : "Salvar"}
           </button>
         </header>
 
@@ -2304,12 +2853,16 @@ function JobModal({
           </div>
 
           <div>
-            <span>Compatibilidade</span>
-            <strong>{job.match}%</strong>
+            <span>Vagas abertas</span>
+            <strong>
+              {job.openings === null
+                ? "Não informado"
+                : job.openings}
+            </strong>
           </div>
 
           <div>
-            <span>Candidatos</span>
+            <span>Candidaturas</span>
             <strong>{job.applicants}</strong>
           </div>
         </div>
@@ -2320,42 +2873,79 @@ function JobModal({
             <p>{job.description}</p>
           </section>
 
-          <section>
-            <h3>O que esperamos de você</h3>
+          {job.responsibilities.length > 0 && (
+            <section>
+              <h3>Responsabilidades</h3>
 
-            <ul>
-              {job.requirements.map((requirement) => (
-                <li key={requirement}>
-                  <CheckIcon />
-                  {requirement}
-                </li>
-              ))}
-            </ul>
-          </section>
+              <ul>
+                {job.responsibilities.map((responsibility) => (
+                  <li key={responsibility}>
+                    <CheckIcon />
+                    {responsibility}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-          <section>
-            <h3>Tecnologias e habilidades</h3>
+          {job.requirements.length > 0 && (
+            <section>
+              <h3>O que esperamos de você</h3>
 
-            <div className="job-modal-skills">
-              {job.skills.map((skill) => (
-                <span key={skill}>{skill}</span>
-              ))}
-            </div>
-          </section>
+              <ul>
+                {job.requirements.map((requirement) => (
+                  <li key={requirement}>
+                    <CheckIcon />
+                    {requirement}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {job.skills.length > 0 && (
+            <section>
+              <h3>Tecnologias e habilidades</h3>
+
+              <div className="job-modal-skills">
+                {job.skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {job.benefits.length > 0 && (
+            <section>
+              <h3>Benefícios</h3>
+
+              <div className="job-modal-skills">
+                {job.benefits.map((benefit) => (
+                  <span key={benefit}>{benefit}</span>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <footer className="job-modal-footer">
           <span>
-            Publicada {job.postedAt.toLowerCase()}
+            Publicada: {job.postedAt}
+            {job.applicationDeadline !== "Não informada" &&
+              ` · Inscrições até ${job.applicationDeadline}`}
           </span>
 
-          <button type="button" onClick={onApply}>
+          <button
+            type="button"
+            onClick={onApply}
+            aria-label={`Candidatar-se à vaga ${job.title}`}
+          >
             Candidatar agora
             <ArrowRightIcon />
           </button>
         </footer>
-      </motion.article>
-    </motion.div>
+      </Motion.article>
+    </Motion.div>
   );
 }
 
@@ -2366,43 +2956,21 @@ function CommandPalette({
   onExecute,
   onClose,
 }) {
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const safeHighlightedIndex = Math.min(
-    highlightedIndex,
-    Math.max(commands.length - 1, 0),
-  );
-  const highlightedCommand = commands[safeHighlightedIndex];
+  const dialogRootRef = useRef(null);
+  const paletteRef = useRef(null);
+  const inputRef = useRef(null);
 
-  function handleCommandKeyDown(event) {
-    if (commands.length === 0) return;
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setHighlightedIndex(
-        (current) =>
-          (Math.min(current, commands.length - 1) + 1) %
-          commands.length,
-      );
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setHighlightedIndex(
-        (current) =>
-          (Math.min(current, commands.length - 1) - 1 +
-            commands.length) %
-          commands.length,
-      );
-    }
-
-    if (event.key === "Enter" && highlightedCommand) {
-      event.preventDefault();
-      onExecute(highlightedCommand.id);
-    }
-  }
+  useDialogFocus({
+    active: true,
+    containerRef: paletteRef,
+    initialFocusRef: inputRef,
+    onClose,
+    rootRef: dialogRootRef,
+  });
 
   return (
-    <motion.div
+    <Motion.div
+      ref={dialogRootRef}
       className="command-overlay"
       role="dialog"
       aria-modal="true"
@@ -2416,8 +2984,10 @@ function CommandPalette({
         }
       }}
     >
-      <motion.div
+      <Motion.div
+        ref={paletteRef}
         className="command-palette"
+        tabIndex={-1}
         initial={{
           opacity: 0,
           y: -24,
@@ -2443,8 +3013,10 @@ function CommandPalette({
           <SearchIcon />
 
           <input
+            ref={inputRef}
             autoFocus
             type="search"
+            aria-label="Buscar uma ação rápida"
             value={query}
             onKeyDown={handleCommandKeyDown}
             onChange={(event) =>
@@ -2460,7 +3032,11 @@ function CommandPalette({
             }
           />
 
-          <button type="button" onClick={onClose}>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar busca rápida"
+          >
             ESC
           </button>
         </div>
@@ -2515,8 +3091,8 @@ function CommandPalette({
             Fechar
           </span>
         </div>
-      </motion.div>
-    </motion.div>
+      </Motion.div>
+    </Motion.div>
   );
 }
 
@@ -2525,9 +3101,25 @@ function MobileMenu({
   onClose,
   onNavigate,
 }) {
+  const dialogRootRef = useRef(null);
+  const menuRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useDialogFocus({
+    active: true,
+    containerRef: menuRef,
+    initialFocusRef: closeButtonRef,
+    onClose,
+    rootRef: dialogRootRef,
+  });
+
   return (
-    <motion.div
+    <Motion.div
+      ref={dialogRootRef}
       className="mobile-menu-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu de navegação"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -2537,8 +3129,10 @@ function MobileMenu({
         }
       }}
     >
-      <motion.aside
+      <Motion.aside
+        ref={menuRef}
         className="mobile-menu"
+        tabIndex={-1}
         initial={{ x: "105%" }}
         animate={{ x: 0 }}
         exit={{ x: "105%" }}
@@ -2556,6 +3150,7 @@ function MobileMenu({
           </span>
 
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Fechar menu"
@@ -2629,39 +3224,68 @@ function MobileMenu({
         <div className="mobile-menu-footer">
           Point · Plataforma de talentos
         </div>
-      </motion.aside>
-    </motion.div>
+      </Motion.aside>
+    </Motion.div>
   );
 }
 
-function EmptyJobs({ savedOnly, onReset }) {
+function JobsFeedback({ type, message, onAction }) {
+  const content = {
+    loading: {
+      title: "Buscando vagas publicadas...",
+      description:
+        "Estamos atualizando o radar com as oportunidades mais recentes.",
+      actionLabel: "",
+    },
+    error: {
+      title: "O radar ficou indisponível.",
+      description:
+        message || "Tente carregar as oportunidades novamente.",
+      actionLabel: "Tentar novamente",
+    },
+    empty: {
+      title: "Ainda não há vagas publicadas.",
+      description:
+        "Novas oportunidades aparecerão aqui assim que forem publicadas.",
+      actionLabel: "Atualizar vagas",
+    },
+    filtered: {
+      title: "Nenhuma vaga passou por esse filtro.",
+      description:
+        "Tente buscar por outro termo ou visualizar todas as categorias.",
+      actionLabel: "Limpar filtros",
+    },
+  }[type];
+
   return (
-    <motion.div
-      className="empty-jobs"
+    <Motion.div
+      className={`empty-jobs empty-jobs--${type}`}
+      role={type === "error" ? "alert" : "status"}
+      aria-live={type === "error" ? "assertive" : "polite"}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="empty-jobs-icon">
-        <SearchIcon />
+        {type === "loading" ? (
+          <BriefcaseIcon />
+        ) : type === "filtered" ? (
+          <SearchIcon />
+        ) : (
+          <RefreshIcon />
+        )}
       </div>
 
-      <h3>
-        {savedOnly
-          ? "Seu radar de vagas salvas está vazio."
-          : "Nenhuma vaga passou por esse filtro."}
-      </h3>
+      <h3>{content.title}</h3>
 
-      <p>
-        {savedOnly
-          ? "Salve oportunidades interessantes para comparar e retomar depois."
-          : "Tente buscar por outro termo ou visualizar todas as categorias."}
-      </p>
+      <p>{content.description}</p>
 
-      <button type="button" onClick={onReset}>
-        {savedOnly ? "Explorar oportunidades" : "Limpar filtros"}
-        <RefreshIcon />
-      </button>
-    </motion.div>
+      {content.actionLabel && onAction && (
+        <button type="button" onClick={onAction}>
+          {content.actionLabel}
+          <RefreshIcon />
+        </button>
+      )}
+    </Motion.div>
   );
 }
 
@@ -2704,12 +3328,10 @@ function MapNode({
   onClick,
 }) {
   return (
-    <motion.button
-      type="button"
+    <Motion.div
       className={`map-node ${className}`}
       style={{ "--node-accent": accent }}
-      onClick={onClick}
-      aria-label={`Explorar vagas de ${label}`}
+      title={`${label} · ${detail}`}
       whileHover={{
         y: -4,
         rotate: 0,
@@ -2722,7 +3344,7 @@ function MapNode({
         <strong>{label}</strong>
         <small>{detail}</small>
       </div>
-    </motion.button>
+    </Motion.div>
   );
 }
 
@@ -2820,22 +3442,6 @@ function DynamicIcon({ name }) {
     default:
       return <SparklesIcon />;
   }
-}
-
-function extractInitialSalary(salary) {
-  const match = salary.match(/R\$\s*([\d.]+)/);
-
-  if (!match) return 0;
-
-  return Number(match[1].replace(".", ""));
-}
-
-function formatJobCount(category) {
-  const count = JOBS.filter(
-    (job) => job.category === category,
-  ).length;
-
-  return `${count} ${count === 1 ? "vaga" : "vagas"}`;
 }
 
 const homeStyles = `
@@ -3914,6 +4520,7 @@ const homeStyles = `
     align-items: center;
     gap: 0.55rem;
     min-width: 9.5rem;
+    max-width: 12.5rem;
     padding: 0.65rem;
     border: 2px solid var(--ink);
     border-radius: 0.9rem;
@@ -3950,8 +4557,11 @@ const homeStyles = `
   }
 
   .map-node strong {
+    overflow: hidden;
     font-size: 0.61rem;
     font-weight: 950;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .map-node small {
@@ -4452,6 +5062,13 @@ const homeStyles = `
     color: #a19a94;
   }
 
+  .jobs-search-box input:disabled,
+  .jobs-sort select:disabled,
+  .category-filter:disabled {
+    cursor: wait;
+    opacity: 0.62;
+  }
+
   .jobs-search-box button {
     display: grid;
     place-items: center;
@@ -4634,6 +5251,11 @@ const homeStyles = `
     font-weight: 950;
   }
 
+  .jobs-result-header small {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
   .jobs-result-header button {
     padding: 0;
     border: 0;
@@ -4811,9 +5433,15 @@ const homeStyles = `
       box-shadow 190ms ease;
   }
 
-  .job-save-button:hover {
+  .job-save-button:not(:disabled):hover {
     transform: translate(-2px, -2px) rotate(-8deg);
     box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .job-save-button:disabled,
+  .modal-save-button:disabled {
+    cursor: wait;
+    opacity: 0.68;
   }
 
   .job-save-button--saved {
@@ -4974,6 +5602,14 @@ const homeStyles = `
     margin-top: 2.5rem;
   }
 
+  .jobs-more-error {
+    margin: 2rem auto 0;
+    color: #9f1239;
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-align: center;
+  }
+
   .jobs-more-button {
     display: flex;
     align-items: center;
@@ -5076,6 +5712,41 @@ const homeStyles = `
   .empty-jobs button svg {
     width: 0.9rem;
     height: 0.9rem;
+  }
+
+  .jobs-more-button:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+    box-shadow: 4px 4px 0 var(--pink);
+  }
+
+  .empty-jobs--loading .empty-jobs-icon {
+    background: var(--blue);
+    animation: jobsLoadingPulse 1.15s ease-in-out infinite;
+  }
+
+  .empty-jobs--error {
+    background: rgba(255, 213, 228, 0.58);
+  }
+
+  .empty-jobs--error .empty-jobs-icon {
+    background: var(--pink);
+  }
+
+  .empty-jobs--empty .empty-jobs-icon {
+    background: var(--lime);
+  }
+
+  @keyframes jobsLoadingPulse {
+    0%,
+    100% {
+      transform: rotate(-6deg) scale(1);
+    }
+
+    50% {
+      transform: rotate(2deg) scale(1.06);
+    }
   }
 
   .experience-bento {

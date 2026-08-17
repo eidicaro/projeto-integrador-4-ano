@@ -1,13 +1,23 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
+import api, { getApiErrorMessage } from "../../lib/api";
+import {
+  getApplicationJobId,
+  getLaravelValidationErrors,
+  unwrapApiCollection,
+  unwrapApiData,
+} from "../../lib/candidate";
 
 const JOBS_STORAGE_KEY = "admin-created-jobs-v2";
 const CANDIDATES_STORAGE_KEY = "admin-job-candidates-v1";
 
 const JOB_STATUS = {
+  rascunho: { label: "Rascunho", tone: "muted" },
   publicada: { label: "Publicada", tone: "green" },
   pausada: { label: "Pausada", tone: "orange" },
   arquivada: { label: "Arquivada", tone: "muted" },
+  encerrada: { label: "Encerrada", tone: "muted" },
 };
 
 const CANDIDATE_STAGES = [
@@ -17,6 +27,7 @@ const CANDIDATE_STAGES = [
   { id: "oferta", label: "Oferta", tone: "pink" },
   { id: "contratado", label: "Contratados", tone: "green" },
   { id: "reprovado", label: "Reprovados", tone: "muted" },
+  { id: "retirado", label: "Retirados", tone: "muted", readonly: true },
 ];
 
 const BENEFIT_LABELS = {
@@ -34,135 +45,6 @@ const BENEFIT_LABELS = {
   "seguro-vida": "Seguro de vida",
 };
 
-const DEMO_JOBS = [
-  {
-    id: "demo-front-end",
-    title: "Desenvolvedor Front-end",
-    company: "Nexa Digital",
-    department: "Tecnologia",
-    location: "São Paulo - SP",
-    employmentType: "CLT",
-    workMode: "Híbrido",
-    seniority: "Júnior",
-    openings: 2,
-    applicationEmail: "talentos@nexadigital.com",
-    applicationDeadline: "2026-09-30",
-    salaryMin: 4200,
-    salaryMax: 6000,
-    salaryVisible: true,
-    description:
-      "Buscamos uma pessoa desenvolvedora Front-end apaixonada por experiências digitais, atenção aos detalhes e interfaces de alta qualidade. Você trabalhará com React em produtos utilizados diariamente por milhares de pessoas.",
-    responsibilities:
-      "• Desenvolver interfaces responsivas e acessíveis;\n• Trabalhar em conjunto com produto e design;\n• Participar de revisões de código;\n• Melhorar desempenho e experiência do usuário.",
-    requirements:
-      "• Conhecimento em React e JavaScript;\n• HTML e CSS sólidos;\n• Noções de Git e APIs REST;\n• Boa comunicação e vontade de aprender.",
-    tags: ["React", "JavaScript", "CSS", "Git"],
-    benefits: ["vale-refeicao", "plano-saude", "gympass", "day-off"],
-    status: "publicada",
-    createdAt: "2026-08-01T13:30:00.000Z",
-    updatedAt: "2026-08-04T17:10:00.000Z",
-  },
-  {
-    id: "demo-design",
-    title: "Product Designer",
-    company: "Nexa Digital",
-    department: "Produto",
-    location: "Remoto - Brasil",
-    employmentType: "PJ",
-    workMode: "Remoto",
-    seniority: "Pleno",
-    openings: 1,
-    applicationEmail: "design@nexadigital.com",
-    applicationDeadline: "2026-09-18",
-    salaryMin: 6500,
-    salaryMax: 8500,
-    salaryVisible: true,
-    description:
-      "Procuramos uma pessoa Product Designer capaz de transformar problemas complexos em experiências simples, elegantes e consistentes, atuando do discovery à entrega final.",
-    responsibilities:
-      "• Conduzir discovery e pesquisas;\n• Criar fluxos, wireframes e protótipos;\n• Evoluir o design system;\n• Acompanhar métricas de produto.",
-    requirements:
-      "• Portfólio de produtos digitais;\n• Domínio de Figma;\n• Experiência com design systems;\n• Comunicação estruturada.",
-    tags: ["Figma", "UX", "UI", "Design System"],
-    benefits: ["home-office", "horario-flexivel", "day-off"],
-    status: "pausada",
-    createdAt: "2026-07-27T14:00:00.000Z",
-    updatedAt: "2026-08-02T10:20:00.000Z",
-  },
-];
-
-const DEMO_CANDIDATES = {
-  "demo-front-end": [
-    {
-      id: "candidate-joao",
-      name: "João Silva",
-      email: "joao.silva@email.com",
-      phone: "(11) 98888-1234",
-      location: "São Paulo - SP",
-      experience: "2 anos",
-      skills: ["React", "TypeScript", "Tailwind"],
-      stage: "entrevista",
-      rating: 4,
-      appliedAt: "2026-08-03T12:00:00.000Z",
-      notes: "Boa comunicação e portfólio consistente.",
-    },
-    {
-      id: "candidate-maria",
-      name: "Maria Oliveira",
-      email: "maria.oliveira@email.com",
-      phone: "(15) 97777-5522",
-      location: "Sorocaba - SP",
-      experience: "1 ano e 6 meses",
-      skills: ["React", "JavaScript", "Figma"],
-      stage: "triagem",
-      rating: 5,
-      appliedAt: "2026-08-04T16:30:00.000Z",
-      notes: "Perfil promissor e ótima atenção visual.",
-    },
-    {
-      id: "candidate-lucas",
-      name: "Lucas Ferreira",
-      email: "lucas.ferreira@email.com",
-      phone: "(11) 96666-7711",
-      location: "Campinas - SP",
-      experience: "3 anos",
-      skills: ["Next.js", "React", "Node.js"],
-      stage: "oferta",
-      rating: 5,
-      appliedAt: "2026-08-01T09:15:00.000Z",
-      notes: "Excelente desempenho técnico e forte visão de produto.",
-    },
-    {
-      id: "candidate-ana",
-      name: "Ana Costa",
-      email: "ana.costa@email.com",
-      phone: "(11) 95555-1122",
-      location: "São Paulo - SP",
-      experience: "1 ano",
-      skills: ["JavaScript", "CSS", "Acessibilidade"],
-      stage: "novo",
-      rating: 3,
-      appliedAt: "2026-08-05T11:40:00.000Z",
-      notes: "Candidatura recente aguardando avaliação.",
-    },
-  ],
-  "demo-design": [
-    {
-      id: "candidate-beatriz",
-      name: "Beatriz Souza",
-      email: "beatriz.souza@email.com",
-      phone: "(21) 94444-3377",
-      location: "Rio de Janeiro - RJ",
-      experience: "4 anos",
-      skills: ["Figma", "Pesquisa", "Design System"],
-      stage: "entrevista",
-      rating: 5,
-      appliedAt: "2026-07-30T15:20:00.000Z",
-      notes: "Apresentação de case muito estruturada.",
-    },
-  ],
-};
-
 const emptyCandidateForm = {
   name: "",
   email: "",
@@ -173,30 +55,14 @@ const emptyCandidateForm = {
   notes: "",
 };
 
-function safeParse(value, fallback) {
-  try {
-    return value ? JSON.parse(value) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function createId(prefix) {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
 function normalizeStatus(status) {
-  return JOB_STATUS[status] ? status : "publicada";
+  return JOB_STATUS[status] ? status : "rascunho";
 }
 
 function normalizeJob(job) {
   return {
     ...job,
-    id: job.id || createId("job"),
+    id: job.id,
     title: job.title || "Vaga sem título",
     company: job.company || "Empresa não informada",
     location: job.location || "Local não informado",
@@ -212,31 +78,38 @@ function normalizeJob(job) {
   };
 }
 
-function loadJobs() {
-  if (typeof window === "undefined") return DEMO_JOBS.map(normalizeJob);
-
-  const rawJobs = window.localStorage.getItem(JOBS_STORAGE_KEY);
-
-  if (rawJobs === null) {
-    return DEMO_JOBS.map(normalizeJob);
-  }
-
-  const stored = safeParse(rawJobs, []);
-  return Array.isArray(stored) ? stored.map(normalizeJob) : [];
+function normalizeCandidate(candidate) {
+  return {
+    ...candidate,
+    id: candidate.id,
+    jobId: getApplicationJobId(candidate),
+    name: candidate.name || "Candidato sem nome",
+    email: candidate.email || "",
+    phone: candidate.phone || "",
+    location: candidate.location || "",
+    experience: candidate.experience || "",
+    skills: Array.isArray(candidate.skills) ? candidate.skills : [],
+    stage: CANDIDATE_STAGES.some((stage) => stage.id === candidate.stage)
+      ? candidate.stage
+      : "novo",
+    rating: Number(candidate.rating) || 0,
+    notes: candidate.notes || "",
+    appliedAt: candidate.appliedAt || candidate.createdAt || null,
+  };
 }
 
-function loadCandidates() {
-  if (typeof window === "undefined") return DEMO_CANDIDATES;
+function groupCandidatesByJob(candidates, jobs) {
+  const grouped = Object.fromEntries(jobs.map((job) => [job.id, []]));
 
-  const rawCandidates = window.localStorage.getItem(CANDIDATES_STORAGE_KEY);
+  candidates.forEach((candidateData) => {
+    const candidate = normalizeCandidate(candidateData);
+    if (candidate.jobId === null || candidate.jobId === undefined) return;
 
-  if (rawCandidates === null) {
-    const hasStoredJobs = window.localStorage.getItem(JOBS_STORAGE_KEY) !== null;
-    return hasStoredJobs ? {} : DEMO_CANDIDATES;
-  }
+    const jobKey = String(candidate.jobId);
+    grouped[jobKey] = [candidate, ...(grouped[jobKey] || [])];
+  });
 
-  const stored = safeParse(rawCandidates, {});
-  return stored && typeof stored === "object" ? stored : {};
+  return grouped;
 }
 
 function formatDate(value, options = {}) {
@@ -304,8 +177,199 @@ function getJobQuality(job) {
 }
 
 function escapeCsv(value) {
-  const text = String(value ?? "").replace(/"/g, '""');
+  let text = String(value ?? "");
+
+  if (/^[\t\r]|^\s*[=+\-@]/.test(text)) {
+    text = `'${text}`;
+  }
+
+  text = text.replace(/"/g, '""');
   return `"${text}"`;
+}
+
+const MAX_PAGE_REQUESTS = 1000;
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+function syncDialogAccessibility() {
+  const dialogs = Array.from(
+    document.querySelectorAll("[data-admin-dialog]")
+  );
+
+  dialogs.forEach((dialog, index) => {
+    if (index === dialogs.length - 1) {
+      dialog.removeAttribute("aria-hidden");
+    } else {
+      dialog.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
+async function fetchAllPages(path, { perPage, signal }) {
+  const records = [];
+  let page = 1;
+
+  while (page <= MAX_PAGE_REQUESTS) {
+    const response = await api.get(path, {
+      params: { page, per_page: perPage },
+      signal,
+    });
+    const pageRecords = unwrapApiCollection(response);
+    const meta = response?.data?.meta;
+
+    records.push(...pageRecords);
+
+    if (!meta) {
+      if (pageRecords.length < perPage) return records;
+      throw new Error(`A API não informou a paginação completa de ${path}.`);
+    }
+
+    const currentPage = Number(meta.current_page);
+    const lastPage = Number(meta.last_page);
+
+    if (
+      !Number.isInteger(currentPage) ||
+      !Number.isInteger(lastPage) ||
+      currentPage < 1 ||
+      lastPage < currentPage
+    ) {
+      throw new Error(`A API retornou paginação inválida para ${path}.`);
+    }
+
+    if (currentPage >= lastPage) return records;
+
+    const nextPage = currentPage + 1;
+    if (nextPage <= page) {
+      throw new Error(`A paginação de ${path} não avançou.`);
+    }
+    page = nextPage;
+  }
+
+  throw new Error(`O limite seguro de páginas foi excedido para ${path}.`);
+}
+
+function AccessibleDialog({
+  children,
+  className = "see-modal",
+  ariaLabel,
+  ariaLabelledBy,
+  onClose,
+  overlayStyle,
+  canClose = true,
+}) {
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  const canCloseRef = useRef(canClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    canCloseRef.current = canClose;
+  }, [canClose, onClose]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    if (!dialog) return undefined;
+
+    syncDialogAccessibility();
+
+    const isTopmost = () => {
+      const dialogs = document.querySelectorAll("[data-admin-dialog]");
+      return dialogs[dialogs.length - 1] === dialog;
+    };
+    const getFocusable = () =>
+      Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTOR)).filter(
+        (element) => element.getAttribute("aria-hidden") !== "true"
+      );
+    const focusFrame = window.requestAnimationFrame(() => {
+      const initialFocus =
+        dialog.querySelector("[data-dialog-initial-focus]") ||
+        getFocusable()[0] ||
+        dialog;
+      initialFocus.focus({ preventScroll: true });
+    });
+
+    function handleKeyDown(event) {
+      if (!isTopmost()) return;
+
+      if (event.key === "Escape" && canCloseRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        onCloseRef.current?.();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog.focus({ preventScroll: true });
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (activeElement === last || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      syncDialogAccessibility();
+      if (previouslyFocused?.isConnected) {
+        previouslyFocused.focus({ preventScroll: true });
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      className="see-overlay"
+      style={overlayStyle}
+      onMouseDown={(event) => {
+        if (
+          event.target === event.currentTarget &&
+          canCloseRef.current
+        ) {
+          onCloseRef.current?.();
+        }
+      }}
+    >
+      <div
+        ref={dialogRef}
+        className={className}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        tabIndex={-1}
+        data-admin-dialog
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function Icon({ name, size = 20, strokeWidth = 1.8 }) {
@@ -372,8 +436,12 @@ export default function AdminSee() {
   const location = useLocation();
   const searchInputRef = useRef(null);
 
-  const [jobs, setJobs] = useState(loadJobs);
-  const [candidatesByJob, setCandidatesByJob] = useState(loadCandidates);
+  const [jobs, setJobs] = useState([]);
+  const [candidatesByJob, setCandidatesByJob] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [pendingAction, setPendingAction] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
   const [workModeFilter, setWorkModeFilter] = useState("todos");
@@ -385,7 +453,19 @@ export default function AdminSee() {
   const [jobDetailTab, setJobDetailTab] = useState("visao");
   const [modal, setModal] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState(() =>
+    location.state?.showCreatedMessage || location.state?.showUpdatedMessage
+      ? {
+          type: "success",
+          title: location.state?.showUpdatedMessage
+            ? "Vaga atualizada com sucesso"
+            : "Vaga publicada com sucesso",
+          description: location.state?.createdJob?.title
+            ? `${location.state.createdJob.title} já está sincronizada no painel.`
+            : "A oportunidade já está sincronizada no painel.",
+        }
+      : null
+  );
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandSearch, setCommandSearch] = useState("");
   const [candidateSearch, setCandidateSearch] = useState("");
@@ -394,6 +474,7 @@ export default function AdminSee() {
   const [candidateForm, setCandidateForm] = useState(emptyCandidateForm);
   const [candidateFormErrors, setCandidateFormErrors] = useState({});
   const [selectedCandidateId, setSelectedCandidateId] = useState(null);
+  const [candidateNotesDraft, setCandidateNotesDraft] = useState("");
   const [draggedCandidate, setDraggedCandidate] = useState(null);
 
   const selectedJob = useMemo(
@@ -507,6 +588,60 @@ export default function AdminSee() {
     });
   }, [candidateSearch, candidateStageFilter, candidatesByJob, selectedJobId]);
 
+  const exportJobsCsv = useCallback(() => {
+    const header = [
+      "Título",
+      "Empresa",
+      "Local",
+      "Contratação",
+      "Modelo",
+      "Status",
+      "Candidatos",
+      "Entrevistas",
+      "Qualidade",
+      "Criada em",
+    ];
+
+    const rows = jobs.map((job) => {
+      const candidates = candidatesByJob[job.id] || [];
+      return [
+        job.title,
+        job.company,
+        job.location,
+        job.employmentType,
+        job.workMode,
+        JOB_STATUS[job.status]?.label || job.status,
+        candidates.length,
+        candidates.filter((candidate) => candidate.stage === "entrevista").length,
+        `${getJobQuality(job)}%`,
+        formatDate(job.createdAt),
+      ];
+    });
+
+    const csv = [header, ...rows]
+      .map((row) => row.map(escapeCsv).join(";"))
+      .join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], {
+      type: "text/csv;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `relatorio-vagas-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+
+    setToast({
+      type: "success",
+      title: "Relatório exportado",
+      description: "O arquivo CSV foi gerado com sucesso.",
+    });
+  }, [candidatesByJob, jobs]);
+
   const commandActions = useMemo(
     () => [
       {
@@ -514,31 +649,27 @@ export default function AdminSee() {
         title: "Criar nova vaga",
         description: "Abrir o editor de oportunidades",
         icon: "plus",
-        run: () => navigate("/admin/criar-vaga"),
       },
       {
         id: "search",
         title: "Pesquisar vagas",
         description: "Focar o campo de busca principal",
         icon: "search",
-        run: () => window.setTimeout(() => searchInputRef.current?.focus(), 50),
       },
       {
         id: "export",
         title: "Exportar relatório CSV",
         description: "Baixar vagas e indicadores",
         icon: "download",
-        run: exportJobsCsv,
       },
       {
         id: "toggle-view",
         title: viewMode === "grid" ? "Usar visualização em lista" : "Usar visualização em grade",
         description: "Alternar o modo de exibição",
         icon: viewMode === "grid" ? "list" : "grid",
-        run: () => setViewMode((current) => (current === "grid" ? "list" : "grid")),
       },
     ],
-    [candidatesByJob, jobs, navigate, viewMode]
+    [viewMode]
   );
 
   const filteredCommandActions = useMemo(() => {
@@ -551,31 +682,63 @@ export default function AdminSee() {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(JOBS_STORAGE_KEY, JSON.stringify(jobs));
+      window.localStorage.removeItem(JOBS_STORAGE_KEY);
+      window.localStorage.removeItem(CANDIDATES_STORAGE_KEY);
     } catch {
-      setToast({ type: "error", title: "Falha ao salvar vagas", description: "O navegador não permitiu atualizar o armazenamento local." });
+      // A aplicação não depende mais do armazenamento local.
     }
-  }, [jobs]);
+  }, []);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(CANDIDATES_STORAGE_KEY, JSON.stringify(candidatesByJob));
-    } catch {
-      setToast({ type: "error", title: "Falha ao salvar candidatos", description: "O navegador não permitiu atualizar o armazenamento local." });
-    }
-  }, [candidatesByJob]);
+    const controller = new AbortController();
+    let active = true;
+
+    Promise.all([
+      fetchAllPages("/admin/vagas", {
+        perPage: 100,
+        signal: controller.signal,
+      }),
+      fetchAllPages("/admin/candidaturas", {
+        perPage: 500,
+        signal: controller.signal,
+      }),
+    ])
+      .then(([jobsRecords, candidateRecords]) => {
+        if (!active) return;
+
+        const loadedJobs = jobsRecords
+          .filter((job) => job?.id !== null && job?.id !== undefined)
+          .map(normalizeJob);
+
+        setJobs(loadedJobs);
+        setCandidatesByJob(
+          groupCandidatesByJob(candidateRecords, loadedJobs)
+        );
+        setSelectedJobs([]);
+        setLoadError("");
+      })
+      .catch((error) => {
+        if (!active || error?.code === "ERR_CANCELED") return;
+
+        setLoadError(
+          getApiErrorMessage(
+            error,
+            "Não foi possível carregar as vagas e candidaturas."
+          )
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [reloadKey]);
 
   useEffect(() => {
-    if (!location.state?.showCreatedMessage) return;
-
-    setToast({
-      type: "success",
-      title: "Vaga publicada com sucesso",
-      description: location.state?.createdJob?.title
-        ? `${location.state.createdJob.title} já aparece no painel.`
-        : "A nova oportunidade já aparece no painel.",
-    });
-
+    if (!location.state?.showCreatedMessage && !location.state?.showUpdatedMessage) return;
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
 
@@ -610,19 +773,22 @@ export default function AdminSee() {
       }
 
       if (event.key === "Escape") {
-        setCommandOpen(false);
-        setModal(null);
-        setConfirmAction(null);
-        setSelectedCandidateId(null);
+        setModal((current) => current === "filters" ? null : current);
       }
     }
 
     window.addEventListener("keydown", handleKeyboard);
     return () => window.removeEventListener("keydown", handleKeyboard);
-  }, [candidatesByJob, jobs, navigate]);
+  }, [exportJobsCsv, navigate]);
 
   function notify(type, title, description) {
     setToast({ type, title, description });
+  }
+
+  function handleReload() {
+    setLoading(true);
+    setLoadError("");
+    setReloadKey((current) => current + 1);
   }
 
   function openJob(jobId) {
@@ -639,6 +805,11 @@ export default function AdminSee() {
     setModal("candidates");
   }
 
+  function openCandidateProfile(candidate) {
+    setSelectedCandidateId(candidate.id);
+    setCandidateNotesDraft(candidate.notes || "");
+  }
+
   function updateJob(jobId, updates) {
     setJobs((currentJobs) =>
       currentJobs.map((job) =>
@@ -649,35 +820,50 @@ export default function AdminSee() {
     );
   }
 
-  function toggleJobStatus(jobId) {
+  async function toggleJobStatus(jobId) {
     const job = jobs.find((item) => item.id === jobId);
-    if (!job) return;
+    if (!job || pendingAction) return;
 
     const nextStatus = job.status === "publicada" ? "pausada" : "publicada";
-    updateJob(jobId, { status: nextStatus });
-    notify(
-      "success",
-      nextStatus === "publicada" ? "Vaga reativada" : "Vaga pausada",
-      `${job.title} agora está ${JOB_STATUS[nextStatus].label.toLowerCase()}.`
-    );
+    setPendingAction(`status-${jobId}`);
+
+    try {
+      const response = await api.patch(`/admin/vagas/${encodeURIComponent(jobId)}/status`, {
+        status: nextStatus,
+      });
+      const updatedJob = unwrapApiData(response);
+      updateJob(jobId, updatedJob ? normalizeJob(updatedJob) : { status: nextStatus });
+      notify(
+        "success",
+        nextStatus === "publicada" ? "Vaga reativada" : "Vaga pausada",
+        `${job.title} agora está ${JOB_STATUS[nextStatus].label.toLowerCase()}.`
+      );
+    } catch (error) {
+      notify("error", "Não foi possível alterar a vaga", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
-  function duplicateJob(jobId) {
+  async function duplicateJob(jobId) {
     const source = jobs.find((job) => job.id === jobId);
-    if (!source) return;
+    if (!source || pendingAction) return;
+    setPendingAction(`duplicate-${jobId}`);
 
-    const clone = {
-      ...source,
-      id: createId("job"),
-      title: `${source.title} — Cópia`,
-      status: "pausada",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      const response = await api.post(`/admin/vagas/${encodeURIComponent(jobId)}/duplicate`);
+      const duplicated = unwrapApiData(response);
+      if (!duplicated?.id) throw new Error("A API não retornou a vaga duplicada.");
 
-    setJobs((current) => [clone, ...current]);
-    setCandidatesByJob((current) => ({ ...current, [clone.id]: [] }));
-    notify("success", "Vaga duplicada", "Uma cópia pausada foi criada para edição futura.");
+      const clone = normalizeJob(duplicated);
+      setJobs((current) => [clone, ...current]);
+      setCandidatesByJob((current) => ({ ...current, [clone.id]: [] }));
+      notify("success", "Vaga duplicada", "Uma cópia pausada foi criada para edição futura.");
+    } catch (error) {
+      notify("error", "Não foi possível duplicar", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
   function requestDelete(jobId) {
@@ -687,16 +873,45 @@ export default function AdminSee() {
     setConfirmAction({
       type: "delete-job",
       title: "Excluir esta vaga?",
-      description: `${job.title} e todos os candidatos vinculados serão removidos permanentemente.`,
+      description: `${job.title} será removida do painel. O histórico das candidaturas continuará preservado no banco.`,
       jobId,
     });
   }
 
-  function archiveJob(jobId) {
+  function requestCandidateDelete(jobId, candidateId) {
+    const candidate = (candidatesByJob[jobId] || []).find(
+      (item) => item.id === candidateId
+    );
+    if (!candidate) return;
+
+    setConfirmAction({
+      type: "delete-candidate",
+      title: "Remover este candidato?",
+      description: `${candidate.name} será removido deste processo seletivo. O histórico já registrado continuará preservado.`,
+      confirmLabel: "Remover candidato",
+      jobId,
+      candidateId,
+      candidateName: candidate.name,
+    });
+  }
+
+  async function archiveJob(jobId) {
     const job = jobs.find((item) => item.id === jobId);
-    if (!job) return;
-    updateJob(jobId, { status: "arquivada" });
-    notify("success", "Vaga arquivada", `${job.title} foi movida para o arquivo.`);
+    if (!job || pendingAction) return;
+    setPendingAction(`archive-${jobId}`);
+
+    try {
+      const response = await api.patch(`/admin/vagas/${encodeURIComponent(jobId)}/status`, {
+        status: "arquivada",
+      });
+      const updatedJob = unwrapApiData(response);
+      updateJob(jobId, updatedJob ? normalizeJob(updatedJob) : { status: "arquivada" });
+      notify("success", "Vaga arquivada", `${job.title} foi movida para o arquivo.`);
+    } catch (error) {
+      notify("error", "Não foi possível arquivar", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
   function toggleJobSelection(jobId) {
@@ -707,55 +922,95 @@ export default function AdminSee() {
     );
   }
 
-  function bulkArchive() {
-    setJobs((current) =>
-      current.map((job) =>
-        selectedJobs.includes(job.id)
-          ? { ...job, status: "arquivada", updatedAt: new Date().toISOString() }
-          : job
-      )
-    );
-    notify("success", "Vagas arquivadas", `${selectedJobs.length} item(ns) foram arquivados.`);
-    setSelectedJobs([]);
+  async function bulkArchive() {
+    if (!selectedJobs.length || pendingAction) return;
+    const ids = [...selectedJobs];
+    setPendingAction("bulk-archive");
+
+    try {
+      await api.post("/admin/vagas/bulk", { ids, action: "arquivar" });
+      setJobs((current) =>
+        current.map((job) =>
+          ids.includes(job.id)
+            ? { ...job, status: "arquivada", updatedAt: new Date().toISOString() }
+            : job
+        )
+      );
+      notify("success", "Vagas arquivadas", `${ids.length} item(ns) foram arquivados.`);
+      setSelectedJobs([]);
+    } catch (error) {
+      notify("error", "Não foi possível arquivar as vagas", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
   function requestBulkDelete() {
     setConfirmAction({
       type: "bulk-delete",
       title: "Excluir vagas selecionadas?",
-      description: `${selectedJobs.length} vaga(s) e seus respectivos candidatos serão removidos permanentemente.`,
+      description: `${selectedJobs.length} vaga(s) serão removidas do painel; os históricos permanecerão preservados.`,
     });
   }
 
-  function executeConfirmAction() {
-    if (!confirmAction) return;
+  async function executeConfirmAction() {
+    if (!confirmAction || pendingAction) return;
+    const action = confirmAction;
+    setPendingAction("delete");
 
-    if (confirmAction.type === "delete-job") {
-      const jobId = confirmAction.jobId;
-      setJobs((current) => current.filter((job) => job.id !== jobId));
-      setCandidatesByJob((current) => {
-        const next = { ...current };
-        delete next[jobId];
-        return next;
-      });
-      setSelectedJobs((current) => current.filter((id) => id !== jobId));
-      setModal(null);
-      notify("success", "Vaga excluída", "A oportunidade foi removida do painel.");
+    try {
+      if (action.type === "delete-job") {
+        const jobId = action.jobId;
+        await api.delete(`/admin/vagas/${encodeURIComponent(jobId)}`);
+        setJobs((current) => current.filter((job) => job.id !== jobId));
+        setCandidatesByJob((current) => {
+          const next = { ...current };
+          delete next[jobId];
+          return next;
+        });
+        setSelectedJobs((current) => current.filter((id) => id !== jobId));
+        setModal(null);
+        notify("success", "Vaga excluída", "A oportunidade foi removida do painel.");
+      }
+
+      if (action.type === "bulk-delete") {
+        const selectedIds = [...selectedJobs];
+        await api.post("/admin/vagas/bulk", { ids: selectedIds, action: "excluir" });
+        const ids = new Set(selectedIds);
+        setJobs((current) => current.filter((job) => !ids.has(job.id)));
+        setCandidatesByJob((current) => {
+          const next = { ...current };
+          ids.forEach((id) => delete next[id]);
+          return next;
+        });
+        notify("success", "Itens excluídos", `${selectedIds.length} vaga(s) foram removidas.`);
+        setSelectedJobs([]);
+      }
+
+      if (action.type === "delete-candidate") {
+        await api.delete(
+          `/admin/candidaturas/${encodeURIComponent(action.candidateId)}`
+        );
+        setCandidatesByJob((current) => ({
+          ...current,
+          [action.jobId]: (current[action.jobId] || []).filter(
+            (candidate) => candidate.id !== action.candidateId
+          ),
+        }));
+        setSelectedCandidateId(null);
+        notify(
+          "success",
+          "Candidato removido",
+          `${action.candidateName} foi removido do processo.`
+        );
+      }
+
+      setConfirmAction(null);
+    } catch (error) {
+      notify("error", "Não foi possível concluir a exclusão", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
     }
-
-    if (confirmAction.type === "bulk-delete") {
-      const ids = new Set(selectedJobs);
-      setJobs((current) => current.filter((job) => !ids.has(job.id)));
-      setCandidatesByJob((current) => {
-        const next = { ...current };
-        ids.forEach((id) => delete next[id]);
-        return next;
-      });
-      notify("success", "Itens excluídos", `${selectedJobs.length} vaga(s) foram removidas.`);
-      setSelectedJobs([]);
-    }
-
-    setConfirmAction(null);
   }
 
   function clearFilters() {
@@ -764,50 +1019,6 @@ export default function AdminSee() {
     setWorkModeFilter("todos");
     setEmploymentFilter("todos");
     setSortBy("recentes");
-  }
-
-  function exportJobsCsv() {
-    const header = [
-      "Título",
-      "Empresa",
-      "Local",
-      "Contratação",
-      "Modelo",
-      "Status",
-      "Candidatos",
-      "Entrevistas",
-      "Qualidade",
-      "Criada em",
-    ];
-
-    const rows = jobs.map((job) => {
-      const candidates = candidatesByJob[job.id] || [];
-      return [
-        job.title,
-        job.company,
-        job.location,
-        job.employmentType,
-        job.workMode,
-        JOB_STATUS[job.status]?.label || job.status,
-        candidates.length,
-        candidates.filter((candidate) => candidate.stage === "entrevista").length,
-        `${getJobQuality(job)}%`,
-        formatDate(job.createdAt),
-      ];
-    });
-
-    const csv = [header, ...rows].map((row) => row.map(escapeCsv).join(";")).join("\n");
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `relatorio-vagas-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
-
-    notify("success", "Relatório exportado", "O arquivo CSV foi gerado com sucesso.");
   }
 
   async function copyJob(job) {
@@ -831,16 +1042,15 @@ export default function AdminSee() {
     return errors;
   }
 
-  function submitCandidate(event) {
+  async function submitCandidate(event) {
     event.preventDefault();
-    if (!selectedJobId) return;
+    if (!selectedJobId || pendingAction) return;
 
     const errors = validateCandidateForm();
     setCandidateFormErrors(errors);
     if (Object.keys(errors).length) return;
 
-    const candidate = {
-      id: createId("candidate"),
+    const payload = {
       name: candidateForm.name.trim(),
       email: candidateForm.email.trim(),
       phone: candidateForm.phone.trim(),
@@ -851,63 +1061,140 @@ export default function AdminSee() {
         .map((skill) => skill.trim())
         .filter(Boolean),
       notes: candidateForm.notes.trim(),
-      stage: "novo",
-      rating: 0,
-      appliedAt: new Date().toISOString(),
     };
+    setPendingAction("candidate-create");
 
-    setCandidatesByJob((current) => ({
-      ...current,
-      [selectedJobId]: [candidate, ...(current[selectedJobId] || [])],
-    }));
-
-    setCandidateForm(emptyCandidateForm);
-    setCandidateFormErrors({});
-    setModal("candidates");
-    notify("success", "Candidato adicionado", `${candidate.name} entrou na etapa Novos.`);
+    try {
+      const response = await api.post(
+        `/admin/vagas/${encodeURIComponent(selectedJobId)}/candidaturas/manual`,
+        payload
+      );
+      const candidate = normalizeCandidate(unwrapApiData(response));
+      setCandidatesByJob((current) => ({
+        ...current,
+        [selectedJobId]: [candidate, ...(current[selectedJobId] || [])],
+      }));
+      setCandidateForm(emptyCandidateForm);
+      setCandidateFormErrors({});
+      setModal("candidates");
+      notify("success", "Candidato adicionado", `${candidate.name} entrou na etapa Novos.`);
+    } catch (error) {
+      const apiValidation = getLaravelValidationErrors(error);
+      setCandidateFormErrors({
+        name: apiValidation.name || apiValidation.nome,
+        email: apiValidation.email,
+        phone: apiValidation.phone || apiValidation.telefone,
+        location: apiValidation.location || apiValidation.localizacao,
+        experience: apiValidation.experience || apiValidation.experiencia,
+        skills: apiValidation.skills || apiValidation.habilidades,
+        notes: apiValidation.notes || apiValidation.observacoes,
+      });
+      notify("error", "Não foi possível adicionar", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
-  function moveCandidate(jobId, candidateId, stage) {
-    setCandidatesByJob((current) => ({
-      ...current,
-      [jobId]: (current[jobId] || []).map((candidate) =>
-        candidate.id === candidateId ? { ...candidate, stage } : candidate
-      ),
-    }));
+  async function moveCandidate(jobId, candidateId, stage) {
+    if (stage === "retirado") return;
 
-    const stageLabel = CANDIDATE_STAGES.find((item) => item.id === stage)?.label || stage;
-    notify("success", "Etapa atualizada", `O candidato foi movido para ${stageLabel}.`);
+    if (pendingAction) return;
+    setPendingAction(`candidate-stage-${candidateId}`);
+
+    try {
+      const response = await api.patch(
+        `/admin/candidaturas/${encodeURIComponent(candidateId)}`,
+        { stage }
+      );
+      const updatedCandidate = unwrapApiData(response);
+      setCandidatesByJob((current) => ({
+        ...current,
+        [jobId]: (current[jobId] || []).map((candidate) =>
+          candidate.id === candidateId
+            ? normalizeCandidate(updatedCandidate || { ...candidate, stage })
+            : candidate
+        ),
+      }));
+      const stageLabel = CANDIDATE_STAGES.find((item) => item.id === stage)?.label || stage;
+      notify("success", "Etapa atualizada", `O candidato foi movido para ${stageLabel}.`);
+    } catch (error) {
+      notify("error", "Não foi possível mover o candidato", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
-  function updateCandidateRating(jobId, candidateId, rating) {
-    setCandidatesByJob((current) => ({
-      ...current,
-      [jobId]: (current[jobId] || []).map((candidate) =>
-        candidate.id === candidateId ? { ...candidate, rating } : candidate
-      ),
-    }));
+  async function updateCandidateRating(jobId, candidateId, rating) {
+    if (pendingAction) return;
+    setPendingAction(`candidate-rating-${candidateId}`);
+
+    try {
+      const response = await api.patch(
+        `/admin/candidaturas/${encodeURIComponent(candidateId)}`,
+        { rating }
+      );
+      const updatedCandidate = unwrapApiData(response);
+      setCandidatesByJob((current) => ({
+        ...current,
+        [jobId]: (current[jobId] || []).map((candidate) =>
+          candidate.id === candidateId
+            ? normalizeCandidate(updatedCandidate || { ...candidate, rating })
+            : candidate
+        ),
+      }));
+    } catch (error) {
+      notify("error", "Não foi possível avaliar", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
-  function removeCandidate(jobId, candidateId) {
-    const candidate = (candidatesByJob[jobId] || []).find((item) => item.id === candidateId);
-    setCandidatesByJob((current) => ({
-      ...current,
-      [jobId]: (current[jobId] || []).filter((item) => item.id !== candidateId),
-    }));
-    setSelectedCandidateId(null);
-    notify("success", "Candidato removido", candidate ? `${candidate.name} foi removido do processo.` : "O candidato foi removido.");
+  async function updateCandidateNotes(jobId, candidateId) {
+    if (pendingAction) return;
+    setPendingAction(`candidate-notes-${candidateId}`);
+
+    try {
+      const notes = candidateNotesDraft.trim() || null;
+      const response = await api.patch(
+        `/admin/candidaturas/${encodeURIComponent(candidateId)}`,
+        { notes }
+      );
+      const updatedCandidate = unwrapApiData(response);
+      setCandidatesByJob((current) => ({
+        ...current,
+        [jobId]: (current[jobId] || []).map((candidate) =>
+          candidate.id === candidateId
+            ? normalizeCandidate(updatedCandidate || { ...candidate, notes })
+            : candidate
+        ),
+      }));
+      setCandidateNotesDraft(updatedCandidate?.notes || notes || "");
+      notify("success", "Anotações salvas", "As observações do processo foram atualizadas.");
+    } catch (error) {
+      notify("error", "Não foi possível salvar as anotações", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
   function handleCandidateDrop(stage) {
     if (!draggedCandidate || !selectedJobId) return;
-    moveCandidate(selectedJobId, draggedCandidate.candidateId, stage);
+    void moveCandidate(selectedJobId, draggedCandidate.candidateId, stage);
     setDraggedCandidate(null);
   }
 
   function runCommand(action) {
     setCommandOpen(false);
     setCommandSearch("");
-    action.run();
+
+    if (action.id === "new-job") navigate("/admin/criar-vaga");
+    if (action.id === "search") {
+      window.setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+    if (action.id === "export") exportJobsCsv();
+    if (action.id === "toggle-view") {
+      setViewMode((current) => (current === "grid" ? "list" : "grid"));
+    }
   }
 
   function renderJobCard(job) {
@@ -1024,9 +1311,20 @@ export default function AdminSee() {
         key={candidate.id}
         className="see-candidate-card"
         draggable
+        tabIndex={0}
+        role="button"
+        aria-label={`Abrir perfil de ${candidate.name}`}
         onDragStart={() => setDraggedCandidate({ candidateId: candidate.id })}
         onDragEnd={() => setDraggedCandidate(null)}
-        onClick={() => setSelectedCandidateId(candidate.id)}
+        onMouseDown={(event) => event.currentTarget.focus()}
+        onClick={() => openCandidateProfile(candidate)}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openCandidateProfile(candidate);
+          }
+        }}
       >
         <div className="see-candidate-card__top">
           <div className="see-avatar">
@@ -1655,7 +1953,7 @@ export default function AdminSee() {
 
             {modal === "filters" && (
               <div className="see-filter-panel">
-                <label>Status<select className="see-select" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="todas">Todas</option><option value="publicada">Publicadas</option><option value="pausada">Pausadas</option><option value="arquivada">Arquivadas</option></select></label>
+                <label>Status<select className="see-select" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="todas">Todas</option><option value="rascunho">Rascunhos</option><option value="publicada">Publicadas</option><option value="pausada">Pausadas</option><option value="arquivada">Arquivadas</option><option value="encerrada">Encerradas</option></select></label>
                 <label>Modelo<select className="see-select" value={workModeFilter} onChange={(event) => setWorkModeFilter(event.target.value)}><option value="todos">Todos</option><option value="Presencial">Presencial</option><option value="Híbrido">Híbrido</option><option value="Remoto">Remoto</option></select></label>
                 <label>Contratação<select className="see-select" value={employmentFilter} onChange={(event) => setEmploymentFilter(event.target.value)}><option value="todos">Todos</option><option value="CLT">CLT</option><option value="Estágio">Estágio</option><option value="Jovem Aprendiz">Jovem Aprendiz</option><option value="PJ">PJ</option><option value="Freelancer">Freelancer</option></select></label>
                 <label>Ordenação<select className="see-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}><option value="recentes">Mais recentes</option><option value="antigas">Mais antigas</option><option value="candidatos">Mais candidatos</option><option value="qualidade">Maior qualidade</option><option value="titulo">Título A-Z</option></select></label>
@@ -1679,7 +1977,24 @@ export default function AdminSee() {
               </div>
             )}
 
-            {filteredJobs.length > 0 ? (
+            {loading ? (
+              <section className="see-empty" role="status" aria-live="polite">
+                <div>
+                  <span className="see-empty__icon"><Icon name="refresh" size={28} /></span>
+                  <h3>Carregando vagas</h3>
+                  <p>Estamos sincronizando oportunidades e candidaturas com o servidor.</p>
+                </div>
+              </section>
+            ) : loadError ? (
+              <section className="see-empty" role="alert">
+                <div>
+                  <span className="see-empty__icon"><Icon name="shield" size={28} /></span>
+                  <h3>Não foi possível carregar o painel</h3>
+                  <p>{loadError}</p>
+                  <button type="button" onClick={handleReload}><Icon name="refresh" size={15} />Tentar novamente</button>
+                </div>
+              </section>
+            ) : filteredJobs.length > 0 ? (
               <section className={`see-jobs ${viewMode === "list" ? "see-jobs--list" : ""}`}>
                 {filteredJobs.map(renderJobCard)}
               </section>
@@ -1689,7 +2004,7 @@ export default function AdminSee() {
                   <span className="see-empty__icon"><Icon name="search" size={28} /></span>
                   <h3>Nenhuma vaga encontrada</h3>
                   <p>Os filtros atuais não retornaram resultados. Ajuste a pesquisa ou crie uma nova oportunidade.</p>
-                  <button type="button" onClick={clearFilters}><Icon name="refresh" size={15} />Restaurar resultados</button>
+                  <button type="button" onClick={jobs.length ? clearFilters : () => navigate("/admin/criar-vaga")}><Icon name={jobs.length ? "refresh" : "plus"} size={15} />{jobs.length ? "Restaurar resultados" : "Criar primeira vaga"}</button>
                 </div>
               </section>
             )}
@@ -1703,8 +2018,11 @@ export default function AdminSee() {
         </nav>
 
         {modal === "job" && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setModal(null)}>
-            <div className="see-modal" role="dialog" aria-modal="true" aria-label="Detalhes da vaga">
+          <AccessibleDialog
+            className="see-modal"
+            ariaLabel="Detalhes da vaga"
+            onClose={() => setModal(null)}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="briefcase" size={18} /></span><div><h2 className="see-modal__title">Detalhes da oportunidade</h2><span className="see-modal__subtitle">Atualizada {formatRelativeDate(selectedJob.updatedAt)}</span></div></div>
@@ -1754,6 +2072,7 @@ export default function AdminSee() {
 
                 <div className="see-detail-actions">
                   <button type="button" className="see-action-btn see-action-btn--danger" onClick={() => requestDelete(selectedJob.id)}><Icon name="trash" size={14} />Excluir</button>
+                  <button type="button" className="see-action-btn" onClick={() => navigate("/admin/criar-vaga", { state: { editJob: selectedJob } })}><Icon name="briefcase" size={14} />Editar</button>
                   <button type="button" className="see-action-btn" onClick={() => archiveJob(selectedJob.id)}><Icon name="archive" size={14} />Arquivar</button>
                   <button type="button" className="see-action-btn" onClick={() => duplicateJob(selectedJob.id)}><Icon name="copy" size={14} />Duplicar</button>
                   <button type="button" className="see-action-btn" onClick={() => copyJob(selectedJob)}><Icon name="external" size={14} />Copiar anúncio</button>
@@ -1761,13 +2080,15 @@ export default function AdminSee() {
                   <button type="button" className="see-action-btn see-action-btn--primary" onClick={() => openCandidates(selectedJob.id)}><Icon name="users" size={15} />Gerenciar candidatos</button>
                 </div>
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {modal === "candidates" && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setModal(null)}>
-            <div className="see-modal see-modal--wide" role="dialog" aria-modal="true" aria-label="Gestão de candidatos">
+          <AccessibleDialog
+            className="see-modal see-modal--wide"
+            ariaLabel="Gestão de candidatos"
+            onClose={() => setModal(null)}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="users" size={18} /></span><div><h2 className="see-modal__title">Pipeline — {selectedJob.title}</h2><span className="see-modal__subtitle">{(candidatesByJob[selectedJob.id] || []).length} candidatos no processo</span></div></div>
@@ -1777,8 +2098,8 @@ export default function AdminSee() {
               <div className="see-modal__body">
                 <div className="see-candidate-toolbar">
                   <div className="see-candidate-toolbar__left">
-                    <div className="see-candidate-search"><Icon name="search" size={15} /><input value={candidateSearch} onChange={(event) => setCandidateSearch(event.target.value)} placeholder="Buscar candidatos..." /></div>
-                    <select className="see-select" value={candidateStageFilter} onChange={(event) => setCandidateStageFilter(event.target.value)}><option value="todos">Todas as etapas</option>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id}>{stage.label}</option>)}</select>
+                    <div className="see-candidate-search"><Icon name="search" size={15} /><input value={candidateSearch} onChange={(event) => setCandidateSearch(event.target.value)} placeholder="Buscar candidatos..." aria-label="Buscar candidatos" data-dialog-initial-focus /></div>
+                    <select className="see-select" value={candidateStageFilter} onChange={(event) => setCandidateStageFilter(event.target.value)} aria-label="Filtrar candidatos por etapa"><option value="todos">Todas as etapas</option>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id}>{stage.label}</option>)}</select>
                   </div>
                   <div className="see-candidate-toolbar__right">
                     <div className="see-view-toggle"><button type="button" className={candidateView === "kanban" ? "active" : ""} onClick={() => setCandidateView("kanban")} aria-label="Kanban"><Icon name="grid" size={14} /></button><button type="button" className={candidateView === "list" ? "active" : ""} onClick={() => setCandidateView("list")} aria-label="Lista"><Icon name="list" size={14} /></button></div>
@@ -1794,8 +2115,12 @@ export default function AdminSee() {
                         <section
                           key={stage.id}
                           className={`see-stage-column ${draggedCandidate ? "see-stage-column--drop" : ""}`}
-                          onDragOver={(event) => event.preventDefault()}
-                          onDrop={() => handleCandidateDrop(stage.id)}
+                          onDragOver={(event) => {
+                            if (!stage.readonly) event.preventDefault();
+                          }}
+                          onDrop={() => {
+                            if (!stage.readonly) handleCandidateDrop(stage.id);
+                          }}
                         >
                           <header className="see-stage-column__head"><span className="see-stage-column__title"><span className={`see-stage-column__dot see-stage-column__dot--${stage.tone}`} />{stage.label}</span><span className="see-stage-column__count">{stageCandidates.length}</span></header>
                           <div className="see-stage-column__cards">{stageCandidates.map(renderCandidateCard)}</div>
@@ -1810,13 +2135,15 @@ export default function AdminSee() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {modal === "add-candidate" && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setModal("candidates")}>
-            <div className="see-modal" role="dialog" aria-modal="true" aria-label="Adicionar candidato">
+          <AccessibleDialog
+            className="see-modal"
+            ariaLabel="Adicionar candidato"
+            onClose={() => setModal("candidates")}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="userPlus" size={18} /></span><div><h2 className="see-modal__title">Adicionar candidato</h2><span className="see-modal__subtitle">{selectedJob.title}</span></div></div>
@@ -1824,26 +2151,28 @@ export default function AdminSee() {
               </header>
               <form className="see-modal__body" onSubmit={submitCandidate} noValidate>
                 <div className="see-form-grid">
-                  <div className="see-field"><label htmlFor="candidateName">Nome completo *</label><input id="candidateName" value={candidateForm.name} onChange={(event) => setCandidateForm((current) => ({ ...current, name: event.target.value }))} placeholder="Nome do candidato" />{candidateFormErrors.name && <span className="see-field__error">{candidateFormErrors.name}</span>}</div>
+                  <div className="see-field"><label htmlFor="candidateName">Nome completo *</label><input id="candidateName" value={candidateForm.name} onChange={(event) => setCandidateForm((current) => ({ ...current, name: event.target.value }))} placeholder="Nome do candidato" data-dialog-initial-focus />{candidateFormErrors.name && <span className="see-field__error">{candidateFormErrors.name}</span>}</div>
                   <div className="see-field"><label htmlFor="candidateEmail">E-mail *</label><input id="candidateEmail" type="email" value={candidateForm.email} onChange={(event) => setCandidateForm((current) => ({ ...current, email: event.target.value }))} placeholder="candidato@email.com" />{candidateFormErrors.email && <span className="see-field__error">{candidateFormErrors.email}</span>}</div>
-                  <div className="see-field"><label htmlFor="candidatePhone">Telefone</label><input id="candidatePhone" value={candidateForm.phone} onChange={(event) => setCandidateForm((current) => ({ ...current, phone: event.target.value }))} placeholder="(00) 00000-0000" /></div>
-                  <div className="see-field"><label htmlFor="candidateLocation">Localização</label><input id="candidateLocation" value={candidateForm.location} onChange={(event) => setCandidateForm((current) => ({ ...current, location: event.target.value }))} placeholder="Cidade - UF" /></div>
-                  <div className="see-field"><label htmlFor="candidateExperience">Experiência</label><input id="candidateExperience" value={candidateForm.experience} onChange={(event) => setCandidateForm((current) => ({ ...current, experience: event.target.value }))} placeholder="Ex: 2 anos" /></div>
-                  <div className="see-field"><label htmlFor="candidateSkills">Habilidades</label><input id="candidateSkills" value={candidateForm.skills} onChange={(event) => setCandidateForm((current) => ({ ...current, skills: event.target.value }))} placeholder="React, JavaScript, Git" /></div>
-                  <div className="see-field see-field--full"><label htmlFor="candidateNotes">Observações</label><textarea id="candidateNotes" value={candidateForm.notes} onChange={(event) => setCandidateForm((current) => ({ ...current, notes: event.target.value }))} placeholder="Registre informações importantes sobre o perfil..." /></div>
+                  <div className="see-field"><label htmlFor="candidatePhone">Telefone</label><input id="candidatePhone" value={candidateForm.phone} onChange={(event) => setCandidateForm((current) => ({ ...current, phone: event.target.value }))} placeholder="(00) 00000-0000" />{candidateFormErrors.phone && <span className="see-field__error">{candidateFormErrors.phone}</span>}</div>
+                  <div className="see-field"><label htmlFor="candidateLocation">Localização</label><input id="candidateLocation" value={candidateForm.location} onChange={(event) => setCandidateForm((current) => ({ ...current, location: event.target.value }))} placeholder="Cidade - UF" />{candidateFormErrors.location && <span className="see-field__error">{candidateFormErrors.location}</span>}</div>
+                  <div className="see-field"><label htmlFor="candidateExperience">Experiência</label><input id="candidateExperience" value={candidateForm.experience} onChange={(event) => setCandidateForm((current) => ({ ...current, experience: event.target.value }))} placeholder="Ex: 2 anos" />{candidateFormErrors.experience && <span className="see-field__error">{candidateFormErrors.experience}</span>}</div>
+                  <div className="see-field"><label htmlFor="candidateSkills">Habilidades</label><input id="candidateSkills" value={candidateForm.skills} onChange={(event) => setCandidateForm((current) => ({ ...current, skills: event.target.value }))} placeholder="React, JavaScript, Git" />{candidateFormErrors.skills && <span className="see-field__error">{candidateFormErrors.skills}</span>}</div>
+                  <div className="see-field see-field--full"><label htmlFor="candidateNotes">Observações</label><textarea id="candidateNotes" value={candidateForm.notes} onChange={(event) => setCandidateForm((current) => ({ ...current, notes: event.target.value }))} placeholder="Registre informações importantes sobre o perfil..." />{candidateFormErrors.notes && <span className="see-field__error">{candidateFormErrors.notes}</span>}</div>
                 </div>
                 <div className="see-detail-actions">
                   <button type="button" className="see-action-btn" onClick={() => setModal("candidates")}>Cancelar</button>
-                  <button type="submit" className="see-action-btn see-action-btn--primary"><Icon name="userPlus" size={14} />Adicionar ao pipeline</button>
+                  <button type="submit" className="see-action-btn see-action-btn--primary" disabled={pendingAction === "candidate-create"}><Icon name="userPlus" size={14} />{pendingAction === "candidate-create" ? "Adicionando..." : "Adicionar ao pipeline"}</button>
                 </div>
               </form>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {selectedCandidate && selectedJob && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setSelectedCandidateId(null)}>
-            <div className="see-modal" role="dialog" aria-modal="true" aria-label="Perfil do candidato">
+          <AccessibleDialog
+            className="see-modal"
+            ariaLabel="Perfil do candidato"
+            onClose={() => setSelectedCandidateId(null)}
+          >
               <div className="see-modal__accent" />
               <header className="see-modal__header">
                 <div className="see-modal__title-wrap"><span className="see-modal__icon"><Icon name="users" size={18} /></span><div><h2 className="see-modal__title">Perfil do candidato</h2><span className="see-modal__subtitle">Inscrição em {selectedJob.title}</span></div></div>
@@ -1857,38 +2186,43 @@ export default function AdminSee() {
                     <div className="see-profile__contact"><span><Icon name="mail" size={13} />{selectedCandidate.email}</span><span><Icon name="phone" size={13} />{selectedCandidate.phone || "Não informado"}</span><span><Icon name="map" size={13} />{selectedCandidate.location || "Não informado"}</span></div>
                   </aside>
                   <div className="see-profile__main">
-                    <section className="see-profile__panel"><h4>Etapa do processo</h4><div className="see-profile__stage" style={{ marginTop: 10 }}><select className="see-select" value={selectedCandidate.stage} onChange={(event) => moveCandidate(selectedJob.id, selectedCandidate.id, event.target.value)}>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id}>{stage.label}</option>)}</select></div></section>
+                    <section className="see-profile__panel"><h4>Etapa do processo</h4><div className="see-profile__stage" style={{ marginTop: 10 }}><select className="see-select" value={selectedCandidate.stage} onChange={(event) => moveCandidate(selectedJob.id, selectedCandidate.id, event.target.value)} aria-label={`Etapa de ${selectedCandidate.name}`}>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id} disabled={stage.readonly}>{stage.label}</option>)}</select></div></section>
                     <section className="see-profile__panel"><h4>Habilidades</h4><div className="see-profile__skills">{(selectedCandidate.skills || []).length ? selectedCandidate.skills.map((skill) => <span key={skill}>{skill}</span>) : <span>Não informado</span>}</div></section>
-                    <section className="see-profile__panel"><h4>Anotações</h4><p>{selectedCandidate.notes || "Nenhuma observação registrada."}</p></section>
-                    <section className="see-profile__panel"><h4>Avaliação</h4><div className="see-rating" style={{ marginTop: 9 }}>{[1,2,3,4,5].map((rating) => <button key={rating} type="button" className={rating <= (selectedCandidate.rating || 0) ? "see-rating__star see-rating__star--active" : "see-rating__star"} onClick={() => updateCandidateRating(selectedJob.id, selectedCandidate.id, rating)}><Icon name="star" size={16} /></button>)}</div></section>
+                    <section className="see-profile__panel"><h4>Anotações</h4><div className="see-field" style={{ marginTop: 10 }}><textarea value={candidateNotesDraft} maxLength={5000} onChange={(event) => setCandidateNotesDraft(event.target.value)} placeholder="Registre informações relevantes para o processo." aria-label={`Anotações sobre ${selectedCandidate.name}`} /><button type="button" className="see-action-btn" style={{ marginTop: 9 }} disabled={pendingAction === `candidate-notes-${selectedCandidate.id}`} onClick={() => updateCandidateNotes(selectedJob.id, selectedCandidate.id)}>{pendingAction === `candidate-notes-${selectedCandidate.id}` ? "Salvando..." : "Salvar anotações"}</button></div></section>
+                    <section className="see-profile__panel"><h4>Avaliação</h4><div className="see-rating" style={{ marginTop: 9 }} aria-label={`Avaliação ${selectedCandidate.rating || 0} de 5`}>{[1,2,3,4,5].map((rating) => <button key={rating} type="button" className={rating <= (selectedCandidate.rating || 0) ? "see-rating__star see-rating__star--active" : "see-rating__star"} onClick={() => updateCandidateRating(selectedJob.id, selectedCandidate.id, rating)} aria-label={`Avaliar ${selectedCandidate.name} com ${rating} estrelas`} aria-pressed={rating === selectedCandidate.rating}><Icon name="star" size={16} /></button>)}</div></section>
                   </div>
                 </div>
-                <div className="see-detail-actions"><button type="button" className="see-action-btn see-action-btn--danger" onClick={() => removeCandidate(selectedJob.id, selectedCandidate.id)}><Icon name="trash" size={14} />Remover candidato</button><button type="button" className="see-action-btn" onClick={() => window.location.href = `mailto:${selectedCandidate.email}`}><Icon name="mail" size={14} />Enviar e-mail</button></div>
+                <div className="see-detail-actions"><button type="button" className="see-action-btn see-action-btn--danger" onClick={() => requestCandidateDelete(selectedJob.id, selectedCandidate.id)}><Icon name="trash" size={14} />Remover candidato</button><button type="button" className="see-action-btn" onClick={() => window.location.href = `mailto:${selectedCandidate.email}`}><Icon name="mail" size={14} />Enviar e-mail</button></div>
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {confirmAction && (
-          <div className="see-overlay" onMouseDown={(event) => event.target === event.currentTarget && setConfirmAction(null)}>
-            <div className="see-modal see-modal--small" role="dialog" aria-modal="true" aria-label="Confirmar exclusão">
+          <AccessibleDialog
+            className="see-modal see-modal--small"
+            ariaLabel="Confirmar exclusão"
+            onClose={() => setConfirmAction(null)}
+            canClose={pendingAction !== "delete"}
+          >
               <div className="see-modal__accent" />
               <div className="see-modal__body see-confirm">
                 <span className="see-confirm__icon"><Icon name="trash" size={22} /></span>
                 <h2>{confirmAction.title}</h2><p>{confirmAction.description}</p>
-                <div className="see-confirm__actions"><button type="button" className="see-action-btn" onClick={() => setConfirmAction(null)}>Cancelar</button><button type="button" className="see-action-btn see-action-btn--danger" onClick={executeConfirmAction}><Icon name="trash" size={14} />Excluir permanentemente</button></div>
+                <div className="see-confirm__actions"><button type="button" className="see-action-btn" onClick={() => setConfirmAction(null)} disabled={pendingAction === "delete"} data-dialog-initial-focus>Cancelar</button><button type="button" className="see-action-btn see-action-btn--danger" onClick={executeConfirmAction} disabled={pendingAction === "delete"}><Icon name="trash" size={14} />{pendingAction === "delete" ? (confirmAction.type === "delete-candidate" ? "Removendo..." : "Excluindo...") : (confirmAction.confirmLabel || "Excluir")}</button></div>
               </div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {commandOpen && (
-          <div className="see-overlay" style={{ placeItems: "start center", paddingTop: "12vh" }} onMouseDown={(event) => event.target === event.currentTarget && setCommandOpen(false)}>
-            <div className="see-command" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-              <div className="see-command__search"><Icon name="search" size={19} /><input autoFocus value={commandSearch} onChange={(event) => setCommandSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" && filteredCommandActions[0] && runCommand(filteredCommandActions[0])} placeholder="Digite uma ação..." /><button type="button" className="see-modal__close" onClick={() => setCommandOpen(false)}><Icon name="close" size={15} /></button></div>
+          <AccessibleDialog
+            className="see-command"
+            ariaLabel="Paleta de comandos"
+            overlayStyle={{ placeItems: "start center", paddingTop: "12vh" }}
+            onClose={() => setCommandOpen(false)}
+          >
+              <div className="see-command__search"><Icon name="search" size={19} /><input value={commandSearch} onChange={(event) => setCommandSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" && filteredCommandActions[0] && runCommand(filteredCommandActions[0])} placeholder="Digite uma ação..." aria-label="Buscar ação na paleta de comandos" data-dialog-initial-focus /><button type="button" className="see-modal__close" onClick={() => setCommandOpen(false)} aria-label="Fechar paleta de comandos"><Icon name="close" size={15} /></button></div>
               <div className="see-command__body"><span className="see-command__label">Ações disponíveis</span>{filteredCommandActions.map((action) => <button key={action.id} type="button" className="see-command__item" onClick={() => runCommand(action)}><span className="see-command__item-icon"><Icon name={action.icon} size={17} /></span><span className="see-command__item-copy"><strong>{action.title}</strong><span>{action.description}</span></span><Icon name="chevron" size={14} /></button>)}</div>
-            </div>
-          </div>
+          </AccessibleDialog>
         )}
 
         {toast && (

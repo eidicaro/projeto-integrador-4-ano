@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import {
+  getApiErrorMessage,
+  getApiFieldError,
+} from "../../lib/api";
 
 const EmailIcon = () => (
   <svg
@@ -156,10 +161,14 @@ const SparkleIcon = () => (
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { login, logout } = useAuth();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -167,11 +176,43 @@ export default function AdminLogin() {
     if (isLoading) return;
 
     setIsLoading(true);
+    setAuthError("");
 
-    // Remova este delay quando conectar sua API real.
-    await new Promise((resolve) => setTimeout(resolve, 900));
+    try {
+      const authenticatedUser = await login({
+        email: email.trim().toLowerCase(),
+        password,
+        remember: rememberMe,
+      });
 
-    navigate("/admin/home");
+      if (
+        String(authenticatedUser.role || "").toLowerCase() !==
+        "recrutador"
+      ) {
+        try {
+          await logout();
+        } catch {
+          // O estado local é limpo pelo AuthContext mesmo se a API falhar.
+        }
+
+        setAuthError(
+          "Esta conta não possui acesso de recrutador.",
+        );
+        return;
+      }
+
+      navigate("/admin/home", { replace: true });
+    } catch (error) {
+      setAuthError(
+        getApiFieldError(error, "email", "password") ||
+          getApiErrorMessage(
+            error,
+            "Não foi possível autenticar. Verifique suas credenciais.",
+          ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -1391,9 +1432,15 @@ export default function AdminLogin() {
                         className="admin-login__input"
                         type="email"
                         name="email"
+                        value={email}
+                        onChange={(event) => {
+                          setEmail(event.target.value);
+                          setAuthError("");
+                        }}
                         placeholder="admin@empresa.com"
                         autoComplete="email"
                         inputMode="email"
+                        disabled={isLoading}
                         required
                       />
                     </div>
@@ -1415,9 +1462,14 @@ export default function AdminLogin() {
                         className="admin-login__input"
                         type={showPassword ? "text" : "password"}
                         name="password"
+                        value={password}
+                        onChange={(event) => {
+                          setPassword(event.target.value);
+                          setAuthError("");
+                        }}
                         placeholder="Digite sua senha"
                         autoComplete="current-password"
-                        minLength={6}
+                        disabled={isLoading}
                         required
                       />
 
@@ -1430,6 +1482,7 @@ export default function AdminLogin() {
                             : "Mostrar senha"
                         }
                         aria-pressed={showPassword}
+                        disabled={isLoading}
                         onClick={() =>
                           setShowPassword((currentValue) => !currentValue)
                         }
@@ -1445,6 +1498,7 @@ export default function AdminLogin() {
                         className="admin-login__checkbox"
                         type="checkbox"
                         checked={rememberMe}
+                        disabled={isLoading}
                         onChange={(event) =>
                           setRememberMe(event.target.checked)
                         }
@@ -1457,14 +1511,25 @@ export default function AdminLogin() {
                     <button
                       className="admin-login__forgot"
                       type="button"
-                      onClick={() => {
-                        // Adicione aqui a sua rota ou modal de recuperação.
-                        console.log("Recuperar senha");
-                      }}
+                      disabled={isLoading}
+                      onClick={() => navigate("/recuperar-senha")}
                     >
                       Esqueceu a senha?
                     </button>
                   </div>
+
+                  {authError && (
+                    <p
+                      className="admin-login__subtitle"
+                      role="alert"
+                      style={{
+                        margin: 0,
+                        color: "#ff91b9",
+                      }}
+                    >
+                      {authError}
+                    </p>
+                  )}
 
                   <button
                     className="admin-login__submit"
