@@ -52,6 +52,7 @@ const emptyCandidateForm = {
   location: "",
   experience: "",
   skills: "",
+  stage: "novo",
   notes: "",
 };
 
@@ -1153,6 +1154,7 @@ export default function AdminSee() {
         .split(",")
         .map((skill) => skill.trim())
         .filter(Boolean),
+      stage: candidateForm.stage,
       notes: candidateForm.notes.trim(),
     };
     setPendingAction("candidate-create");
@@ -1170,7 +1172,8 @@ export default function AdminSee() {
       setCandidateForm(emptyCandidateForm);
       setCandidateFormErrors({});
       setModal("candidates");
-      notify("success", "Candidato adicionado", `${candidate.name} entrou na etapa Novos.`);
+      const initialStage = CANDIDATE_STAGES.find((stage) => stage.id === candidate.stage)?.label || candidate.stage;
+      notify("success", "Candidato adicionado", `${candidate.name} entrou na etapa ${initialStage}.`);
     } catch (error) {
       const apiValidation = getLaravelValidationErrors(error);
       setCandidateFormErrors({
@@ -1180,6 +1183,7 @@ export default function AdminSee() {
         location: apiValidation.location || apiValidation.localizacao,
         experience: apiValidation.experience || apiValidation.experiencia,
         skills: apiValidation.skills || apiValidation.habilidades,
+        stage: apiValidation.stage || apiValidation.status,
         notes: apiValidation.notes || apiValidation.observacoes,
       });
       notify("error", "Não foi possível adicionar", getApiErrorMessage(error));
@@ -2274,6 +2278,7 @@ export default function AdminSee() {
                   <div className="see-field"><label htmlFor="candidatePhone">Telefone</label><input id="candidatePhone" value={candidateForm.phone} onChange={(event) => setCandidateForm((current) => ({ ...current, phone: event.target.value }))} placeholder="(00) 00000-0000" />{candidateFormErrors.phone && <span className="see-field__error">{candidateFormErrors.phone}</span>}</div>
                   <div className="see-field"><label htmlFor="candidateLocation">Localização</label><input id="candidateLocation" value={candidateForm.location} onChange={(event) => setCandidateForm((current) => ({ ...current, location: event.target.value }))} placeholder="Cidade - UF" />{candidateFormErrors.location && <span className="see-field__error">{candidateFormErrors.location}</span>}</div>
                   <div className="see-field"><label htmlFor="candidateExperience">Experiência</label><input id="candidateExperience" value={candidateForm.experience} onChange={(event) => setCandidateForm((current) => ({ ...current, experience: event.target.value }))} placeholder="Ex: 2 anos" />{candidateFormErrors.experience && <span className="see-field__error">{candidateFormErrors.experience}</span>}</div>
+                  <div className="see-field"><label htmlFor="candidateStage">Etapa inicial *</label><select id="candidateStage" className="see-select" value={candidateForm.stage} onChange={(event) => setCandidateForm((current) => ({ ...current, stage: event.target.value }))}>{CANDIDATE_STAGES.filter((stage) => !stage.readonly).map((stage) => <option key={stage.id} value={stage.id}>{stage.label}</option>)}</select>{candidateFormErrors.stage && <span className="see-field__error">{candidateFormErrors.stage}</span>}</div>
                   <div className="see-field"><label htmlFor="candidateSkills">Habilidades</label><input id="candidateSkills" value={candidateForm.skills} onChange={(event) => setCandidateForm((current) => ({ ...current, skills: event.target.value }))} placeholder="React, JavaScript, Git" />{candidateFormErrors.skills && <span className="see-field__error">{candidateFormErrors.skills}</span>}</div>
                   <div className="see-field see-field--full"><label htmlFor="candidateNotes">Observações</label><textarea id="candidateNotes" value={candidateForm.notes} onChange={(event) => setCandidateForm((current) => ({ ...current, notes: event.target.value }))} placeholder="Registre informações importantes sobre o perfil..." />{candidateFormErrors.notes && <span className="see-field__error">{candidateFormErrors.notes}</span>}</div>
                 </div>

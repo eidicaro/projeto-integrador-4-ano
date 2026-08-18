@@ -180,6 +180,7 @@ class CandidaturaTest extends TestCase
             'location' => 'Sorocaba - SP',
             'experience' => '3 anos',
             'skills' => 'Laravel, PHP, MySQL',
+            'stage' => CandidaturaStatus::Screening->value,
             'notes' => 'Indicação interna.',
         ]);
 
@@ -192,7 +193,7 @@ class CandidaturaTest extends TestCase
             ->assertJsonPath('data.experience', '3 anos')
             ->assertJsonPath('data.skills', ['Laravel', 'PHP', 'MySQL'])
             ->assertJsonPath('data.notes', 'Indicação interna.')
-            ->assertJsonPath('data.stage', CandidaturaStatus::New->value)
+            ->assertJsonPath('data.stage', CandidaturaStatus::Screening->value)
             ->assertJsonPath('data.rating', 0)
             ->assertJsonPath('data.source', 'manual');
 
@@ -203,6 +204,12 @@ class CandidaturaTest extends TestCase
             'email_candidato' => 'joao@example.com',
             'origem' => 'manual',
             'atualizada_por' => $owner->id,
+        ]);
+        $this->assertDatabaseHas('candidatura_movimentacoes', [
+            'candidatura_id' => $response->json('data.id'),
+            'status_anterior' => null,
+            'status_novo' => CandidaturaStatus::Screening->value,
+            'user_id' => $owner->id,
         ]);
     }
 

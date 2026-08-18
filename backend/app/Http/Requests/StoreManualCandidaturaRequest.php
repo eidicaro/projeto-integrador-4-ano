@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CandidaturaStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreManualCandidaturaRequest extends FormRequest
 {
@@ -19,6 +21,7 @@ class StoreManualCandidaturaRequest extends FormRequest
             'telefone' => trim((string) ($this->input('telefone') ?? $this->input('phone'))),
             'localizacao' => trim((string) ($this->input('localizacao') ?? $this->input('location'))),
             'experiencia' => trim((string) ($this->input('experiencia') ?? $this->input('experience'))),
+            'status' => $this->input('status') ?? $this->input('stage') ?? CandidaturaStatus::New->value,
         ];
 
         if ($this->exists('habilidades') || $this->exists('skills')) {
@@ -50,6 +53,7 @@ class StoreManualCandidaturaRequest extends FormRequest
             'telefone' => ['nullable', 'string', 'max:20'],
             'localizacao' => ['nullable', 'string', 'max:150'],
             'experiencia' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', Rule::enum(CandidaturaStatus::class), Rule::notIn([CandidaturaStatus::Withdrawn->value])],
             'habilidades' => ['sometimes', 'array', 'max:50'],
             'habilidades.*' => ['string', 'max:80', 'distinct:ignore_case'],
             'observacoes' => ['nullable', 'string', 'max:5000'],

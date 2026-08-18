@@ -202,6 +202,7 @@ class CandidaturaController extends Controller
 
         try {
             $candidatura = DB::transaction(function () use ($data, $request, $vaga): Candidatura {
+                $initialStatus = CandidaturaStatus::from($data['status']);
                 $candidatura = Candidatura::create([
                     'vaga_id' => $vaga->id,
                     'nome_candidato' => $data['nome'],
@@ -211,12 +212,12 @@ class CandidaturaController extends Controller
                     'experiencia_resumo' => $data['experiencia'] ?? null,
                     'habilidades' => $data['habilidades'] ?? [],
                     'observacoes' => $data['observacoes'] ?? null,
-                    'status' => CandidaturaStatus::New,
+                    'status' => $initialStatus,
                     'origem' => 'manual',
                     'atualizada_por' => $request->user()->id,
                     'status_atualizado_em' => now(),
                 ]);
-                $this->recordMovement($candidatura, $request->user()->id, null, CandidaturaStatus::New);
+                $this->recordMovement($candidatura, $request->user()->id, null, $initialStatus);
 
                 return $candidatura;
             });
