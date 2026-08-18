@@ -908,9 +908,11 @@ export default function CreateResume() {
       return;
     }
 
+    showToast('Na janela que abrir, escolha "Salvar como PDF" para baixar o arquivo.');
+
     window.setTimeout(() => {
       window.print();
-    }, 150);
+    }, 300);
   }
 
   async function copiarCurriculo() {
@@ -2568,7 +2570,7 @@ export default function CreateResume() {
                   }
                 >
                   <PrinterIcon />
-                  Gerar currículo
+                  Baixar PDF
                 </button>
               </div>
             </section>
@@ -2607,7 +2609,7 @@ export default function CreateResume() {
                     onClick={
                       imprimirCurriculo
                     }
-                    title="Imprimir ou salvar como PDF"
+                    title="Baixar ou imprimir o currículo em PDF"
                   >
                     <PrinterIcon />
                   </button>
@@ -7190,10 +7192,47 @@ input:checked + span svg {
 /* PRINT */
 
 @media print {
+  html,
+  body,
+  #root,
+  .resume-page {
+    width: 210mm !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  body > #root > *:not(.resume-page),
+  .resume-page > *:not(.resume-layout),
+  .resume-layout > *:not(.resume-preview-column),
+  .preview-toolbar,
+  .preview-hint,
+  .mobile-preview-overlay {
+    display: none !important;
+  }
+
+  .resume-page::after {
+    display: none !important;
+  }
+
+  .resume-layout {
+    display: block !important;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .resume-preview-column,
   .preview-sticky {
     display: block !important;
     position: static !important;
+    width: 210mm !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
 
   body * {
@@ -7208,16 +7247,15 @@ input:checked + span svg {
   }
 
   #resume-print-area {
-    position: absolute;
+    position: static;
 
-    top: 0;
-    left: 0;
+    width: 210mm;
 
-    width: 100%;
+    min-height: 297mm;
 
-    min-height: 0;
+    margin: 0;
 
-    padding: 16mm;
+    padding: 14mm 16mm;
 
     border: 0;
 
@@ -7228,6 +7266,9 @@ input:checked + span svg {
     transform: none !important;
 
     background: white;
+
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   @page {

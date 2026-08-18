@@ -79,16 +79,24 @@ function normalizeJob(job) {
 }
 
 function normalizeCandidate(candidate) {
+  const resume = candidate.resumeSnapshot || candidate.resume || null;
+  const resumeSkills = Array.isArray(resume?.habilidades)
+    ? resume.habilidades.map((skill) => typeof skill === "string" ? skill : skill?.nome).filter(Boolean)
+    : [];
+
   return {
     ...candidate,
     id: candidate.id,
     jobId: getApplicationJobId(candidate),
-    name: candidate.name || "Candidato sem nome",
-    email: candidate.email || "",
-    phone: candidate.phone || "",
-    location: candidate.location || "",
-    experience: candidate.experience || "",
-    skills: Array.isArray(candidate.skills) ? candidate.skills : [],
+    name: resume?.nome_completo || candidate.name || "Candidato sem nome",
+    email: resume?.email || candidate.email || "",
+    phone: resume?.telefone || candidate.phone || "",
+    location: resume?.cidade_estado || candidate.location || "",
+    experience: resume?.area_atuacao || candidate.experience || "",
+    skills: resumeSkills.length
+      ? resumeSkills
+      : (Array.isArray(candidate.skills) ? candidate.skills : []),
+    resumeData: resume,
     stage: CANDIDATE_STAGES.some((stage) => stage.id === candidate.stage)
       ? candidate.stage
       : "novo",
@@ -429,6 +437,66 @@ function Icon({ name, size = 20, strokeWidth = 1.8 }) {
   };
 
   return <svg {...props}>{icons[name] || null}</svg>;
+}
+
+function CandidateResume({ candidate, loading, onOpenFile }) {
+  const resume = candidate.resumeData;
+
+  if (candidate.resumeSource === "arquivo" && candidate.resumeFileUrl) {
+    return (
+      <section className="see-profile__panel see-resume">
+        <h4>Currículo enviado</h4>
+        <p>O candidato anexou o currículo em PDF nesta candidatura.</p>
+        <button type="button" className="see-action-btn see-action-btn--primary" onClick={onOpenFile} disabled={loading}>
+          <Icon name="external" size={14} />
+          {loading ? "Abrindo..." : "Abrir currículo em PDF"}
+        </button>
+      </section>
+    );
+  }
+
+  if (!resume) {
+    return (
+      <section className="see-profile__panel see-resume">
+        <h4>Currículo</h4>
+        <p>Esta candidatura não possui um currículo vinculado.</p>
+      </section>
+    );
+  }
+
+  const sections = [
+    ["Experiência profissional", resume.experiencias, (item) => item.cargo, (item) => [item.empresa, item.periodo].filter(Boolean).join(" · ")],
+    ["Formação", resume.formacoes, (item) => item.curso, (item) => [item.instituicao, item.periodo].filter(Boolean).join(" · ")],
+    ["Cursos", resume.cursos, (item) => item.nome, (item) => [item.instituicao, item.periodo].filter(Boolean).join(" · ")],
+    ["Idiomas", resume.idiomas, (item) => item.idioma, (item) => item.nivel],
+  ];
+
+  return (
+    <section className="see-profile__panel see-resume">
+      <div className="see-resume__heading">
+        <div><h4>Currículo da candidatura</h4><span>Versão enviada pelo candidato</span></div>
+        <Icon name="briefcase" size={17} />
+      </div>
+      {resume.resumo && <div className="see-resume__section"><h5>Resumo profissional</h5><p>{resume.resumo}</p></div>}
+      {sections.map(([title, items, getTitle, getMeta]) => Array.isArray(items) && items.length > 0 && (
+        <div className="see-resume__section" key={title}>
+          <h5>{title}</h5>
+          <div className="see-resume__items">
+            {items.map((item, index) => (
+              <article key={item.id || `${title}-${index}`}>
+                <strong>{getTitle(item)}</strong>
+                {getMeta(item) && <span>{getMeta(item)}</span>}
+                {item.descricao && <p>{item.descricao}</p>}
+              </article>
+            ))}
+          </div>
+        </div>
+      ))}
+      {Array.isArray(resume.links) && resume.links.length > 0 && (
+        <div className="see-resume__section"><h5>Links</h5><div className="see-resume__links">{resume.links.map((link) => <a key={link} href={link} target="_blank" rel="noreferrer"><Icon name="external" size={11} />{link}</a>)}</div></div>
+      )}
+    </section>
+  );
 }
 
 export default function AdminSee() {
@@ -808,6 +876,31 @@ export default function AdminSee() {
   function openCandidateProfile(candidate) {
     setSelectedCandidateId(candidate.id);
     setCandidateNotesDraft(candidate.notes || "");
+  }
+
+  async function openCandidateResumeFile(candidate) {
+    if (!candidate.resumeFileUrl || pendingAction) return;
+
+    setPendingAction(`candidate-resume-${candidate.id}`);
+
+    try {
+      const response = await api.get(candidate.resumeFileUrl, { responseType: "blob" });
+      const fileUrl = window.URL.createObjectURL(response.data);
+      const openedWindow = window.open(fileUrl, "_blank", "noopener,noreferrer");
+
+      if (!openedWindow) {
+        const link = document.createElement("a");
+        link.href = fileUrl;
+        link.download = `curriculo-${candidate.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
+        link.click();
+      }
+
+      window.setTimeout(() => window.URL.revokeObjectURL(fileUrl), 60000);
+    } catch (error) {
+      notify("error", "Não foi possível abrir o currículo", getApiErrorMessage(error));
+    } finally {
+      setPendingAction("");
+    }
   }
 
   function updateJob(jobId, updates) {
@@ -1703,6 +1796,19 @@ export default function AdminSee() {
         .see-profile__skills span { padding: 7px 9px; color: #bdc9f6; border: 1px solid rgba(82,125,255,.11); border-radius: 8px; background: rgba(82,125,255,.05); font-size: 7px; font-weight: 700; }
         .see-profile__stage { display: flex; align-items: center; gap: 9px; }
         .see-profile__stage .see-select { flex: 1; }
+        .see-resume > .see-action-btn { margin-top: 12px; }
+        .see-resume__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #9bb4ff; }
+        .see-resume__heading span { display: block; margin-top: 4px; color: #696b78; font-size: 7px; }
+        .see-resume__section { margin-top: 15px; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.06); }
+        .see-resume__section h5 { margin: 0 0 9px; color: #aeb9df; font-size: 8px; text-transform: uppercase; letter-spacing: .06em; }
+        .see-resume__items { display: grid; gap: 8px; }
+        .see-resume__items article { padding-left: 10px; border-left: 2px solid rgba(82,125,255,.25); }
+        .see-resume__items strong, .see-resume__items span { display: block; }
+        .see-resume__items strong { color: #d9dae0; font-size: 8px; }
+        .see-resume__items span { margin-top: 3px; color: #737581; font-size: 7px; }
+        .see-resume__items article p { margin-top: 5px; }
+        .see-resume__links { display: flex; flex-direction: column; gap: 7px; }
+        .see-resume__links a { display: flex; align-items: center; gap: 6px; color: #9bb4ff; font-size: 7px; overflow-wrap: anywhere; }
 
         .see-confirm__icon { display: grid; width: 53px; height: 53px; place-items: center; color: #ffc0ca; border: 1px solid rgba(251,113,133,.16); border-radius: 17px; background: rgba(251,113,133,.065); }
         .see-confirm h2 { margin: 18px 0 0; font-size: 22px; letter-spacing: -.035em; }
@@ -2188,6 +2294,7 @@ export default function AdminSee() {
                   <div className="see-profile__main">
                     <section className="see-profile__panel"><h4>Etapa do processo</h4><div className="see-profile__stage" style={{ marginTop: 10 }}><select className="see-select" value={selectedCandidate.stage} onChange={(event) => moveCandidate(selectedJob.id, selectedCandidate.id, event.target.value)} aria-label={`Etapa de ${selectedCandidate.name}`}>{CANDIDATE_STAGES.map((stage) => <option key={stage.id} value={stage.id} disabled={stage.readonly}>{stage.label}</option>)}</select></div></section>
                     <section className="see-profile__panel"><h4>Habilidades</h4><div className="see-profile__skills">{(selectedCandidate.skills || []).length ? selectedCandidate.skills.map((skill) => <span key={skill}>{skill}</span>) : <span>Não informado</span>}</div></section>
+                    <CandidateResume candidate={selectedCandidate} loading={pendingAction === `candidate-resume-${selectedCandidate.id}`} onOpenFile={() => openCandidateResumeFile(selectedCandidate)} />
                     <section className="see-profile__panel"><h4>Anotações</h4><div className="see-field" style={{ marginTop: 10 }}><textarea value={candidateNotesDraft} maxLength={5000} onChange={(event) => setCandidateNotesDraft(event.target.value)} placeholder="Registre informações relevantes para o processo." aria-label={`Anotações sobre ${selectedCandidate.name}`} /><button type="button" className="see-action-btn" style={{ marginTop: 9 }} disabled={pendingAction === `candidate-notes-${selectedCandidate.id}`} onClick={() => updateCandidateNotes(selectedJob.id, selectedCandidate.id)}>{pendingAction === `candidate-notes-${selectedCandidate.id}` ? "Salvando..." : "Salvar anotações"}</button></div></section>
                     <section className="see-profile__panel"><h4>Avaliação</h4><div className="see-rating" style={{ marginTop: 9 }} aria-label={`Avaliação ${selectedCandidate.rating || 0} de 5`}>{[1,2,3,4,5].map((rating) => <button key={rating} type="button" className={rating <= (selectedCandidate.rating || 0) ? "see-rating__star see-rating__star--active" : "see-rating__star"} onClick={() => updateCandidateRating(selectedJob.id, selectedCandidate.id, rating)} aria-label={`Avaliar ${selectedCandidate.name} com ${rating} estrelas`} aria-pressed={rating === selectedCandidate.rating}><Icon name="star" size={16} /></button>)}</div></section>
                   </div>
