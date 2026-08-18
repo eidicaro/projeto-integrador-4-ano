@@ -1851,6 +1851,18 @@ export default function AdminSee() {
         @keyframes seeGradient { to { background-position: 220% center; } }
         @keyframes seeOrb { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(28px,-24px,0) scale(1.08); } }
 
+        /* Legibilidade: controles e dados operacionais com piso de 12px. */
+        .see-app :is(button, input, select, textarea) { font-size: 13px !important; }
+        .see-app :is(p, small, label) { font-size: 13px !important; }
+        .see-app span { font-size: 12px; }
+        .see-candidate-card__identity strong,
+        .see-resume__items strong,
+        .see-detail-info strong { font-size: 13px; }
+        .see-modal__subtitle,
+        .see-profile__contact span,
+        .see-resume__items span,
+        .see-resume__links a { font-size: 12px; }
+
         @media (max-width: 1260px) {
           .see-jobs { grid-template-columns: 1fr; }
           .see-job-card--list { grid-template-columns: minmax(240px,1fr) minmax(180px,.7fr); }

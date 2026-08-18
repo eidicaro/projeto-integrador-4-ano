@@ -3849,6 +3849,19 @@ Candidaturas: ${
             }
           }
 
+          /* Legibilidade: formulários e informações auxiliares com piso de 12px. */
+          .create-app :is(button, input, select, textarea) {
+            font-size: 13px !important;
+          }
+
+          .create-app :is(p, small, label) {
+            font-size: 13px !important;
+          }
+
+          .create-app span {
+            font-size: 12px;
+          }
+
           @media (max-width: 1240px) {
             .create-layout {
               grid-template-columns: minmax(0, 1fr) 330px;

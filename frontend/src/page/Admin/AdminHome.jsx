@@ -2033,6 +2033,23 @@ export default function AdminHome() {
             }
           }
 
+          /* Legibilidade: textos funcionais nunca ficam abaixo de 12px. */
+          .admin-app :is(button, input, select, textarea) {
+            font-size: 13px !important;
+          }
+
+          .admin-app :is(p, small, label) {
+            font-size: 13px !important;
+          }
+
+          .admin-app span {
+            font-size: 12px;
+          }
+
+          .admin-app :is(.stat-card, .job-card, .application-card, .activity-card) strong {
+            font-size: max(13px, 1em);
+          }
+
           @media (max-width: 1180px) {
             .admin-info-grid {
               grid-template-columns: repeat(2, minmax(0, 1fr));
