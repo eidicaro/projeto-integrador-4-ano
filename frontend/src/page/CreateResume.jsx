@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 import Logo from "./../assets/logo-invertida.png";
 import CandidateHeader from "../components/CandidateHeader";
+import { useAuth } from "../context/AuthContext";
 import api, { getApiErrorMessage } from "../lib/api";
 import { unwrapApiData } from "../lib/candidate";
 import "../styles/candidate-pages.css";
@@ -196,6 +197,7 @@ const SECTIONS = [
 ];
 
 export default function CreateResume() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
 
@@ -258,7 +260,7 @@ export default function CreateResume() {
         if (resume?.id) {
           setOnlineResumeId(resume.id);
           setData(fromApiResume(resume));
-          setFoto(resume.foto || "");
+          setFoto(resume.foto || user?.foto || "");
           showToast("Seu currículo online foi carregado.");
           return;
         }
@@ -268,6 +270,7 @@ export default function CreateResume() {
         const parsed = JSON.parse(draft);
         if (parsed?.data) setData(parsed.data);
         if (parsed?.foto) setFoto(parsed.foto);
+        else if (user?.foto) setFoto(user.foto);
         showToast("Seu último rascunho local foi recuperado.");
       })
       .catch((error) => {

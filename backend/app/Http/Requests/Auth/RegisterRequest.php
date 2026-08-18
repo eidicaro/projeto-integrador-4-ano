@@ -32,6 +32,7 @@ class RegisterRequest extends FormRequest
             'telefone' => ['required', 'digits_between:10,11'],
             'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
             'accepted_terms' => ['accepted'],
+            'foto' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=4096,max_height=4096'],
         ];
     }
 

@@ -33,7 +33,7 @@ export default function CandidateHeader() {
 
       <div className="candidate-account">
         <span className="candidate-account__avatar" aria-hidden="true">
-          {String(user?.name || "C").trim().charAt(0).toUpperCase()}
+          {user?.foto ? <img src={user.foto} alt="" /> : String(user?.name || "C").trim().charAt(0).toUpperCase()}
         </span>
         <span className="candidate-account__name">{user?.name}</span>
         <button type="button" onClick={handleLogout}>Sair ↗</button>

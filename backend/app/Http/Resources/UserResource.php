@@ -15,6 +15,9 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'telefone' => $this->telefone,
+            'foto' => $this->foto && $request->user()?->is($this->resource)
+                ? url('/api/me/foto')
+                : null,
             'role' => $this->role instanceof UserRole ? $this->role->value : $this->role,
             'ativo' => (bool) $this->ativo,
             'emailVerifiedAt' => $this->email_verified_at?->toISOString(),

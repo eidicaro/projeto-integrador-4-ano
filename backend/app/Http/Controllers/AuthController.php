@@ -33,6 +33,12 @@ class AuthController extends Controller
             'termos_aceitos_em' => now(),
         ]);
 
+        if ($request->hasFile('foto')) {
+            $user->update([
+                'foto' => $request->file('foto')->store('usuarios/fotos', 'local'),
+            ]);
+        }
+
         return response()->json([
             'message' => 'Conta criada com sucesso.',
             'data' => ['user' => new UserResource($user)],

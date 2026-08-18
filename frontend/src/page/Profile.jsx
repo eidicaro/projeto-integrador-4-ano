@@ -7,7 +7,7 @@ import { getApiErrorMessage } from "../lib/api";
 import "../styles/candidate-pages.css";
 
 export default function Profile() {
-  const { updateProfile, user } = useAuth();
+  const { removeProfilePhoto, updateProfile, uploadProfilePhoto, user } = useAuth();
   const [form, setForm] = useState(() => ({
     name: user?.name || "",
     email: user?.email || "",
@@ -16,6 +16,38 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [photoSaving, setPhotoSaving] = useState(false);
+
+  async function handlePhoto(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setPhotoSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      await uploadProfilePhoto(file);
+      setSuccess("Foto de perfil atualizada com sucesso.");
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, "Não foi possível atualizar a foto."));
+    } finally {
+      setPhotoSaving(false);
+    }
+  }
+
+  async function handleRemovePhoto() {
+    setPhotoSaving(true);
+    setError("");
+    try {
+      await removeProfilePhoto();
+      setSuccess("Foto de perfil removida.");
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, "Não foi possível remover a foto."));
+    } finally {
+      setPhotoSaving(false);
+    }
+  }
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -72,6 +104,12 @@ export default function Profile() {
 
         <div className="profile-grid">
           <section className="candidate-panel">
+            <div className="profile-photo-editor">
+              <div className="profile-photo-editor__preview">
+                {user?.foto ? <img src={user.foto} alt="Sua foto de perfil" /> : <span>{String(user?.name || "C").charAt(0).toUpperCase()}</span>}
+              </div>
+              <div><h2>Foto de perfil</h2><p>JPG, PNG ou WebP, com no máximo 2 MB.</p><div className="profile-photo-editor__actions"><label className="candidate-button">{photoSaving ? "Enviando…" : user?.foto ? "Trocar foto" : "Adicionar foto"}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} disabled={photoSaving} /></label>{user?.foto && <button type="button" className="candidate-button-secondary" onClick={handleRemovePhoto} disabled={photoSaving}>Remover</button>}</div></div>
+            </div>
             <form className="candidate-form" onSubmit={handleSubmit}>
               <label>
                 Nome completo

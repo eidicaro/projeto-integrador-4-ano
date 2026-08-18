@@ -25,6 +25,9 @@ Route::middleware('throttle:api')->group(function (): void {
         Route::middleware('active')->group(function (): void {
             Route::get('/me', [AuthController::class, 'me']);
             Route::patch('/me', [ProfileController::class, 'update']);
+            Route::get('/me/foto', [ProfileController::class, 'photo']);
+            Route::post('/me/foto', [ProfileController::class, 'uploadPhoto']);
+            Route::delete('/me/foto', [ProfileController::class, 'destroyPhoto']);
 
             Route::get('/curriculos/me', [CurriculoController::class, 'me'])->middleware('role:candidato');
             Route::get('/curriculos', [CurriculoController::class, 'index']);

@@ -105,6 +105,20 @@ export function AuthProvider({ children }) {
     return updatedUser;
   }, []);
 
+  const uploadProfilePhoto = useCallback(async (file) => {
+    const formData = new FormData();
+    formData.append("foto", file);
+    const response = await api.post("/me/foto", formData);
+    const updatedUser = extractUser(response.data);
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
+  const removeProfilePhoto = useCallback(async () => {
+    await api.delete("/me/foto");
+    setUser((current) => current ? { ...current, foto: null } : current);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post("/logout");
@@ -120,9 +134,11 @@ export function AuthProvider({ children }) {
       login,
       register,
       updateProfile,
+      uploadProfilePhoto,
+      removeProfilePhoto,
       logout,
     }),
-    [loading, login, logout, register, updateProfile, user],
+    [loading, login, logout, register, removeProfilePhoto, updateProfile, uploadProfilePhoto, user],
   );
 
   return (

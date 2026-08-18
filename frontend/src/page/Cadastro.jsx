@@ -18,6 +18,7 @@ const INITIAL_FORM = {
   email: "",
   senha: "",
   confirmarSenha: "",
+  foto: null,
   aceitouTermos: false,
 };
 
@@ -36,6 +37,21 @@ export default function Cadastro() {
   const [capsLock, setCapsLock] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [concluido, setConcluido] = useState(false);
+  const [fotoPreview, setFotoPreview] = useState("");
+
+  function handleFotoChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/) || file.size > 2 * 1024 * 1024) {
+      setErros((current) => ({ ...current, foto: "Use uma imagem JPG, PNG ou WebP de até 2 MB." }));
+      event.target.value = "";
+      return;
+    }
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
+    setForm((current) => ({ ...current, foto: file }));
+    setFotoPreview(URL.createObjectURL(file));
+    setErros((current) => ({ ...current, foto: "" }));
+  }
 
   const iniciais = useMemo(() => {
     const partes = form.nome
@@ -221,14 +237,14 @@ export default function Cadastro() {
     setCarregando(true);
 
     try {
-      const payload = {
-        name: form.nome.trim(),
-        email: form.email.trim().toLowerCase(),
-        telefone: form.telefone.replace(/\D/g, ""),
-        password: form.senha,
-        password_confirmation: form.confirmarSenha,
-        accepted_terms: true,
-      };
+      const payload = new FormData();
+      payload.append("name", form.nome.trim());
+      payload.append("email", form.email.trim().toLowerCase());
+      payload.append("telefone", form.telefone.replace(/\D/g, ""));
+      payload.append("password", form.senha);
+      payload.append("password_confirmation", form.confirmarSenha);
+      payload.append("accepted_terms", "1");
+      if (form.foto) payload.append("foto", form.foto);
 
       await register(payload);
 
@@ -240,7 +256,7 @@ export default function Cadastro() {
         replace: true,
         state: {
           cadastroRealizado: true,
-          email: payload.email,
+          email: form.email.trim().toLowerCase(),
         },
       });
     } catch (error) {
@@ -259,6 +275,7 @@ export default function Cadastro() {
           "accepted_terms",
           "aceitouTermos",
         ),
+        foto: getApiFieldError(error, "foto"),
       };
 
       const hasFieldError = Object.values(apiErrors).some(Boolean);
@@ -709,6 +726,20 @@ export default function Cadastro() {
           box-shadow: 5px 5px 0 var(--ink);
           transform: rotate(-4deg);
         }
+
+        .passport-initials img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .field-group--photo { grid-column: 1 / -1; }
+        .register-photo-picker { display: flex; min-height: 76px; align-items: center; gap: 14px; padding: 10px 14px; border: 2px dashed rgba(23,23,26,.28); border-radius: 16px; background: rgba(255,255,255,.55); cursor: pointer; font-size: 13px; font-weight: 850; }
+        .register-photo-picker:hover { border-color: #9183ff; background: rgba(145,131,255,.08); }
+        .register-photo-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        .register-photo-picker__preview { display: grid; width: 52px; height: 52px; flex: 0 0 auto; place-items: center; overflow: hidden; border: 2px solid #17171a; border-radius: 14px; background: #64c7ee; }
+        .register-photo-picker__preview img { width: 100%; height: 100%; object-fit: cover; }
+        .register-photo-picker__preview svg { width: 22px; height: 22px; }
 
         .passport-stamp {
           position: absolute;
@@ -2373,7 +2404,7 @@ export default function Cadastro() {
                 </div>
 
                 <div className="passport-initials">
-                  {iniciais}
+                  {fotoPreview ? <img src={fotoPreview} alt="Prévia da sua foto" /> : iniciais}
                 </div>
 
                 <div className="passport-stamp">
@@ -2563,6 +2594,8 @@ export default function Cadastro() {
                           erros={erros}
                           atualizarCampo={atualizarCampo}
                           handleTelefoneChange={handleTelefoneChange}
+                          handleFotoChange={handleFotoChange}
+                          fotoPreview={fotoPreview}
                         />
                       )}
 
@@ -2723,6 +2756,8 @@ function StepOne({
   erros,
   atualizarCampo,
   handleTelefoneChange,
+  handleFotoChange,
+  fotoPreview,
 }) {
   return (
     <>
@@ -2742,6 +2777,15 @@ function StepOne({
       </header>
 
       <div className="field-grid">
+        <div className="field-group field-group--photo">
+          <label className="field-label" htmlFor="cadastro-foto">Foto de perfil <span className="field-label-detail">Opcional · até 2 MB</span></label>
+          <label className={`register-photo-picker ${erros.foto ? "field-shell--error" : ""}`} htmlFor="cadastro-foto">
+            <span className="register-photo-picker__preview">{fotoPreview ? <img src={fotoPreview} alt="" /> : <UserIcon />}</span>
+            <span>{form.foto ? "Trocar foto escolhida" : "Escolher uma foto"}</span>
+            <input id="cadastro-foto" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFotoChange} />
+          </label>
+          {erros.foto && <span className="field-error" role="alert"><AlertIcon />{erros.foto}</span>}
+        </div>
         <div className="field-group">
           <label className="field-label" htmlFor="cadastro-nome">
             Nome completo
