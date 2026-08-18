@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   useEffect,
   useMemo,
@@ -291,13 +291,16 @@ export default function CreateResume() {
   ===================================== */
 
   useEffect(() => {
-    setSavedState("saving");
+    const savingTimer = window.setTimeout(() => {
+      setSavedState("saving");
+    }, 0);
 
     const timer = window.setTimeout(() => {
       salvarRascunhoSilencioso();
     }, 700);
 
     return () => {
+      window.clearTimeout(savingTimer);
       window.clearTimeout(timer);
     };
   }, [data, foto]);
