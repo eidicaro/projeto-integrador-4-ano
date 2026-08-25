@@ -87,7 +87,7 @@ const infoStyles = `
   .info-nav-links { display: flex; gap: 18px; }
   .info-nav-links a { color: #555867; font-size: 14px; font-weight: 750; text-decoration: none; }
   .info-content { width: min(900px, 100%); margin: 0 auto; padding: clamp(70px, 12vw, 140px) 0 80px; }
-  .info-eyebrow { color: #ff4f8b; font-size: 12px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+  .info-eyebrow { color: #ff4f8b; font-size: 14px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
   .info-content h1 { max-width: 850px; margin: 14px 0 22px; font-size: clamp(42px, 8vw, 82px); line-height: .94; letter-spacing: -.06em; }
   .info-introduction { max-width: 720px; margin: 0; color: #626574; font-size: clamp(17px, 2.2vw, 21px); line-height: 1.65; }
   .info-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 48px 0; }

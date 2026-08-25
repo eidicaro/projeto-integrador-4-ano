@@ -397,7 +397,7 @@ export default function Login() {
           border-radius: 999px;
           background: var(--paper-light);
           color: var(--ink);
-          font-size: 0.69rem;
+          font-size: 0.875rem;
           font-weight: 900;
           letter-spacing: 0.13em;
           text-transform: uppercase;
@@ -422,7 +422,7 @@ export default function Login() {
 
         .header-login-label {
           color: var(--muted);
-          font-size: 0.75rem;
+          font-size: 0.875rem;
           font-weight: 700;
         }
 
@@ -437,7 +437,7 @@ export default function Login() {
           border-radius: 999px;
           background: var(--yellow);
           color: var(--ink);
-          font-size: 0.77rem;
+          font-size: 0.875rem;
           font-weight: 900;
           cursor: pointer;
           box-shadow: 5px 5px 0 var(--ink);
@@ -504,7 +504,7 @@ export default function Login() {
           border: 2px solid var(--ink);
           border-radius: 0.75rem;
           background: var(--blue);
-          font-size: 0.7rem;
+          font-size: 0.875rem;
           font-weight: 900;
           letter-spacing: 0.11em;
           text-transform: uppercase;
@@ -674,7 +674,7 @@ export default function Login() {
           border: 2px solid var(--ink);
           border-radius: 999px;
           background: var(--paper-light);
-          font-size: 0.64rem;
+          font-size: 0.875rem;
           font-weight: 900;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -740,7 +740,7 @@ export default function Login() {
           justify-content: space-between;
           gap: 0.5rem;
           margin-bottom: 0.75rem;
-          font-size: 0.61rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.09em;
           text-transform: uppercase;
@@ -763,7 +763,7 @@ export default function Login() {
           display: block;
           margin-top: 0.55rem;
           color: rgba(23, 23, 26, 0.67);
-          font-size: 0.66rem;
+          font-size: 0.875rem;
           font-weight: 750;
           line-height: 1.4;
         }
@@ -783,7 +783,7 @@ export default function Login() {
           border: 2px solid var(--ink);
           border-radius: 999px;
           background: var(--paper-light);
-          font-size: 0.58rem;
+          font-size: 0.875rem;
           font-weight: 950;
         }
 
@@ -909,7 +909,7 @@ export default function Login() {
           right: 1.25rem;
           color: rgba(23, 23, 26, 0.32);
           font-family: "Courier New", monospace;
-          font-size: 0.65rem;
+          font-size: 0.875rem;
           font-weight: 900;
           letter-spacing: 0.12em;
           transform: rotate(90deg) translateX(1.4rem);
@@ -925,7 +925,7 @@ export default function Login() {
           border: 2px solid var(--ink);
           border-radius: 0.6rem;
           background: var(--lime);
-          font-size: 0.63rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -952,7 +952,7 @@ export default function Login() {
           max-width: 23rem;
           margin: 0.9rem 0 0;
           color: var(--muted);
-          font-size: 0.8rem;
+          font-size: 0.875rem;
           font-weight: 620;
           line-height: 1.55;
         }
@@ -964,7 +964,7 @@ export default function Login() {
           border-radius: 0.8rem;
           color: #176844;
           background: #dcf8ec;
-          font-size: 0.76rem;
+          font-size: 0.875rem;
           font-weight: 750;
           line-height: 1.45;
         }
@@ -991,7 +991,7 @@ export default function Login() {
           justify-content: space-between;
           gap: 1rem;
           color: var(--ink);
-          font-size: 0.7rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -999,7 +999,7 @@ export default function Login() {
 
         .field-label-detail {
           color: #9a938c;
-          font-size: 0.58rem;
+          font-size: 0.875rem;
           font-weight: 800;
           letter-spacing: 0.07em;
         }
@@ -1103,7 +1103,7 @@ export default function Login() {
           align-items: center;
           gap: 0.4rem;
           padding-left: 0.15rem;
-          font-size: 0.66rem;
+          font-size: 0.875rem;
           font-weight: 800;
           line-height: 1.4;
           animation: feedbackReveal 220ms ease both;
@@ -1137,7 +1137,7 @@ export default function Login() {
           align-items: center;
           gap: 0.55rem;
           color: #625d58;
-          font-size: 0.7rem;
+          font-size: 0.875rem;
           font-weight: 750;
           cursor: pointer;
           user-select: none;
@@ -1197,7 +1197,7 @@ export default function Login() {
           border: 0;
           background: transparent;
           color: var(--ink);
-          font-size: 0.69rem;
+          font-size: 0.875rem;
           font-weight: 900;
           text-decoration: underline;
           text-decoration-thickness: 2px;
@@ -1228,7 +1228,7 @@ export default function Login() {
           overflow: hidden;
           background: var(--ink);
           color: #ffffff;
-          font-size: 0.78rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.06em;
           text-transform: uppercase;
@@ -1323,7 +1323,7 @@ export default function Login() {
           padding-top: 1.25rem;
           border-top: 2px solid rgba(23, 23, 26, 0.12);
           color: #766f69;
-          font-size: 0.7rem;
+          font-size: 0.875rem;
           font-weight: 700;
         }
 
@@ -1351,7 +1351,7 @@ export default function Login() {
           gap: 0.45rem;
           margin-top: 1.1rem;
           color: #9a938c;
-          font-size: 0.62rem;
+          font-size: 0.875rem;
           font-weight: 750;
         }
 
@@ -1390,7 +1390,7 @@ export default function Login() {
           gap: 1.25rem;
           padding: 0 1.25rem;
           color: var(--ink);
-          font-size: 0.68rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.11em;
           text-transform: uppercase;
@@ -1659,7 +1659,7 @@ export default function Login() {
           .create-account-button {
             min-height: 2.65rem;
             padding: 0.65rem 0.85rem;
-            font-size: 0.69rem;
+            font-size: 0.875rem;
             box-shadow: 4px 4px 0 var(--ink);
           }
 
@@ -1673,7 +1673,7 @@ export default function Login() {
 
           .hero-kicker {
             margin-bottom: 0.8rem;
-            font-size: 0.61rem;
+            font-size: 0.875rem;
           }
 
           .hero-title {
@@ -1724,7 +1724,7 @@ export default function Login() {
           }
 
           .floating-stat-label {
-            font-size: 0.53rem;
+            font-size: 0.875rem;
           }
 
           .floating-stat-value {
@@ -1732,7 +1732,7 @@ export default function Login() {
           }
 
           .floating-stat-description {
-            font-size: 0.57rem;
+            font-size: 0.875rem;
           }
 
           .sparkle-badge {
@@ -1777,7 +1777,7 @@ export default function Login() {
 
           .field-input {
             height: 3.4rem;
-            font-size: 0.83rem;
+            font-size: 0.875rem;
           }
 
           .field-icon {
@@ -1790,7 +1790,7 @@ export default function Login() {
 
           .remember-label,
           .forgot-button {
-            font-size: 0.64rem;
+            font-size: 0.875rem;
           }
 
           .submit-button {

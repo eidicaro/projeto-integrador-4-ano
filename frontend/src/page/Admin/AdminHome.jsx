@@ -631,7 +631,7 @@ export default function AdminHome() {
             display: block;
             margin-top: 3px;
             color: var(--text-muted);
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 600;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -645,7 +645,7 @@ export default function AdminHome() {
             display: block;
             margin: 0 12px 10px;
             color: #5f616e;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.15em;
             text-transform: uppercase;
@@ -724,7 +724,7 @@ export default function AdminHome() {
 
           .admin-nav__text {
             flex: 1;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 650;
           }
 
@@ -776,7 +776,7 @@ export default function AdminHome() {
                 rgba(77, 131, 255, 0.82)
               );
             box-shadow: 0 8px 24px rgba(77, 131, 255, 0.16);
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 900;
             letter-spacing: 0.04em;
           }
@@ -801,7 +801,7 @@ export default function AdminHome() {
             display: block;
             overflow: hidden;
             color: var(--text-primary);
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 750;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -812,7 +812,7 @@ export default function AdminHome() {
             margin-top: 3px;
             overflow: hidden;
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 600;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -837,7 +837,7 @@ export default function AdminHome() {
             align-items: center;
             gap: 9px;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 650;
           }
 
@@ -901,7 +901,7 @@ export default function AdminHome() {
           }
 
           .admin-command-button__label {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -914,7 +914,7 @@ export default function AdminHome() {
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 7px;
             background: rgba(0, 0, 0, 0.22);
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 800;
             box-shadow: inset 0 -1px rgba(255, 255, 255, 0.035);
           }
@@ -996,7 +996,7 @@ export default function AdminHome() {
             gap: 8px;
             margin-bottom: 19px;
             color: #c8cad4;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.17em;
             text-transform: uppercase;
@@ -1069,7 +1069,7 @@ export default function AdminHome() {
             border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 999px;
             background: rgba(5, 6, 9, 0.35);
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 700;
             backdrop-filter: blur(12px);
           }
@@ -1106,7 +1106,7 @@ export default function AdminHome() {
             display: block;
             margin-bottom: 6px;
             color: var(--text-muted);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.16em;
             text-transform: uppercase;
@@ -1146,13 +1146,13 @@ export default function AdminHome() {
           .admin-section__description {
             margin: 7px 0 0;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.6;
           }
 
           .admin-section__count {
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 750;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -1305,7 +1305,7 @@ export default function AdminHome() {
             border: 1px solid rgba(var(--accent-rgb), 0.18);
             border-radius: 999px;
             background: rgba(var(--accent-rgb), 0.07);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.11em;
             text-transform: uppercase;
@@ -1327,7 +1327,7 @@ export default function AdminHome() {
             max-width: 460px;
             margin: 11px 0 0;
             color: var(--text-secondary);
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.7;
           }
 
@@ -1345,7 +1345,7 @@ export default function AdminHome() {
             align-items: center;
             gap: 9px;
             color: var(--accent-light);
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 800;
           }
 
@@ -1366,7 +1366,7 @@ export default function AdminHome() {
             border: 1px solid rgba(255, 255, 255, 0.075);
             border-radius: 9px;
             background: rgba(0, 0, 0, 0.19);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
             box-shadow: inset 0 -1px rgba(255, 255, 255, 0.03);
           }
@@ -1429,7 +1429,7 @@ export default function AdminHome() {
             display: block;
             margin-top: 17px;
             color: var(--text-muted);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.12em;
             text-transform: uppercase;
@@ -1509,7 +1509,7 @@ export default function AdminHome() {
           .admin-panel__subtitle {
             margin: 4px 0 0;
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
           }
 
           .admin-panel__badge {
@@ -1522,7 +1522,7 @@ export default function AdminHome() {
             border: 1px solid rgba(74, 222, 128, 0.15);
             border-radius: 999px;
             background: rgba(74, 222, 128, 0.06);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -1565,14 +1565,14 @@ export default function AdminHome() {
           .admin-activity-item__title {
             margin: 0;
             color: #dfe0e6;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 720;
           }
 
           .admin-activity-item__description {
             margin: 5px 0 0;
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
             line-height: 1.55;
           }
 
@@ -1655,7 +1655,7 @@ export default function AdminHome() {
             max-width: 270px;
             margin: 8px auto 0;
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
             line-height: 1.6;
             text-align: center;
           }
@@ -1668,7 +1668,7 @@ export default function AdminHome() {
             margin-top: auto;
             padding-top: 21px;
             color: #b9bbc4;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -1770,7 +1770,7 @@ export default function AdminHome() {
             display: block;
             padding: 8px 10px;
             color: #656773;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.14em;
             text-transform: uppercase;
@@ -1820,7 +1820,7 @@ export default function AdminHome() {
           .admin-command-item__title {
             display: block;
             color: #e8e9ed;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 750;
           }
 
@@ -1829,7 +1829,7 @@ export default function AdminHome() {
             margin-top: 4px;
             overflow: hidden;
             color: #70727f;
-            font-size: 10px;
+            font-size: 14px;
             text-overflow: ellipsis;
             white-space: nowrap;
           }
@@ -1844,14 +1844,14 @@ export default function AdminHome() {
             border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.16);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
           }
 
           .admin-command-empty {
             padding: 38px 20px;
             color: #6e707c;
-            font-size: 11px;
+            font-size: 14px;
             text-align: center;
           }
 
@@ -1864,7 +1864,7 @@ export default function AdminHome() {
             color: #626470;
             border-top: 1px solid rgba(255, 255, 255, 0.06);
             background: rgba(0, 0, 0, 0.1);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -1884,7 +1884,7 @@ export default function AdminHome() {
             border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 6px;
             background: rgba(255, 255, 255, 0.025);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 850;
           }
 
@@ -1929,7 +1929,7 @@ export default function AdminHome() {
           .admin-toast__title {
             display: block;
             color: #ecf7ef;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 780;
           }
 
@@ -1937,7 +1937,7 @@ export default function AdminHome() {
             display: block;
             margin-top: 5px;
             color: #7f9286;
-            font-size: 9px;
+            font-size: 14px;
             line-height: 1.5;
           }
 
@@ -2035,15 +2035,15 @@ export default function AdminHome() {
 
           /* Legibilidade: textos funcionais nunca ficam abaixo de 12px. */
           .admin-app :is(button, input, select, textarea) {
-            font-size: 13px !important;
+            font-size: 14px !important;
           }
 
           .admin-app :is(p, small, label) {
-            font-size: 13px !important;
+            font-size: 14px !important;
           }
 
           .admin-app span {
-            font-size: 12px;
+            font-size: 14px;
           }
 
           .admin-app :is(.stat-card, .job-card, .application-card, .activity-card) strong {
@@ -2136,7 +2136,7 @@ export default function AdminHome() {
             }
 
             .admin-mobile-nav__label {
-              font-size: 9px;
+              font-size: 14px;
               font-weight: 750;
             }
           }

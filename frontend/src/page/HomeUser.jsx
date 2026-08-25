@@ -939,7 +939,7 @@ const styles = {
         color: "#0369a1",
         padding: "7px 12px",
         borderRadius: "999px",
-        fontSize: "12px",
+        fontSize: "14px",
         fontWeight: "600",
     },
     appliedBadge: {
@@ -949,7 +949,7 @@ const styles = {
         borderRadius: "999px",
         background: "#dcfce7",
         color: "#166534",
-        fontSize: "12px",
+        fontSize: "14px",
         fontWeight: "800",
     },
     savedButton: {
@@ -960,7 +960,7 @@ const styles = {
         border: "1px solid #cbd5e1",
         background: "rgba(255,255,255,0.9)",
         color: "#475569",
-        fontSize: "12px",
+        fontSize: "14px",
         fontWeight: "800",
         cursor: "pointer",
     },

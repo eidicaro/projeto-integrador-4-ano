@@ -3777,7 +3777,7 @@ const homeStyles = `
     border-radius: 999px;
     background: transparent;
     color: var(--ink);
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 850;
     cursor: pointer;
     transition:
@@ -3831,7 +3831,7 @@ const homeStyles = `
   }
 
   .command-trigger-label {
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 850;
   }
 
@@ -3841,7 +3841,7 @@ const homeStyles = `
     border-radius: 0.4rem;
     background: #ece6dc;
     font-family: "Courier New", monospace;
-    font-size: 0.54rem;
+    font-size: 0.875rem;
     font-weight: 900;
     box-shadow: 1px 1px 0 var(--ink);
   }
@@ -3889,7 +3889,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--yellow);
     color: var(--ink);
-    font-size: 0.55rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -3899,7 +3899,7 @@ const homeStyles = `
     border: 0;
     background: transparent;
     color: var(--ink);
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 900;
     cursor: pointer;
   }
@@ -3915,7 +3915,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--pink);
     color: #ffffff;
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 4px 4px 0 var(--ink);
@@ -3992,7 +3992,7 @@ const homeStyles = `
     border-radius: 0.65rem;
     background: var(--blue);
     color: var(--ink);
-    font-size: 0.62rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -4114,7 +4114,7 @@ const homeStyles = `
     outline: 0;
     background: transparent;
     color: var(--ink);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 750;
   }
 
@@ -4134,7 +4134,7 @@ const homeStyles = `
     border-radius: 0.9rem;
     background: var(--ink);
     color: #ffffff;
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -4166,7 +4166,7 @@ const homeStyles = `
 
   .hero-trends-label {
     color: #716a64;
-    font-size: 0.67rem;
+    font-size: 0.875rem;
     font-weight: 850;
   }
 
@@ -4176,7 +4176,7 @@ const homeStyles = `
     border-radius: 999px;
     background: transparent;
     color: var(--ink);
-    font-size: 0.61rem;
+    font-size: 0.875rem;
     font-weight: 820;
     cursor: pointer;
     transition:
@@ -4211,7 +4211,7 @@ const homeStyles = `
     border-radius: 50%;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.58rem;
+    font-size: 0.875rem;
     font-weight: 950;
     box-shadow: 2px 2px 0 var(--ink);
   }
@@ -4244,13 +4244,13 @@ const homeStyles = `
   }
 
   .hero-proof-copy strong {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
   .hero-proof-copy span {
     color: var(--muted);
-    font-size: 0.64rem;
+    font-size: 0.875rem;
     font-weight: 650;
   }
 
@@ -4323,7 +4323,7 @@ const homeStyles = `
     border: 2px solid var(--ink);
     border-radius: 0.55rem;
     background: var(--yellow);
-    font-size: 0.57rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.11em;
     text-transform: uppercase;
@@ -4334,7 +4334,7 @@ const homeStyles = `
   .map-paper-code {
     color: #756e68;
     font-family: "Courier New", monospace;
-    font-size: 0.57rem;
+    font-size: 0.875rem;
     font-weight: 900;
     letter-spacing: 0.1em;
   }
@@ -4441,7 +4441,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.53rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -4467,7 +4467,7 @@ const homeStyles = `
   }
 
   .map-feature-copy small {
-    font-size: 0.52rem;
+    font-size: 0.875rem;
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -4484,7 +4484,7 @@ const homeStyles = `
 
   .map-feature-copy > span {
     color: #5d5650;
-    font-size: 0.57rem;
+    font-size: 0.875rem;
     font-weight: 760;
   }
 
@@ -4508,13 +4508,13 @@ const homeStyles = `
 
   .map-feature-footer small {
     color: var(--muted);
-    font-size: 0.46rem;
+    font-size: 0.875rem;
     font-weight: 800;
     text-transform: uppercase;
   }
 
   .map-feature-footer strong {
-    font-size: 0.61rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -4523,7 +4523,7 @@ const homeStyles = `
     align-items: center;
     flex: 0 0 auto;
     gap: 0.28rem;
-    font-size: 0.5rem;
+    font-size: 0.875rem;
     font-weight: 950;
     text-transform: uppercase;
   }
@@ -4578,7 +4578,7 @@ const homeStyles = `
 
   .map-node strong {
     overflow: hidden;
-    font-size: 0.61rem;
+    font-size: 0.875rem;
     font-weight: 950;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -4587,7 +4587,7 @@ const homeStyles = `
   .map-node small {
     margin-top: 0.1rem;
     color: var(--muted);
-    font-size: 0.53rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 
@@ -4634,7 +4634,7 @@ const homeStyles = `
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    font-size: 0.54rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -4685,7 +4685,7 @@ const homeStyles = `
     display: block;
     margin-top: 0.6rem;
     color: rgba(23, 23, 26, 0.67);
-    font-size: 0.53rem;
+    font-size: 0.875rem;
     font-weight: 750;
     line-height: 1.4;
   }
@@ -4716,7 +4716,7 @@ const homeStyles = `
 
   .map-orbit-badge text {
     fill: var(--ink);
-    font-size: 9px;
+    font-size: 14px;
     font-weight: 950;
     letter-spacing: 1.2px;
   }
@@ -4751,7 +4751,7 @@ const homeStyles = `
     align-items: center;
     gap: 1rem;
     padding: 0 1.25rem;
-    font-size: 0.66rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.11em;
     text-transform: uppercase;
@@ -4799,7 +4799,7 @@ const homeStyles = `
     margin-bottom: 0.8rem;
     color: var(--pink-dark);
     font-family: "Courier New", monospace;
-    font-size: 0.62rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.11em;
     text-transform: uppercase;
@@ -4843,7 +4843,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.66rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 4px 4px 0 var(--ink);
@@ -4950,7 +4950,7 @@ const homeStyles = `
     right: 1rem;
     color: rgba(23, 23, 26, 0.25);
     font-family: "Courier New", monospace;
-    font-size: 0.62rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -5000,7 +5000,7 @@ const homeStyles = `
     max-width: 28rem;
     margin-top: 0.7rem;
     color: var(--muted);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 650;
     line-height: 1.55;
   }
@@ -5018,7 +5018,7 @@ const homeStyles = `
   }
 
   .shortcut-footer > span {
-    font-size: 0.6rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -5074,7 +5074,7 @@ const homeStyles = `
     outline: 0;
     background: transparent;
     color: var(--ink);
-    font-size: 0.82rem;
+    font-size: 0.875rem;
     font-weight: 740;
   }
 
@@ -5134,7 +5134,7 @@ const homeStyles = `
   .jobs-sort > span {
     padding-left: 1rem;
     color: rgba(23, 23, 26, 0.55);
-    font-size: 0.56rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -5153,7 +5153,7 @@ const homeStyles = `
     appearance: none;
     background: transparent;
     color: var(--ink);
-    font-size: 0.66rem;
+    font-size: 0.875rem;
     font-weight: 900;
     cursor: pointer;
   }
@@ -5188,7 +5188,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.64rem;
+    font-size: 0.875rem;
     font-weight: 850;
     cursor: pointer;
     box-shadow: 2px 2px 0 var(--ink);
@@ -5217,7 +5217,7 @@ const homeStyles = `
     padding: 0 0.2rem;
     border: 1.5px solid currentColor;
     border-radius: 50%;
-    font-size: 0.5rem;
+    font-size: 0.875rem;
   }
 
   .category-filter--saved {
@@ -5236,7 +5236,7 @@ const homeStyles = `
     gap: 1rem;
     margin: 1rem 0 1.5rem;
     color: var(--muted);
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 
@@ -5260,14 +5260,14 @@ const homeStyles = `
     border-radius: 999px;
     background: rgba(255, 253, 248, 0.7);
     color: #655e58;
-    font-size: 0.54rem;
+    font-size: 0.875rem;
     font-weight: 850;
     white-space: nowrap;
   }
 
   .jobs-result-header strong {
     color: var(--ink);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -5281,7 +5281,7 @@ const homeStyles = `
     border: 0;
     background: transparent;
     color: var(--pink-dark);
-    font-size: 0.64rem;
+    font-size: 0.875rem;
     font-weight: 900;
     text-decoration: underline;
     text-decoration-thickness: 2px;
@@ -5388,7 +5388,7 @@ const homeStyles = `
     border-radius: 1rem;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 950;
     box-shadow: 4px 4px 0 var(--ink);
     transform: rotate(-5deg);
@@ -5412,7 +5412,7 @@ const homeStyles = `
     border: 1.7px solid var(--ink);
     border-radius: 999px;
     color: var(--ink);
-    font-size: 0.5rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -5485,7 +5485,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.5rem;
+    font-size: 0.875rem;
     font-weight: 780;
     box-shadow: 2px 2px 0 var(--ink);
   }
@@ -5504,7 +5504,7 @@ const homeStyles = `
     flex-wrap: wrap;
     gap: 0.42rem;
     color: var(--muted);
-    font-size: 0.54rem;
+    font-size: 0.875rem;
     font-weight: 780;
     text-transform: uppercase;
   }
@@ -5533,13 +5533,13 @@ const homeStyles = `
 
   .job-company span:first-child {
     color: var(--ink);
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     font-weight: 850;
   }
 
   .job-company span:last-child {
     color: var(--muted);
-    font-size: 0.62rem;
+    font-size: 0.875rem;
     font-weight: 650;
   }
 
@@ -5556,7 +5556,7 @@ const homeStyles = `
     border-radius: 0.45rem;
     background: var(--job-soft-accent);
     color: var(--ink);
-    font-size: 0.52rem;
+    font-size: 0.875rem;
     font-weight: 820;
   }
 
@@ -5578,14 +5578,14 @@ const homeStyles = `
 
   .job-card-footer small {
     color: var(--muted);
-    font-size: 0.51rem;
+    font-size: 0.875rem;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
   .job-card-footer strong {
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -5625,7 +5625,7 @@ const homeStyles = `
   .jobs-more-error {
     margin: 2rem auto 0;
     color: #9f1239;
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     font-weight: 850;
     text-align: center;
   }
@@ -5641,7 +5641,7 @@ const homeStyles = `
     border-radius: 1rem;
     background: var(--ink);
     color: #ffffff;
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -5708,7 +5708,7 @@ const homeStyles = `
     max-width: 29rem;
     margin: 0.65rem 0 0;
     color: var(--muted);
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     font-weight: 650;
     line-height: 1.55;
   }
@@ -5723,7 +5723,7 @@ const homeStyles = `
     border-radius: 0.8rem;
     background: var(--blue);
     color: var(--ink);
-    font-size: 0.63rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 3px 3px 0 var(--ink);
@@ -5804,7 +5804,7 @@ const homeStyles = `
 
   .bento-card-kicker {
     font-family: "Courier New", monospace;
-    font-size: 0.59rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -5822,7 +5822,7 @@ const homeStyles = `
   .bento-card p {
     margin: 0.8rem 0 0;
     color: var(--muted);
-    font-size: 0.74rem;
+    font-size: 0.875rem;
     font-weight: 650;
     line-height: 1.6;
   }
@@ -5876,12 +5876,12 @@ const homeStyles = `
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    font-size: 0.63rem;
+    font-size: 0.875rem;
     font-weight: 850;
   }
 
   .profile-completion-copy strong {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -5914,7 +5914,7 @@ const homeStyles = `
     border-radius: 0.9rem;
     background: var(--ink);
     color: #ffffff;
-    font-size: 0.64rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 4px 4px 0 var(--pink);
@@ -6008,13 +6008,13 @@ const homeStyles = `
   }
 
   .application-step strong {
-    font-size: 0.67rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
   .application-step small {
     color: rgba(23, 23, 26, 0.6);
-    font-size: 0.55rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 
@@ -6058,7 +6058,7 @@ const homeStyles = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 0.55rem;
+    font-size: 0.875rem;
     font-weight: 850;
     text-transform: uppercase;
   }
@@ -6089,7 +6089,7 @@ const homeStyles = `
     border-radius: 999px;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.5rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -6142,7 +6142,7 @@ const homeStyles = `
   }
 
   .activity-current strong {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -6150,7 +6150,7 @@ const homeStyles = `
     margin-top: 0.2rem;
     overflow: hidden;
     color: var(--muted);
-    font-size: 0.57rem;
+    font-size: 0.875rem;
     font-weight: 650;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -6159,7 +6159,7 @@ const homeStyles = `
   .activity-current time {
     color: var(--pink-dark);
     font-family: "Courier New", monospace;
-    font-size: 0.55rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -6240,7 +6240,7 @@ const homeStyles = `
     border: 2px solid var(--ink);
     border-radius: 0.6rem;
     background: var(--blue);
-    font-size: 0.58rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -6262,7 +6262,7 @@ const homeStyles = `
     max-width: 38rem;
     margin: 1.3rem auto 0;
     color: rgba(23, 23, 26, 0.66);
-    font-size: 0.86rem;
+    font-size: 0.875rem;
     font-weight: 680;
     line-height: 1.6;
   }
@@ -6281,7 +6281,7 @@ const homeStyles = `
     padding: 0.75rem 1.15rem;
     border: 3px solid var(--ink);
     border-radius: 1rem;
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -6339,7 +6339,7 @@ const homeStyles = `
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.6rem;
+    font-size: 0.875rem;
     font-weight: 850;
   }
 
@@ -6431,7 +6431,7 @@ const homeStyles = `
   .footer-brand p {
     margin: 1rem 0 0;
     color: rgba(255, 255, 255, 0.54);
-    font-size: 0.73rem;
+    font-size: 0.875rem;
     font-weight: 620;
     line-height: 1.65;
   }
@@ -6446,7 +6446,7 @@ const homeStyles = `
   .footer-column strong {
     margin-bottom: 0.3rem;
     color: #ffffff;
-    font-size: 0.65rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.09em;
     text-transform: uppercase;
@@ -6457,7 +6457,7 @@ const homeStyles = `
     border: 0;
     background: transparent;
     color: rgba(255, 255, 255, 0.58);
-    font-size: 0.66rem;
+    font-size: 0.875rem;
     font-weight: 650;
     cursor: pointer;
     transition:
@@ -6480,7 +6480,7 @@ const homeStyles = `
     padding-top: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.13);
     color: rgba(255, 255, 255, 0.38);
-    font-size: 0.59rem;
+    font-size: 0.875rem;
     font-weight: 650;
   }
 
@@ -6593,7 +6593,7 @@ const homeStyles = `
   .job-modal-kicker {
     color: var(--muted);
     font-family: "Courier New", monospace;
-    font-size: 0.59rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -6611,7 +6611,7 @@ const homeStyles = `
   .job-modal-header p {
     margin: 0.6rem 0 0;
     color: var(--muted);
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 
@@ -6625,7 +6625,7 @@ const homeStyles = `
     border-radius: 0.8rem;
     background: var(--paper-light);
     color: var(--ink);
-    font-size: 0.61rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 3px 3px 0 var(--ink);
@@ -6660,7 +6660,7 @@ const homeStyles = `
   .job-modal-highlight-grid span {
     display: block;
     color: var(--muted);
-    font-size: 0.52rem;
+    font-size: 0.875rem;
     font-weight: 850;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -6669,7 +6669,7 @@ const homeStyles = `
   .job-modal-highlight-grid strong {
     display: block;
     margin-top: 0.35rem;
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -6692,7 +6692,7 @@ const homeStyles = `
 
   .job-modal-content h3 {
     margin: 0;
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -6701,7 +6701,7 @@ const homeStyles = `
   .job-modal-content p {
     margin: 0.65rem 0 0;
     color: var(--muted);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 620;
     line-height: 1.65;
   }
@@ -6720,7 +6720,7 @@ const homeStyles = `
     align-items: center;
     gap: 0.5rem;
     color: #514b46;
-    font-size: 0.67rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 
@@ -6743,7 +6743,7 @@ const homeStyles = `
     border: 1.7px solid var(--ink);
     border-radius: 0.5rem;
     background: var(--job-soft-accent);
-    font-size: 0.57rem;
+    font-size: 0.875rem;
     font-weight: 850;
   }
 
@@ -6761,7 +6761,7 @@ const homeStyles = `
 
   .job-modal-footer > span {
     color: var(--muted);
-    font-size: 0.6rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 
@@ -6775,7 +6775,7 @@ const homeStyles = `
     border-radius: 0.85rem;
     background: var(--ink);
     color: #ffffff;
-    font-size: 0.65rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 4px 4px 0 var(--job-accent);
@@ -6849,7 +6849,7 @@ const homeStyles = `
     background: #ece6dd;
     color: var(--ink);
     font-family: "Courier New", monospace;
-    font-size: 0.54rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 1px 1px 0 var(--ink);
@@ -6865,7 +6865,7 @@ const homeStyles = `
     display: block;
     padding: 0.45rem 0.5rem;
     color: var(--muted);
-    font-size: 0.54rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -6920,7 +6920,7 @@ const homeStyles = `
   }
 
   .command-result-copy strong {
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 950;
   }
 
@@ -6928,7 +6928,7 @@ const homeStyles = `
     margin-top: 0.15rem;
     overflow: hidden;
     color: var(--muted);
-    font-size: 0.56rem;
+    font-size: 0.875rem;
     font-weight: 650;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -6946,7 +6946,7 @@ const homeStyles = `
     gap: 0.7rem;
     padding: 3rem 1rem;
     color: var(--muted);
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 750;
   }
 
@@ -6964,7 +6964,7 @@ const homeStyles = `
     border-top: 2px solid rgba(23, 23, 26, 0.12);
     background: #f1ece4;
     color: var(--muted);
-    font-size: 0.53rem;
+    font-size: 0.875rem;
     font-weight: 750;
   }
 
@@ -7067,7 +7067,7 @@ const homeStyles = `
     border-radius: 0.9rem;
     background: var(--pink);
     color: #ffffff;
-    font-size: 0.62rem;
+    font-size: 0.875rem;
     font-weight: 950;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -7111,7 +7111,7 @@ const homeStyles = `
   .mobile-menu nav > button > span:first-child {
     color: var(--pink-dark);
     font-family: "Courier New", monospace;
-    font-size: 0.55rem;
+    font-size: 0.875rem;
     letter-spacing: 0.08em;
   }
 
@@ -7128,7 +7128,7 @@ const homeStyles = `
     border: 2px solid var(--ink);
     border-radius: 50%;
     background: var(--yellow);
-    font-size: 0.55rem;
+    font-size: 0.875rem;
     font-style: normal;
     box-shadow: 2px 2px 0 var(--ink);
   }
@@ -7144,7 +7144,7 @@ const homeStyles = `
     min-height: 3.3rem;
     border: 2px solid var(--ink);
     border-radius: 0.9rem;
-    font-size: 0.65rem;
+    font-size: 0.875rem;
     font-weight: 950;
     cursor: pointer;
     box-shadow: 4px 4px 0 var(--ink);
@@ -7173,7 +7173,7 @@ const homeStyles = `
     margin-top: auto;
     padding-top: 2rem;
     color: var(--muted);
-    font-size: 0.56rem;
+    font-size: 0.875rem;
     font-weight: 750;
     text-align: center;
   }
@@ -7192,7 +7192,7 @@ const homeStyles = `
     border-radius: 1rem;
     background: var(--lime);
     color: var(--ink);
-    font-size: 0.67rem;
+    font-size: 0.875rem;
     font-weight: 900;
     box-shadow:
       6px 6px 0 var(--pink),
@@ -7457,7 +7457,7 @@ const homeStyles = `
     }
 
     .hero-eyebrow {
-      font-size: 0.54rem;
+      font-size: 0.875rem;
     }
 
     .hero-title {
@@ -7720,7 +7720,7 @@ const homeStyles = `
       border-radius: 0.85rem;
       background: transparent;
       color: var(--muted);
-      font-size: 0.5rem;
+      font-size: 0.875rem;
       font-weight: 850;
       cursor: pointer;
     }
@@ -7754,7 +7754,7 @@ const homeStyles = `
       border-radius: 999px;
       background: var(--pink);
       color: #ffffff;
-      font-size: 0.45rem;
+      font-size: 0.875rem;
       font-style: normal;
       font-weight: 950;
     }
@@ -7824,11 +7824,11 @@ const homeStyles = `
     }
 
     .map-node strong {
-      font-size: 0.54rem;
+      font-size: 0.875rem;
     }
 
     .map-node small {
-      font-size: 0.56rem;
+      font-size: 0.875rem;
     }
 
     .map-feature-card {

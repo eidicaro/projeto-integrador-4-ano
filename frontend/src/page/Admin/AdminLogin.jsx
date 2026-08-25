@@ -540,7 +540,7 @@ export default function AdminLogin() {
 
         .admin-login__brand-category {
           color: #8f858b;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 650;
           letter-spacing: 0.16em;
           text-transform: uppercase;
@@ -563,7 +563,7 @@ export default function AdminLogin() {
           color: #eeb5ca;
           background: rgba(255, 71, 137, 0.065);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 730;
           letter-spacing: 0.11em;
           text-transform: uppercase;
@@ -650,7 +650,7 @@ export default function AdminLogin() {
           display: block;
           overflow: hidden;
           color: #847981;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 620;
           letter-spacing: 0.03em;
           text-overflow: ellipsis;
@@ -663,7 +663,7 @@ export default function AdminLogin() {
           justify-content: space-between;
           gap: 24px;
           color: #645b61;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 600;
           animation: admin-login-content-enter 0.75s 0.24s ease-out both;
         }
@@ -853,7 +853,7 @@ export default function AdminLogin() {
           justify-content: space-between;
           gap: 12px;
           color: #d8cfd4;
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 690;
           letter-spacing: 0.025em;
         }
@@ -983,7 +983,7 @@ export default function AdminLogin() {
           align-items: center;
           gap: 9px;
           color: #93888f;
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 590;
           cursor: pointer;
           user-select: none;
@@ -1051,7 +1051,7 @@ export default function AdminLogin() {
           color: #df90ad;
           background: transparent;
           cursor: pointer;
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 650;
           text-decoration: none;
           transition: color 0.2s ease;
@@ -1175,7 +1175,7 @@ export default function AdminLogin() {
           gap: 8px;
           margin: 23px 0 0;
           color: #6f656b;
-          font-size: 10px;
+          font-size: 14px;
           font-weight: 620;
           letter-spacing: 0.045em;
           text-align: center;

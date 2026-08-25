@@ -92,7 +92,7 @@ const routeLoadingStyles = `
 
   .route-loading-copy span {
     color: #716a65;
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     font-weight: 700;
   }
 

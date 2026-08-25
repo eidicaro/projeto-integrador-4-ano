@@ -1775,7 +1775,7 @@ Candidaturas: ${
             display: block;
             margin-top: 3px;
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 700;
             letter-spacing: 0.11em;
             text-transform: uppercase;
@@ -1789,7 +1789,7 @@ Candidaturas: ${
             display: block;
             margin: 0 12px 10px;
             color: #5e606c;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.15em;
             text-transform: uppercase;
@@ -1868,7 +1868,7 @@ Candidaturas: ${
 
           .create-nav__text {
             flex: 1;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 650;
           }
 
@@ -1915,7 +1915,7 @@ Candidaturas: ${
             display: block;
             margin-top: 14px;
             color: #e9e2ff;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 800;
           }
 
@@ -1923,7 +1923,7 @@ Candidaturas: ${
             display: block;
             margin-top: 7px;
             color: #85818f;
-            font-size: 9px;
+            font-size: 14px;
             line-height: 1.6;
           }
 
@@ -1938,7 +1938,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 7px;
             background: rgba(0, 0, 0, 0.15);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 800;
           }
 
@@ -1986,7 +1986,7 @@ Candidaturas: ${
           }
 
           .create-back-button__text {
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 750;
           }
 
@@ -2006,7 +2006,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 11px;
             background: rgba(255, 255, 255, 0.025);
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -2044,7 +2044,7 @@ Candidaturas: ${
           }
 
           .create-topbar-button__text {
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 750;
           }
 
@@ -2105,7 +2105,7 @@ Candidaturas: ${
             gap: 8px;
             margin-bottom: 15px;
             color: #c6c7d0;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.17em;
             text-transform: uppercase;
@@ -2157,7 +2157,7 @@ Candidaturas: ${
             max-width: 690px;
             margin: 15px 0 0;
             color: var(--text-secondary);
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.7;
           }
 
@@ -2212,7 +2212,7 @@ Candidaturas: ${
           .create-progress__label {
             margin-top: 3px;
             color: var(--text-muted);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.12em;
             text-transform: uppercase;
@@ -2307,7 +2307,7 @@ Candidaturas: ${
           .create-form-card__description {
             margin: 6px 0 0;
             color: var(--text-muted);
-            font-size: 10px;
+            font-size: 14px;
             line-height: 1.55;
           }
 
@@ -2320,7 +2320,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.065);
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.025);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -2353,7 +2353,7 @@ Candidaturas: ${
             align-items: center;
             gap: 7px;
             color: #c9cad2;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 750;
           }
 
@@ -2363,13 +2363,13 @@ Candidaturas: ${
 
           .create-field__optional {
             color: #5e606d;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 700;
           }
 
           .create-field__counter {
             color: #5f616d;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
           }
@@ -2413,7 +2413,7 @@ Candidaturas: ${
             min-height: 50px;
             padding: 0 14px 0 43px;
             border-radius: 14px;
-            font-size: 11px;
+            font-size: 14px;
           }
 
           .create-input--no-icon,
@@ -2425,7 +2425,7 @@ Candidaturas: ${
             min-height: 145px;
             padding: 15px 16px;
             border-radius: 16px;
-            font-size: 11px;
+            font-size: 14px;
             line-height: 1.7;
             resize: vertical;
           }
@@ -2507,7 +2507,7 @@ Candidaturas: ${
             gap: 6px;
             margin: 7px 2px 0;
             color: var(--red);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 650;
             animation: createErrorReveal 180ms ease both;
           }
@@ -2515,7 +2515,7 @@ Candidaturas: ${
           .create-field__hint {
             margin: 7px 2px 0;
             color: #5f616d;
-            font-size: 8px;
+            font-size: 14px;
             line-height: 1.5;
           }
 
@@ -2553,7 +2553,7 @@ Candidaturas: ${
 
           .create-salary-visibility__label {
             color: #b8bac3;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -2607,7 +2607,7 @@ Candidaturas: ${
             border-radius: 9px;
             background: rgba(140, 92, 255, 0.055);
             cursor: pointer;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 750;
             transition:
               color 180ms ease,
@@ -2639,7 +2639,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.055);
             border-radius: 7px;
             background: rgba(7, 8, 12, 0.75);
-            font-size: 7px;
+            font-size: 14px;
             font-weight: 700;
             pointer-events: none;
             backdrop-filter: blur(8px);
@@ -2685,7 +2685,7 @@ Candidaturas: ${
                 rgba(82, 125, 255, 0.1),
                 rgba(140, 92, 255, 0.06)
               );
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
             animation: createTagReveal 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
           }
@@ -2718,7 +2718,7 @@ Candidaturas: ${
             border: 0;
             outline: 0;
             background: transparent;
-            font-size: 10px;
+            font-size: 14px;
           }
 
           .create-tags-input::placeholder {
@@ -2785,7 +2785,7 @@ Candidaturas: ${
           }
 
           .create-benefit__label {
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
             line-height: 1.35;
           }
@@ -2859,7 +2859,7 @@ Candidaturas: ${
             border-radius: 13px;
             background: rgba(255, 255, 255, 0.027);
             cursor: pointer;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 750;
             transition:
               color 180ms ease,
@@ -2905,7 +2905,7 @@ Candidaturas: ${
               0 16px 40px rgba(82, 125, 255, 0.24),
               inset 0 1px rgba(255, 255, 255, 0.22);
             cursor: pointer;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 800;
             transition:
               box-shadow 220ms ease,
@@ -2980,7 +2980,7 @@ Candidaturas: ${
             align-items: center;
             gap: 8px;
             color: #d4d5dc;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 750;
           }
 
@@ -2993,7 +2993,7 @@ Candidaturas: ${
 
           .create-quality-card__score small {
             color: #656773;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -3022,7 +3022,7 @@ Candidaturas: ${
           .create-quality-card__text {
             margin: 10px 0 0;
             color: #6c6e79;
-            font-size: 8px;
+            font-size: 14px;
             line-height: 1.55;
           }
 
@@ -3133,7 +3133,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 999px;
             background: rgba(6, 7, 13, 0.24);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.07em;
             text-transform: uppercase;
@@ -3163,7 +3163,7 @@ Candidaturas: ${
           .create-preview__company {
             display: block;
             color: #7d8090;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.11em;
             text-transform: uppercase;
@@ -3221,7 +3221,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 9px;
             background: rgba(255, 255, 255, 0.023);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -3256,7 +3256,7 @@ Candidaturas: ${
           .create-preview__salary-label {
             display: block;
             color: #66836f;
-            font-size: 7px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -3266,7 +3266,7 @@ Candidaturas: ${
             display: block;
             margin-top: 4px;
             color: #c8f7d7;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 780;
           }
 
@@ -3278,7 +3278,7 @@ Candidaturas: ${
             display: block;
             margin-bottom: 8px;
             color: #777986;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.12em;
             text-transform: uppercase;
@@ -3290,7 +3290,7 @@ Candidaturas: ${
             margin: 0;
             overflow: hidden;
             color: #a3a5af;
-            font-size: 9px;
+            font-size: 14px;
             line-height: 1.7;
             white-space: pre-line;
             -webkit-box-orient: vertical;
@@ -3312,7 +3312,7 @@ Candidaturas: ${
             border: 1px solid rgba(82, 125, 255, 0.14);
             border-radius: 8px;
             background: rgba(82, 125, 255, 0.065);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -3332,7 +3332,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 9px;
             background: rgba(255, 255, 255, 0.02);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 650;
           }
 
@@ -3356,7 +3356,7 @@ Candidaturas: ${
             align-items: center;
             gap: 7px;
             color: #727480;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 700;
           }
 
@@ -3369,7 +3369,7 @@ Candidaturas: ${
             border: 1px solid rgba(255, 255, 255, 0.065);
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.025);
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 750;
           }
 
@@ -3510,7 +3510,7 @@ Candidaturas: ${
           .create-modal__description {
             margin: 10px 0 0;
             color: #858794;
-            font-size: 10px;
+            font-size: 14px;
             line-height: 1.65;
           }
 
@@ -3531,7 +3531,7 @@ Candidaturas: ${
           .create-modal__summary-label {
             display: block;
             color: #5f616d;
-            font-size: 7px;
+            font-size: 14px;
             font-weight: 850;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -3542,7 +3542,7 @@ Candidaturas: ${
             margin-top: 5px;
             overflow: hidden;
             color: #c5c6ce;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 700;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -3564,7 +3564,7 @@ Candidaturas: ${
             padding: 0 15px;
             border-radius: 13px;
             cursor: pointer;
-            font-size: 9px;
+            font-size: 14px;
             font-weight: 800;
             transition:
               transform 180ms ease,
@@ -3700,7 +3700,7 @@ Candidaturas: ${
           .create-toast__title {
             display: block;
             color: #f0f1f4;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 800;
           }
 
@@ -3708,7 +3708,7 @@ Candidaturas: ${
             display: block;
             margin-top: 5px;
             color: #797b87;
-            font-size: 8px;
+            font-size: 14px;
             line-height: 1.55;
           }
 
@@ -3851,15 +3851,15 @@ Candidaturas: ${
 
           /* Legibilidade: formulários e informações auxiliares com piso de 12px. */
           .create-app :is(button, input, select, textarea) {
-            font-size: 13px !important;
+            font-size: 14px !important;
           }
 
           .create-app :is(p, small, label) {
-            font-size: 13px !important;
+            font-size: 14px !important;
           }
 
           .create-app span {
-            font-size: 12px;
+            font-size: 14px;
           }
 
           @media (max-width: 1240px) {
@@ -3959,7 +3959,7 @@ Candidaturas: ${
             }
 
             .create-mobile-nav__label {
-              font-size: 9px;
+              font-size: 14px;
               font-weight: 750;
             }
 

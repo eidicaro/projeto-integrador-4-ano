@@ -531,7 +531,7 @@ export default function Cadastro() {
           border: 2px solid var(--ink);
           border-radius: 999px;
           background: var(--lime);
-          font-size: 0.66rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.11em;
           text-transform: uppercase;
@@ -552,7 +552,7 @@ export default function Cadastro() {
 
         .login-access-text {
           color: var(--muted);
-          font-size: 0.74rem;
+          font-size: 0.875rem;
           font-weight: 700;
         }
 
@@ -567,7 +567,7 @@ export default function Cadastro() {
           border-radius: 999px;
           background: var(--blue);
           color: var(--ink);
-          font-size: 0.73rem;
+          font-size: 0.875rem;
           font-weight: 950;
           cursor: pointer;
           box-shadow: 5px 5px 0 var(--ink);
@@ -692,7 +692,7 @@ export default function Cadastro() {
           border: 2px solid var(--ink);
           border-radius: 999px;
           background: var(--paper-light);
-          font-size: 0.58rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.09em;
           text-transform: uppercase;
@@ -734,7 +734,7 @@ export default function Cadastro() {
         }
 
         .field-group--photo { grid-column: 1 / -1; }
-        .register-photo-picker { display: flex; min-height: 76px; align-items: center; gap: 14px; padding: 10px 14px; border: 2px dashed rgba(23,23,26,.28); border-radius: 16px; background: rgba(255,255,255,.55); cursor: pointer; font-size: 13px; font-weight: 850; }
+        .register-photo-picker { display: flex; min-height: 76px; align-items: center; gap: 14px; padding: 10px 14px; border: 2px dashed rgba(23,23,26,.28); border-radius: 16px; background: rgba(255,255,255,.55); cursor: pointer; font-size: 14px; font-weight: 850; }
         .register-photo-picker:hover { border-color: #9183ff; background: rgba(145,131,255,.08); }
         .register-photo-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
         .register-photo-picker__preview { display: grid; width: 52px; height: 52px; flex: 0 0 auto; place-items: center; overflow: hidden; border: 2px solid #17171a; border-radius: 14px; background: #64c7ee; }
@@ -752,7 +752,7 @@ export default function Cadastro() {
           border: 3px solid var(--paper-light);
           border-radius: 50%;
           color: var(--paper-light);
-          font-size: 0.56rem;
+          font-size: 0.875rem;
           font-weight: 950;
           line-height: 1.25;
           letter-spacing: 0.12em;
@@ -781,7 +781,7 @@ export default function Cadastro() {
           margin-bottom: 1.2rem;
           padding-bottom: 0.9rem;
           border-bottom: 2px dashed rgba(23, 23, 26, 0.25);
-          font-size: 0.59rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.11em;
           text-transform: uppercase;
@@ -818,7 +818,7 @@ export default function Cadastro() {
           border: 2px solid var(--ink);
           border-radius: 0.55rem;
           background: var(--lime);
-          font-size: 0.57rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -851,7 +851,7 @@ export default function Cadastro() {
           display: block;
           margin-bottom: 0.3rem;
           color: #8b837c;
-          font-size: 0.52rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -861,7 +861,7 @@ export default function Cadastro() {
           display: block;
           overflow: hidden;
           color: var(--ink);
-          font-size: 0.71rem;
+          font-size: 0.875rem;
           font-weight: 850;
           line-height: 1.35;
           text-overflow: ellipsis;
@@ -904,7 +904,7 @@ export default function Cadastro() {
         .passport-number {
           color: #817a73;
           font-family: "Courier New", monospace;
-          font-size: 0.57rem;
+          font-size: 0.875rem;
           font-weight: 900;
           letter-spacing: 0.11em;
           writing-mode: vertical-rl;
@@ -933,7 +933,7 @@ export default function Cadastro() {
           padding: 0.7rem;
           border-radius: 50%;
           background: var(--yellow);
-          font-size: 0.6rem;
+          font-size: 0.875rem;
           line-height: 1.25;
           letter-spacing: 0.07em;
           transform:
@@ -950,7 +950,7 @@ export default function Cadastro() {
           border-radius: 1.2rem;
           background: var(--violet);
           color: #fff;
-          font-size: 0.55rem;
+          font-size: 0.875rem;
           line-height: 1.3;
           letter-spacing: 0.08em;
           transform:
@@ -981,7 +981,7 @@ export default function Cadastro() {
           border-radius: 0.6rem;
           background: var(--pink);
           color: #fff;
-          font-size: 0.59rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -1110,7 +1110,7 @@ export default function Cadastro() {
           border: 2px solid var(--ink);
           border-radius: 0.55rem;
           background: #e8e2da;
-          font-size: 0.62rem;
+          font-size: 0.875rem;
           font-weight: 950;
           box-shadow: 2px 2px 0 var(--ink);
           transition:
@@ -1129,7 +1129,7 @@ export default function Cadastro() {
 
         .progress-step-label {
           overflow: hidden;
-          font-size: 0.61rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.07em;
           text-overflow: ellipsis;
@@ -1161,7 +1161,7 @@ export default function Cadastro() {
           margin-bottom: 0.7rem;
           color: var(--pink-dark);
           font-family: "Courier New", monospace;
-          font-size: 0.63rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -1180,7 +1180,7 @@ export default function Cadastro() {
         .step-description {
           margin: 0.6rem 0 0;
           color: var(--muted);
-          font-size: 0.78rem;
+          font-size: 0.875rem;
           font-weight: 650;
           line-height: 1.55;
         }
@@ -1214,7 +1214,7 @@ export default function Cadastro() {
           gap: 1rem;
           padding: 0 0.1rem;
           color: var(--ink);
-          font-size: 0.67rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -1222,7 +1222,7 @@ export default function Cadastro() {
 
         .field-label-detail {
           color: #a59e97;
-          font-size: 0.54rem;
+          font-size: 0.875rem;
           font-weight: 850;
         }
 
@@ -1281,7 +1281,7 @@ export default function Cadastro() {
           background: transparent;
           color: var(--ink);
           caret-color: var(--pink);
-          font-size: 0.86rem;
+          font-size: 0.875rem;
           font-weight: 760;
         }
 
@@ -1334,7 +1334,7 @@ export default function Cadastro() {
           align-items: center;
           gap: 0.42rem;
           padding-left: 0.12rem;
-          font-size: 0.65rem;
+          font-size: 0.875rem;
           font-weight: 800;
           line-height: 1.4;
           animation: feedbackReveal 220ms ease both;
@@ -1389,13 +1389,13 @@ export default function Cadastro() {
         .contact-preview-title {
           display: block;
           margin-bottom: 0.18rem;
-          font-size: 0.7rem;
+          font-size: 0.875rem;
           font-weight: 950;
         }
 
         .contact-preview-description {
           color: var(--muted);
-          font-size: 0.65rem;
+          font-size: 0.875rem;
           font-weight: 650;
           line-height: 1.4;
         }
@@ -1418,7 +1418,7 @@ export default function Cadastro() {
 
         .password-strength-label,
         .password-strength-value {
-          font-size: 0.6rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -1485,7 +1485,7 @@ export default function Cadastro() {
           align-items: center;
           gap: 0.4rem;
           color: #938b84;
-          font-size: 0.6rem;
+          font-size: 0.875rem;
           font-weight: 750;
           transition: color 200ms ease;
         }
@@ -1583,7 +1583,7 @@ export default function Cadastro() {
 
         .terms-text {
           color: var(--muted);
-          font-size: 0.66rem;
+          font-size: 0.875rem;
           font-weight: 650;
           line-height: 1.55;
         }
@@ -1625,7 +1625,7 @@ export default function Cadastro() {
           border-radius: 0.9rem;
           background: #ffffff;
           color: var(--ink);
-          font-size: 0.69rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.05em;
           text-transform: uppercase;
@@ -1667,7 +1667,7 @@ export default function Cadastro() {
           overflow: hidden;
           background: var(--ink);
           color: #ffffff;
-          font-size: 0.72rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.06em;
           text-transform: uppercase;
@@ -1811,7 +1811,7 @@ export default function Cadastro() {
         .success-description {
           margin: 1rem 0 0;
           color: #43403d;
-          font-size: 0.8rem;
+          font-size: 0.875rem;
           font-weight: 750;
           line-height: 1.55;
         }
@@ -1822,7 +1822,7 @@ export default function Cadastro() {
           justify-content: center;
           gap: 0.55rem;
           margin-top: 1.25rem;
-          font-size: 0.62rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.09em;
           text-transform: uppercase;
@@ -1875,7 +1875,7 @@ export default function Cadastro() {
           align-items: center;
           gap: 1rem;
           padding: 1.25rem 0;
-          font-size: 0.58rem;
+          font-size: 0.875rem;
           font-weight: 950;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -2148,7 +2148,7 @@ export default function Cadastro() {
           .login-access-button {
             min-height: 2.6rem;
             padding: 0.62rem 0.8rem;
-            font-size: 0.65rem;
+            font-size: 0.875rem;
             box-shadow: 4px 4px 0 var(--ink);
           }
 
@@ -2165,7 +2165,7 @@ export default function Cadastro() {
           }
 
           .workspace-description {
-            font-size: 0.82rem;
+            font-size: 0.875rem;
           }
 
           .form-machine-back {
@@ -2208,7 +2208,7 @@ export default function Cadastro() {
 
           .field-input {
             height: 3.4rem;
-            font-size: 0.82rem;
+            font-size: 0.875rem;
           }
 
           .field-icon {

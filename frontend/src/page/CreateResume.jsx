@@ -3992,7 +3992,7 @@ select {
 
   color: var(--ink);
 
-  font-size: .58rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -4063,7 +4063,7 @@ select {
 
   color: var(--muted);
 
-  font-size: .52rem;
+  font-size: 0.875rem;
 
   font-weight: 800;
 }
@@ -4116,7 +4116,7 @@ select {
 
   border-radius: .75rem;
 
-  font-size: .56rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -4167,9 +4167,9 @@ select {
   display: grid;
 
   grid-template-columns:
-    15rem
+    16rem
     minmax(0,1fr)
-    minmax(300px,25rem);
+    minmax(28rem,30rem);
 
   align-items: start;
 
@@ -4313,7 +4313,7 @@ select {
 
   align-items: center;
 
-  font-size: .42rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 
@@ -4335,7 +4335,7 @@ select {
 }
 
 .navigation-progress-copy strong {
-  font-size: .63rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -4345,7 +4345,7 @@ select {
 
   color: var(--muted);
 
-  font-size: .5rem;
+  font-size: 0.875rem;
 
   line-height: 1.4;
 }
@@ -4459,7 +4459,7 @@ select {
     "Courier New",
     monospace;
 
-  font-size: .48rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -4498,7 +4498,7 @@ select {
 }
 
 .section-nav-label {
-  font-size: .56rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 }
@@ -4534,7 +4534,7 @@ select {
 
   color: var(--ink);
 
-  font-size: .52rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -4544,7 +4544,7 @@ select {
 
   margin-top: .15rem;
 
-  font-size: .46rem;
+  font-size: 0.875rem;
 
   line-height: 1.45;
 }
@@ -4566,7 +4566,7 @@ kbd {
     "Courier New",
     monospace;
 
-  font-size: .44rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -4596,7 +4596,7 @@ kbd {
 
   color: #bc3555;
 
-  font-size: .51rem;
+  font-size: 0.875rem;
 
   font-weight: 900;
 
@@ -4645,7 +4645,7 @@ kbd {
 
   background: var(--blue);
 
-  font-size: .53rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -4702,7 +4702,7 @@ kbd {
 
   color: var(--muted);
 
-  font-size: .78rem;
+  font-size: 0.875rem;
 
   font-weight: 650;
 
@@ -4785,7 +4785,7 @@ kbd {
     "Courier New",
     monospace;
 
-  font-size: .5rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -4811,7 +4811,7 @@ kbd {
 
   color: var(--muted);
 
-  font-size: .58rem;
+  font-size: 0.875rem;
 
   font-weight: 630;
 
@@ -4873,7 +4873,7 @@ kbd {
 
   color: var(--ink);
 
-  font-size: .52rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -4951,7 +4951,7 @@ kbd {
 
   color: var(--ink);
 
-  font-size: .67rem;
+  font-size: 0.875rem;
 
   font-weight: 700;
 }
@@ -4994,7 +4994,7 @@ kbd {
 
   color: var(--ink);
 
-  font-size: .66rem;
+  font-size: 0.875rem;
 
   font-weight: 650;
 
@@ -5033,7 +5033,7 @@ kbd {
 
   color: #c53456;
 
-  font-size: .5rem;
+  font-size: 0.875rem;
 
   font-weight: 800;
 }
@@ -5081,7 +5081,7 @@ kbd {
 }
 
 .links-box-title strong {
-  font-size: .56rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -5089,7 +5089,7 @@ kbd {
 .links-box-title span {
   color: var(--muted);
 
-  font-size: .48rem;
+  font-size: 0.875rem;
 }
 
 /* FOTO */
@@ -5129,7 +5129,7 @@ kbd {
     1.5px dashed
     rgba(23,23,26,.2);
 
-  font-size: .5rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -5178,7 +5178,7 @@ kbd {
 
   color: var(--muted);
 
-  font-size: .5rem;
+  font-size: 0.875rem;
 
   font-weight: 650;
 
@@ -5208,7 +5208,7 @@ kbd {
 
   color: #fff;
 
-  font-size: .5rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -5239,7 +5239,7 @@ kbd {
 
   color: #b73855;
 
-  font-size: .48rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 
@@ -5253,7 +5253,7 @@ kbd {
 
   color: #9b938c;
 
-  font-size: .42rem;
+  font-size: 0.875rem;
 }
 
 /* RESUMO */
@@ -5285,7 +5285,7 @@ kbd {
     "Courier New",
     monospace;
 
-  font-size: .43rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 }
@@ -5332,7 +5332,7 @@ kbd {
 }
 
 .resume-tip strong {
-  font-size: .54rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -5343,7 +5343,7 @@ kbd {
 
   color: var(--muted);
 
-  font-size: .49rem;
+  font-size: 0.875rem;
 
   font-weight: 650;
 
@@ -5424,7 +5424,7 @@ kbd {
     "Courier New",
     monospace;
 
-  font-size: .46rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -5433,7 +5433,7 @@ kbd {
 }
 
 .dynamic-card-header strong {
-  font-size: .57rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -5518,7 +5518,7 @@ kbd {
 
   color: var(--muted);
 
-  font-size: .48rem;
+  font-size: 0.875rem;
 
   font-weight: 750;
 
@@ -5591,7 +5591,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .54rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -5684,7 +5684,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .66rem;
+  font-size: 0.875rem;
 
   font-weight: 700;
 }
@@ -5712,7 +5712,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .49rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -5731,7 +5731,7 @@ input:checked + span svg {
 .skills-help {
   color: var(--muted);
 
-  font-size: .47rem;
+  font-size: 0.875rem;
 
   margin:
     -.25rem 0 .9rem;
@@ -5766,7 +5766,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .53rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 
@@ -5789,7 +5789,7 @@ input:checked + span svg {
     "Courier New",
     monospace;
 
-  font-size: .43rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -5817,7 +5817,7 @@ input:checked + span svg {
 
   color: #9f978f;
 
-  font-size: .55rem;
+  font-size: 0.875rem;
 
   font-weight: 750;
 }
@@ -5861,7 +5861,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .65rem;
+  font-size: 0.875rem;
 
   font-weight: 750;
 
@@ -5955,7 +5955,7 @@ input:checked + span svg {
     "Courier New",
     monospace;
 
-  font-size: .53rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -5991,7 +5991,7 @@ input:checked + span svg {
   color:
     rgba(23,23,26,.65);
 
-  font-size: .66rem;
+  font-size: 0.875rem;
 
   font-weight: 650;
 
@@ -6007,13 +6007,13 @@ input:checked + span svg {
 
   justify-content: space-between;
 
-  font-size: .55rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 }
 
 .finish-progress strong {
-  font-size: .7rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -6075,7 +6075,7 @@ input:checked + span svg {
 
   border-radius: .75rem;
 
-  font-size: .54rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -6216,7 +6216,7 @@ input:checked + span svg {
     "Courier New",
     monospace;
 
-  font-size: .45rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -6226,7 +6226,7 @@ input:checked + span svg {
 .preview-toolbar strong {
   margin-top: .15rem;
 
-  font-size: .65rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -6376,7 +6376,7 @@ input:checked + span svg {
 
   color: #e43975;
 
-  font-size: .58rem;
+  font-size: 0.875rem;
 
   font-weight: 800;
 
@@ -6394,7 +6394,7 @@ input:checked + span svg {
 
   color: #666;
 
-  font-size: .45rem;
+  font-size: 0.875rem;
 }
 
 .paper-links {
@@ -6412,7 +6412,7 @@ input:checked + span svg {
 
   color: #555;
 
-  font-size: .4rem;
+  font-size: 0.875rem;
 }
 
 .paper-section {
@@ -6427,7 +6427,7 @@ input:checked + span svg {
   border-bottom:
     1px solid #ddd;
 
-  font-size: .55rem;
+  font-size: 0.875rem;
 
   font-weight: 900;
 
@@ -6442,7 +6442,7 @@ input:checked + span svg {
 
   color: #444;
 
-  font-size: .47rem;
+  font-size: 0.875rem;
 
   line-height: 1.55;
 }
@@ -6481,7 +6481,7 @@ input:checked + span svg {
 }
 
 .paper-list-heading strong {
-  font-size: .51rem;
+  font-size: 0.875rem;
 
   font-weight: 900;
 }
@@ -6491,13 +6491,13 @@ input:checked + span svg {
 
   color: #666;
 
-  font-size: .43rem;
+  font-size: 0.875rem;
 }
 
 .paper-list-heading small {
   color: #777;
 
-  font-size: .38rem;
+  font-size: 0.875rem;
 
   white-space: nowrap;
 }
@@ -6508,7 +6508,7 @@ input:checked + span svg {
 
   color: #555;
 
-  font-size: .43rem;
+  font-size: 0.875rem;
 
   line-height: 1.5;
 }
@@ -6534,7 +6534,7 @@ input:checked + span svg {
 
   background: #f4f0e8;
 
-  font-size: .4rem;
+  font-size: 0.875rem;
 
   font-weight: 700;
 }
@@ -6565,7 +6565,7 @@ input:checked + span svg {
 }
 
 .paper-mini-list strong {
-  font-size: .46rem;
+  font-size: 0.875rem;
 
   font-weight: 850;
 }
@@ -6575,7 +6575,7 @@ input:checked + span svg {
 
   color: #666;
 
-  font-size: .39rem;
+  font-size: 0.875rem;
 }
 
 .preview-hint {
@@ -6594,7 +6594,7 @@ input:checked + span svg {
 
   color: var(--muted);
 
-  font-size: .47rem;
+  font-size: 0.875rem;
 
   line-height: 1.45;
 }
@@ -6606,6 +6606,113 @@ input:checked + span svg {
   height: .8rem;
 
   color: var(--ink);
+}
+
+/*
+  A tipografia desta tela tem piso de 14px. Estes ajustes impedem que os
+  controles compactos e a prévia, originalmente desenhados para tipos bem
+  menores, cortem ou sobreponham o conteúdo.
+*/
+.resume-header,
+.resume-header-actions,
+.navigation-progress,
+.section-nav-item,
+.resume-section-header,
+.dynamic-card-header,
+.finish-actions,
+.preview-toolbar,
+.mobile-preview-header,
+.mobile-preview-actions {
+  min-width: 0;
+}
+
+.resume-back,
+.header-preview-button,
+.header-save-button,
+.clear-resume-button,
+.add-item-button,
+.finish-secondary,
+.finish-primary,
+.mobile-preview-actions button {
+  height: auto;
+  white-space: normal;
+}
+
+.navigation-progress-copy,
+.section-nav-label,
+.keyboard-tip,
+.resume-section-header > div:last-child,
+.dynamic-card-header > div:first-child,
+.preview-toolbar > div:first-child,
+.paper-identity,
+.paper-list-heading > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.section-nav-item,
+.dynamic-card-header,
+.current-job-checkbox,
+.skill-chip,
+.preview-toolbar,
+.mobile-preview-header,
+.mobile-preview-actions button {
+  min-height: 3rem;
+}
+
+.progress-circle {
+  width: 5.25rem;
+  height: 5.25rem;
+}
+
+.dynamic-card-header {
+  flex-wrap: wrap;
+}
+
+.dynamic-card-header > div:first-child {
+  flex: 1 1 12rem;
+}
+
+.dynamic-card-index,
+.section-nav-icon,
+.resume-toast > span {
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.paper-header {
+  grid-template-columns: minmax(4.2rem, auto) minmax(0, 1fr);
+}
+
+.paper-identity h2,
+.paper-identity > strong,
+.paper-contact,
+.paper-links,
+.paper-paragraph,
+.paper-list-heading strong,
+.paper-list-heading span,
+.paper-list-item p,
+.paper-mini-list strong,
+.paper-mini-list span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.paper-list-heading {
+  flex-wrap: wrap;
+}
+
+.paper-list-heading > div {
+  flex: 1 1 12rem;
+}
+
+.paper-list-heading small {
+  margin-left: auto;
+  white-space: normal;
+}
+
+.paper-two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* MOBILE PREVIEW */
@@ -6676,7 +6783,7 @@ input:checked + span svg {
 .mobile-preview-header span {
   color: var(--pink);
 
-  font-size: .45rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -6684,7 +6791,7 @@ input:checked + span svg {
 }
 
 .mobile-preview-header strong {
-  font-size: .7rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 }
@@ -6746,7 +6853,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .52rem;
+  font-size: 0.875rem;
 
   font-weight: 950;
 
@@ -6795,7 +6902,7 @@ input:checked + span svg {
 
   color: var(--ink);
 
-  font-size: .55rem;
+  font-size: 0.875rem;
 
   font-weight: 900;
 
@@ -6864,11 +6971,18 @@ input:checked + span svg {
 @media (max-width: 1320px) {
   .resume-layout {
     grid-template-columns:
-      13rem
-      minmax(0,1fr)
-      21rem;
+      15rem
+      minmax(0,1fr);
 
     gap: 1.5rem;
+  }
+
+  .resume-preview-column {
+    display: none;
+  }
+
+  .header-preview-button {
+    display: flex;
   }
 
   .navigation-progress {
@@ -6883,16 +6997,8 @@ input:checked + span svg {
 @media (max-width: 1100px) {
   .resume-layout {
     grid-template-columns:
-      12rem
+      15rem
       minmax(0,1fr);
-  }
-
-  .resume-preview-column {
-    display: none;
-  }
-
-  .header-preview-button {
-    display: flex;
   }
 }
 
@@ -7036,6 +7142,8 @@ input:checked + span svg {
 
     padding:
       .4rem .55rem;
+
+    white-space: nowrap;
   }
 
   .section-nav-item:hover {
@@ -7145,6 +7253,11 @@ input:checked + span svg {
       column;
   }
 
+  .dynamic-card-header > div:first-child,
+  .paper-list-heading > div {
+    flex-basis: 100%;
+  }
+
   .dynamic-actions {
     width: 100%;
 
@@ -7182,6 +7295,10 @@ input:checked + span svg {
   .paper-two-columns {
     grid-template-columns:
       1fr;
+  }
+
+  .mobile-preview-actions {
+    grid-template-columns: 1fr;
   }
 
   .resume-toast {

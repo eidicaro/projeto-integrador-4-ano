@@ -413,7 +413,7 @@ const styles = {
         borderRadius: "999px",
         background: "#e0f2fe",
         color: "#0369a1",
-        fontSize: "13px",
+        fontSize: "14px",
         fontWeight: "700",
         textAlign: "center",
     },
