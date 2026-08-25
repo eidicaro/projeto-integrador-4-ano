@@ -1944,6 +1944,150 @@ export default function AdminSee() {
           .see-toast { right: 18px; left: 18px; width: auto; }
         }
 
+        /* Tema claro administrativo */
+        body { background: #f4f6fb; }
+
+        .see-app {
+          --bg: #f4f6fb;
+          --surface: rgba(255,255,255,.88);
+          --surface-strong: #fff;
+          --border: rgba(15,23,42,.1);
+          --border-hover: rgba(82,125,255,.28);
+          --text: #172033;
+          --secondary: #536079;
+          --muted: #7a8498;
+          background: radial-gradient(circle at 10% 5%,rgba(255,77,141,.08),transparent 29%), radial-gradient(circle at 90% 8%,rgba(82,125,255,.1),transparent 28%), radial-gradient(circle at 65% 100%,rgba(139,92,246,.055),transparent 32%), var(--bg);
+        }
+
+        .see-sidebar { background: rgba(255,255,255,.86); box-shadow: 18px 0 55px rgba(45,55,80,.07); }
+        .see-brand__name,
+        .see-hero__title,
+        .see-stat__value,
+        .see-section-head h2,
+        .see-job-card__title,
+        .see-job-card__metrics strong,
+        .see-modal__title,
+        .see-detail-panel h3,
+        .see-candidate-card__identity strong,
+        .see-profile__panel h4,
+        .see-resume__items strong,
+        .see-command__item-copy strong,
+        .see-toast__title { color: var(--text); }
+
+        .see-nav__item:hover,
+        .see-nav__item--active,
+        .see-top-button,
+        .see-filter-clear,
+        .see-bulk button,
+        .see-job-card__actions button,
+        .see-action-btn {
+          color: var(--text);
+          border-color: var(--border);
+          background: rgba(82,125,255,.055);
+        }
+
+        .see-nav__item:hover,
+        .see-top-button:hover,
+        .see-filter-clear:hover,
+        .see-bulk button:hover,
+        .see-job-card__actions button:hover,
+        .see-action-btn:hover {
+          color: #2854c7;
+          border-color: var(--border-hover);
+          background: rgba(82,125,255,.1);
+        }
+
+        .see-top-button--primary,
+        .see-action-btn--primary { color: #fff; }
+
+        .see-sidebar__insight,
+        .see-hero,
+        .see-health,
+        .see-stat,
+        .see-toolbar,
+        .see-filter-panel,
+        .see-bulk,
+        .see-job-card,
+        .see-empty,
+        .see-detail-panel,
+        .see-detail-info,
+        .see-stage-column,
+        .see-candidate-card,
+        .see-profile__sidebar,
+        .see-profile__panel {
+          color: var(--text);
+          border-color: var(--border);
+          background: rgba(255,255,255,.88);
+          box-shadow: 0 18px 50px rgba(45,55,80,.08);
+        }
+
+        .see-sidebar__insight-icon,
+        .see-sidebar__insight strong { color: #6045b8; }
+        .see-health__copy strong { color: #28734a; }
+        .see-health__ring { background: conic-gradient(var(--green) 0 var(--health),#e4e8f1 var(--health) 100%); }
+        .see-health__ring::after { background: #fff; }
+
+        .see-search input,
+        .see-select,
+        .see-candidate-search input,
+        .see-field input,
+        .see-field textarea,
+        .see-command__search input {
+          color: var(--text);
+          border-color: rgba(15,23,42,.13);
+          background-color: #fff;
+          box-shadow: 0 8px 22px rgba(45,55,80,.055);
+        }
+
+        .see-search input::placeholder,
+        .see-candidate-search input::placeholder,
+        .see-field input::placeholder,
+        .see-field textarea::placeholder,
+        .see-command__search input::placeholder { color: #929aad; }
+
+        .see-select option { color: var(--text); background: #fff; }
+        .see-search__shortcut,
+        .see-key,
+        .see-stage-column__count {
+          color: var(--secondary);
+          border-color: var(--border);
+          background: #eef1f7;
+        }
+
+        .see-view-toggle,
+        .see-detail-tabs { border-color: var(--border); background: #eef1f7; }
+        .see-view-toggle button.active,
+        .see-detail-tabs button.active { color: #2854c7; background: #fff; box-shadow: 0 2px 8px rgba(45,55,80,.08); }
+
+        .see-checkbox { border-color: var(--border); background: #fff; }
+        .see-job-card__meta span,
+        .see-job-card__metrics > div,
+        .see-detail-info,
+        .see-candidate-card,
+        .see-profile__panel { background: #f8f9fc; }
+        .see-job-card__quality-track { background: #e4e8f1; }
+
+        .see-overlay { background: rgba(35,43,62,.3); }
+        .see-modal,
+        .see-command,
+        .see-toast {
+          color: var(--text);
+          border-color: var(--border);
+          background: rgba(255,255,255,.99);
+          box-shadow: 0 35px 100px rgba(45,55,80,.2);
+        }
+
+        .see-modal__header { border-color: var(--border); background: rgba(255,255,255,.94); }
+        .see-modal__close,
+        .see-command__item,
+        .see-command__item-icon,
+        .see-toast__icon { color: var(--secondary); border-color: var(--border); background: #f7f8fb; }
+        .see-modal__close:hover,
+        .see-command__item:hover { color: var(--text); border-color: var(--border-hover); background: #eef3ff; }
+
+        .see-mobile-nav { border-color: var(--border); background: rgba(255,255,255,.94); box-shadow: 0 20px 55px rgba(45,55,80,.16); }
+        .see-mobile-nav button.active { color: #2854c7; border-color: rgba(82,125,255,.17); background: rgba(82,125,255,.1); }
+
         @media (prefers-reduced-motion: reduce) {
           *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }

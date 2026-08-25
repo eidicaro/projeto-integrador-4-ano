@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 export default function ProtectedRoute({ children, roles = [] }) {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const normalizedRoles = Array.isArray(roles) ? roles : [roles];
+  const requiresRecruiter = normalizedRoles.includes("recrutador");
 
   if (loading) {
     return (
@@ -15,8 +17,8 @@ export default function ProtectedRoute({ children, roles = [] }) {
           minHeight: "100vh",
           display: "grid",
           placeItems: "center",
-          background: "#050816",
-          color: "#fff",
+          background: requiresRecruiter ? "#f4f6fb" : "#050816",
+          color: requiresRecruiter ? "#172033" : "#fff",
           fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >
@@ -24,9 +26,6 @@ export default function ProtectedRoute({ children, roles = [] }) {
       </div>
     );
   }
-
-  const normalizedRoles = Array.isArray(roles) ? roles : [roles];
-  const requiresRecruiter = normalizedRoles.includes("recrutador");
 
   if (!user) {
     const redirectTo = `${location.pathname}${location.search}${location.hash}`;

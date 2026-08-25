@@ -1284,6 +1284,120 @@ export default function AdminLogin() {
           }
         }
 
+        /* Tema claro administrativo */
+        html,
+        body {
+          background: #f6f3f5;
+        }
+
+        .admin-login {
+          --background: #f6f3f5;
+          --surface: rgba(255, 255, 255, 0.9);
+          --surface-soft: rgba(23, 32, 51, 0.04);
+          --border: rgba(23, 32, 51, 0.11);
+          --text: #172033;
+          --text-muted: #687286;
+          background:
+            radial-gradient(circle at 15% 10%, rgba(255, 79, 145, 0.12), transparent 32%),
+            radial-gradient(circle at 88% 82%, rgba(137, 24, 80, 0.08), transparent 35%),
+            linear-gradient(145deg, #fffafb 0%, #f7f4f6 48%, #f0f3f8 100%);
+        }
+
+        .admin-login__spotlight {
+          background: radial-gradient(ellipse, rgba(255, 255, 255, 0.72), transparent 68%);
+        }
+
+        .admin-login__brand,
+        .admin-login__hero-title,
+        .admin-login__feature-value,
+        .admin-login__title,
+        .admin-login__label,
+        .admin-login__input {
+          color: var(--text);
+        }
+
+        .admin-login__hero-title span {
+          background: linear-gradient(110deg, #172033 0%, #9a496a 44%, #ff4f91 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .admin-login__brand-category,
+        .admin-login__hero-description,
+        .admin-login__feature-label,
+        .admin-login__footer,
+        .admin-login__remember,
+        .admin-login__card-footer {
+          color: var(--text-muted);
+        }
+
+        .admin-login__eyebrow {
+          color: #9f315f;
+          border-color: rgba(184, 46, 101, 0.2);
+          background: rgba(255, 255, 255, 0.62);
+        }
+
+        .admin-login__feature,
+        .admin-login__card,
+        .admin-login__input-shell,
+        .admin-login__checkbox-ui,
+        .admin-login__sparkle {
+          border-color: var(--border);
+          background: rgba(255, 255, 255, 0.82);
+          box-shadow: 0 16px 45px rgba(56, 45, 54, 0.08);
+        }
+
+        .admin-login__feature:hover,
+        .admin-login__input-shell:hover {
+          border-color: rgba(255, 79, 145, 0.25);
+          background: #fff;
+        }
+
+        .admin-login__card {
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 30px 85px rgba(56, 45, 54, 0.14), 0 8px 24px rgba(56, 45, 54, 0.07);
+        }
+
+        .admin-login__input-shell:focus-within {
+          border-color: rgba(255, 79, 145, 0.58);
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(255, 75, 142, 0.1), 0 12px 30px rgba(56, 45, 54, 0.08);
+        }
+
+        .admin-login__field-icon,
+        .admin-login__password-toggle {
+          color: #7a8498;
+        }
+
+        .admin-login__password-toggle:hover {
+          color: #b82561;
+          background: rgba(255, 79, 145, 0.08);
+        }
+
+        .admin-login__input::placeholder {
+          color: #969eac;
+        }
+
+        .admin-login__input:-webkit-autofill,
+        .admin-login__input:-webkit-autofill:hover,
+        .admin-login__input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #172033;
+          box-shadow: 0 0 0 1000px #fff inset;
+        }
+
+        .admin-login__forgot {
+          color: #b82e65;
+        }
+
+        .admin-login__forgot:hover {
+          color: #8f1749;
+        }
+
+        .admin-login__card-footer::before,
+        .admin-login__card-footer::after {
+          background: linear-gradient(90deg, transparent, rgba(23, 32, 51, 0.18));
+        }
+
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,

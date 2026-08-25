@@ -2249,6 +2249,148 @@ export default function AdminHome() {
             }
           }
 
+          /* Tema claro administrativo */
+          html,
+          body {
+            background: #f4f6fb;
+          }
+
+          .admin-app {
+            --background: #f4f6fb;
+            --surface: rgba(255, 255, 255, 0.86);
+            --surface-strong: #ffffff;
+            --surface-soft: rgba(15, 23, 42, 0.035);
+            --border: rgba(15, 23, 42, 0.1);
+            --border-hover: rgba(77, 131, 255, 0.28);
+            --text-primary: #172033;
+            --text-secondary: #536079;
+            --text-muted: #7a8498;
+            --shadow: 0 28px 70px rgba(45, 55, 80, 0.1), 0 8px 24px rgba(45, 55, 80, 0.06);
+            background:
+              radial-gradient(circle at 15% 15%, rgba(255, 77, 141, 0.09), transparent 30%),
+              radial-gradient(circle at 90% 10%, rgba(77, 131, 255, 0.1), transparent 30%),
+              radial-gradient(circle at 70% 90%, rgba(119, 74, 255, 0.06), transparent 28%),
+              var(--background);
+          }
+
+          .admin-sidebar {
+            background: rgba(255, 255, 255, 0.84);
+            box-shadow: 18px 0 55px rgba(45, 55, 80, 0.07);
+          }
+
+          .admin-profile,
+          .admin-hero,
+          .admin-action-card,
+          .admin-info-card,
+          .admin-panel {
+            background: rgba(255, 255, 255, 0.84);
+            box-shadow: 0 18px 50px rgba(45, 55, 80, 0.08);
+          }
+
+          .admin-nav__item:hover,
+          .admin-nav__item--active,
+          .admin-command-button,
+          .admin-icon-button,
+          .admin-info-card__icon,
+          .admin-panel__title-icon,
+          .admin-activity-item__marker {
+            color: var(--text-primary);
+            border-color: var(--border);
+            background: rgba(77, 131, 255, 0.055);
+          }
+
+          .admin-command-button:hover,
+          .admin-icon-button:hover {
+            color: var(--blue-dark);
+            background: rgba(77, 131, 255, 0.1);
+          }
+
+          .admin-profile__status {
+            border-color: #fff;
+          }
+
+          .admin-command-button__key,
+          .admin-action-card__shortcut,
+          .admin-command-item__key,
+          .admin-command-dialog__hint-key {
+            color: #5e687c;
+            border-color: var(--border);
+            background: #eef1f7;
+          }
+
+          .admin-detail-pill,
+          .admin-hero__time {
+            color: var(--text-secondary);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 12px 30px rgba(45, 55, 80, 0.07);
+          }
+
+          .admin-hero__title,
+          .admin-hero__time-value,
+          .admin-action-card__title,
+          .admin-info-card__value,
+          .admin-panel__title,
+          .admin-activity-item__title,
+          .admin-system__title,
+          .admin-command-dialog__input,
+          .admin-command-item__title,
+          .admin-toast__title {
+            color: var(--text-primary);
+          }
+
+          .admin-system__ring::after {
+            background: #fff;
+          }
+
+          .admin-command-overlay {
+            background: rgba(35, 43, 62, 0.28);
+          }
+
+          .admin-command-dialog,
+          .admin-toast {
+            color: var(--text-primary);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 35px 100px rgba(45, 55, 80, 0.2);
+          }
+
+          .admin-command-dialog__input,
+          .admin-command-dialog__close,
+          .admin-command-item,
+          .admin-command-item__icon,
+          .admin-toast__icon {
+            color: var(--text-secondary);
+            border-color: var(--border);
+            background: #f7f8fb;
+          }
+
+          .admin-command-item:hover,
+          .admin-command-item:focus-visible,
+          .admin-command-dialog__close:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            background: #eef3ff;
+          }
+
+          .admin-command-dialog__footer {
+            color: var(--text-muted);
+            border-color: var(--border);
+            background: #f7f8fb;
+          }
+
+          .admin-mobile-nav {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 20px 55px rgba(45, 55, 80, 0.16);
+          }
+
+          .admin-mobile-nav__item--active {
+            color: var(--blue-dark);
+            border-color: rgba(77, 131, 255, 0.16);
+            background: rgba(77, 131, 255, 0.1);
+          }
+
           @media (prefers-reduced-motion: reduce) {
             *,
             *::before,

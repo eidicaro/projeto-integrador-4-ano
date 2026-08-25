@@ -4098,6 +4098,199 @@ Candidaturas: ${
             }
           }
 
+          /* Tema claro administrativo */
+          body {
+            background: #f4f6fb;
+          }
+
+          .create-app {
+            --background: #f4f6fb;
+            --surface: rgba(255, 255, 255, 0.88);
+            --surface-strong: #ffffff;
+            --surface-soft: rgba(15, 23, 42, 0.035);
+            --border: rgba(15, 23, 42, 0.1);
+            --border-hover: rgba(82, 125, 255, 0.28);
+            --text-primary: #172033;
+            --text-secondary: #536079;
+            --text-muted: #7a8498;
+            --shadow: 0 28px 70px rgba(45, 55, 80, 0.1), 0 8px 24px rgba(45, 55, 80, 0.06);
+            background:
+              radial-gradient(circle at 10% 5%, rgba(255, 77, 141, 0.08), transparent 29%),
+              radial-gradient(circle at 88% 8%, rgba(82, 125, 255, 0.1), transparent 28%),
+              radial-gradient(circle at 70% 95%, rgba(140, 92, 255, 0.055), transparent 30%),
+              var(--background);
+          }
+
+          .create-floating-shape {
+            border-color: rgba(15, 23, 42, 0.06);
+            background: rgba(255, 255, 255, 0.35);
+          }
+
+          .create-sidebar {
+            background: rgba(255, 255, 255, 0.86);
+            box-shadow: 18px 0 55px rgba(45, 55, 80, 0.07);
+          }
+
+          .create-brand__name,
+          .create-hero__title,
+          .create-form-card__title,
+          .create-quality-card__title,
+          .create-quality-card__score,
+          .create-preview__title,
+          .create-modal__title,
+          .create-toast__title {
+            color: var(--text-primary);
+          }
+
+          .create-nav__item:hover,
+          .create-nav__item--active,
+          .create-back-button,
+          .create-topbar-button,
+          .create-save-status {
+            color: var(--text-primary);
+            border-color: var(--border);
+            background: rgba(82, 125, 255, 0.055);
+          }
+
+          .create-back-button:hover,
+          .create-topbar-button:hover {
+            color: #2854c7;
+            background: rgba(82, 125, 255, 0.1);
+          }
+
+          .create-sidebar__tip,
+          .create-hero,
+          .create-form-card,
+          .create-quality-card,
+          .create-preview {
+            color: var(--text-primary);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 20px 55px rgba(45, 55, 80, 0.09);
+          }
+
+          .create-sidebar__tip-title,
+          .create-sidebar__tip-icon,
+          .create-form-card__icon {
+            color: #6045b8;
+          }
+
+          .create-sidebar__shortcut,
+          .create-form-card__step {
+            color: var(--text-secondary);
+            border-color: var(--border);
+            background: #eef1f7;
+          }
+
+          .create-progress__ring {
+            background: conic-gradient(var(--blue) 0 var(--progress), #e4e8f1 var(--progress) 100%);
+          }
+
+          .create-progress__ring::after {
+            border-color: var(--border);
+            background: #fff;
+          }
+
+          .create-progress__value {
+            color: var(--text-primary);
+          }
+
+          .create-input,
+          .create-select,
+          .create-textarea,
+          .create-tags-box,
+          .create-tags-input {
+            color: var(--text-primary);
+            border-color: rgba(15, 23, 42, 0.13);
+            background: #fff;
+            box-shadow: 0 8px 22px rgba(45, 55, 80, 0.055);
+          }
+
+          .create-input::placeholder,
+          .create-textarea::placeholder,
+          .create-tags-input::placeholder {
+            color: #929aad;
+          }
+
+          .create-select option {
+            color: var(--text-primary);
+            background: #fff;
+          }
+
+          .create-salary-visibility,
+          .create-template-button,
+          .create-benefit,
+          .create-secondary-button,
+          .create-form-actions,
+          .create-modal__summary-item,
+          .create-preview__meta,
+          .create-preview__tag,
+          .create-preview__benefit,
+          .create-preview__openings {
+            color: var(--text-secondary);
+            border-color: var(--border);
+            background: #f7f8fb;
+          }
+
+          .create-template-button:hover,
+          .create-benefit:hover,
+          .create-benefit--active,
+          .create-secondary-button:hover {
+            color: #30466f;
+            border-color: var(--border-hover);
+            background: #eef3ff;
+          }
+
+          .create-tag {
+            color: #3156b4;
+            border-color: rgba(82, 125, 255, 0.2);
+            background: #edf2ff;
+          }
+
+          .create-preview__copy,
+          .create-mobile-preview-close {
+            color: var(--text-secondary);
+            border-color: var(--border);
+            background: #fff;
+          }
+
+          .create-preview__copy:hover,
+          .create-mobile-preview-close:hover {
+            color: #2854c7;
+            background: #eef3ff;
+          }
+
+          .create-mobile-preview-overlay,
+          .create-modal-overlay {
+            background: rgba(35, 43, 62, 0.3);
+          }
+
+          .create-modal,
+          .create-toast {
+            color: var(--text-primary);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 35px 100px rgba(45, 55, 80, 0.2);
+          }
+
+          .create-modal__button--secondary {
+            color: var(--text-primary);
+            border-color: var(--border);
+            background: #f7f8fb;
+          }
+
+          .create-mobile-nav {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 20px 55px rgba(45, 55, 80, 0.16);
+          }
+
+          .create-mobile-nav__item--active {
+            color: #2854c7;
+            border-color: rgba(82, 125, 255, 0.17);
+            background: rgba(82, 125, 255, 0.1);
+          }
+
           @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
