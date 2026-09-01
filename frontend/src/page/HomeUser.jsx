@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import CandidateHeader from "../components/CandidateHeader";
 import Footer from "../components/Footer";
-import JobModal from "../components/JobModal";
+import JobModal from "../components/CandidateJobDetailsModal";
 import api, { getApiErrorMessage } from "../lib/api";
 import {
     extractAuthenticatedUser,
@@ -720,6 +720,7 @@ export default function HomeUser() {
                 )}
 
                 <JobModal
+                    key={`${vagaSelecionada?.id ?? "sem-vaga"}-${modalAberto ? "aberto" : "fechado"}-${curriculo?.id ?? "sem-curriculo"}`}
                     vaga={vagaSelecionada}
                     aberto={modalAberto}
                     fechar={closeJob}
