@@ -1529,7 +1529,7 @@ Candidaturas: ${
       <style>
         {`
           :root {
-            color-scheme: dark;
+            color-scheme: light;
           }
 
           * {
@@ -4112,8 +4112,9 @@ Candidaturas: ${
             --border-hover: rgba(82, 125, 255, 0.28);
             --text-primary: #172033;
             --text-secondary: #536079;
-            --text-muted: #7a8498;
+            --text-muted: #667085;
             --shadow: 0 28px 70px rgba(45, 55, 80, 0.1), 0 8px 24px rgba(45, 55, 80, 0.06);
+            color-scheme: light;
             background:
               radial-gradient(circle at 10% 5%, rgba(255, 77, 141, 0.08), transparent 29%),
               radial-gradient(circle at 88% 8%, rgba(82, 125, 255, 0.1), transparent 28%),
@@ -4195,6 +4196,50 @@ Candidaturas: ${
             color: var(--text-primary);
           }
 
+          .create-sidebar__label,
+          .create-field__optional,
+          .create-field__counter,
+          .create-field__hint,
+          .create-quality-card__score small,
+          .create-quality-card__text,
+          .create-preview__company,
+          .create-preview__section-label,
+          .create-preview__description,
+          .create-preview__deadline,
+          .create-modal__description,
+          .create-modal__summary-label,
+          .create-toast__description {
+            color: var(--text-muted);
+          }
+
+          .create-sidebar__tip-text,
+          .create-save-status,
+          .create-hero__eyebrow,
+          .create-field__label,
+          .create-salary-visibility__label,
+          .create-modal__summary-value {
+            color: var(--text-secondary);
+          }
+
+          .create-hero__gradient {
+            background: linear-gradient(100deg, #b4235c, #3159d9 48%, #6842bd 85%, #b4235c);
+            background-size: 220% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+          }
+
+          .create-hero__eyebrow-icon,
+          .create-field__icon,
+          .create-salary-visibility__icon,
+          .create-modal__icon {
+            color: #3156b4;
+          }
+
+          .create-field__required,
+          .create-field__message {
+            color: #b4235c;
+          }
+
           .create-input,
           .create-select,
           .create-textarea,
@@ -4210,6 +4255,37 @@ Candidaturas: ${
           .create-textarea::placeholder,
           .create-tags-input::placeholder {
             color: #929aad;
+          }
+
+          .create-input:hover,
+          .create-select:hover,
+          .create-textarea:hover {
+            border-color: var(--border-hover);
+            background-color: #fff;
+          }
+
+          .create-input:focus,
+          .create-select:focus,
+          .create-textarea:focus,
+          .create-tags-box:focus-within {
+            border-color: rgba(82, 125, 255, 0.62);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(82, 125, 255, 0.1), 0 8px 22px rgba(45, 55, 80, 0.055);
+          }
+
+          .create-input--error,
+          .create-select--error,
+          .create-textarea--error {
+            border-color: rgba(190, 24, 57, 0.48);
+            background-color: #fff7f8;
+          }
+
+          .create-input--error:focus,
+          .create-select--error:focus,
+          .create-textarea--error:focus {
+            border-color: rgba(190, 24, 57, 0.72);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(190, 24, 57, 0.1);
           }
 
           .create-select option {
@@ -4241,10 +4317,45 @@ Candidaturas: ${
             background: #eef3ff;
           }
 
+          .create-secondary-button--danger:hover {
+            color: #a8213c;
+            border-color: rgba(190, 24, 57, 0.24);
+            background: rgba(190, 24, 57, 0.07);
+          }
+
           .create-tag {
             color: #3156b4;
             border-color: rgba(82, 125, 255, 0.2);
             background: #edf2ff;
+          }
+
+          .create-tag__remove {
+            color: #5870ac;
+          }
+
+          .create-tag__remove:hover {
+            color: #244da9;
+            background: rgba(82, 125, 255, 0.12);
+          }
+
+          .create-tags-input {
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+          }
+
+          .create-switch {
+            background: #d9deea;
+          }
+
+          .create-switch--active {
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+          }
+
+          .create-textarea-decoration {
+            color: var(--text-secondary);
+            border-color: var(--border);
+            background: #eef1f7;
           }
 
           .create-preview__copy,
@@ -4258,6 +4369,20 @@ Candidaturas: ${
           .create-mobile-preview-close:hover {
             color: #2854c7;
             background: #eef3ff;
+          }
+
+          .create-quality-card__track {
+            background: #e4e8f1;
+          }
+
+          .create-preview__company-logo {
+            border-color: #fff;
+          }
+
+          .create-preview__salary-icon,
+          .create-preview__salary-label,
+          .create-preview__salary-value {
+            color: #217443;
           }
 
           .create-mobile-preview-overlay,
@@ -4277,6 +4402,34 @@ Candidaturas: ${
             color: var(--text-primary);
             border-color: var(--border);
             background: #f7f8fb;
+          }
+
+          .create-modal__button--secondary:hover {
+            color: #2854c7;
+            border-color: var(--border-hover);
+            background: #eef3ff;
+          }
+
+          .create-modal__icon--danger {
+            color: #b42345;
+          }
+
+          .create-toast--success .create-toast__icon {
+            color: #217443;
+            border-color: rgba(33, 116, 67, 0.18);
+            background: rgba(33, 116, 67, 0.08);
+          }
+
+          .create-toast--error .create-toast__icon {
+            color: #b42345;
+            border-color: rgba(180, 35, 69, 0.18);
+            background: rgba(180, 35, 69, 0.08);
+          }
+
+          .create-toast--info .create-toast__icon {
+            color: #3156b4;
+            border-color: rgba(49, 86, 180, 0.18);
+            background: rgba(49, 86, 180, 0.08);
           }
 
           .create-mobile-nav {

@@ -415,7 +415,7 @@ export default function AdminHome() {
       <style>
         {`
           :root {
-            color-scheme: dark;
+            color-scheme: light;
           }
 
           * {
@@ -2264,8 +2264,9 @@ export default function AdminHome() {
             --border-hover: rgba(77, 131, 255, 0.28);
             --text-primary: #172033;
             --text-secondary: #536079;
-            --text-muted: #7a8498;
+            --text-muted: #667085;
             --shadow: 0 28px 70px rgba(45, 55, 80, 0.1), 0 8px 24px rgba(45, 55, 80, 0.06);
+            color-scheme: light;
             background:
               radial-gradient(circle at 15% 15%, rgba(255, 77, 141, 0.09), transparent 30%),
               radial-gradient(circle at 90% 10%, rgba(77, 131, 255, 0.1), transparent 30%),
@@ -2309,6 +2310,14 @@ export default function AdminHome() {
             border-color: #fff;
           }
 
+          .admin-action-card {
+            --accent-light: #b4235c;
+          }
+
+          .admin-action-card--blue {
+            --accent-light: #2854c7;
+          }
+
           .admin-command-button__key,
           .admin-action-card__shortcut,
           .admin-command-item__key,
@@ -2341,6 +2350,39 @@ export default function AdminHome() {
 
           .admin-system__ring::after {
             background: #fff;
+          }
+
+          .admin-sidebar__label,
+          .admin-nav__arrow,
+          .admin-breadcrumb__separator,
+          .admin-command-dialog__search-icon,
+          .admin-command-dialog__label,
+          .admin-command-item__description,
+          .admin-command-empty,
+          .admin-toast__description {
+            color: var(--text-muted);
+          }
+
+          .admin-eyebrow,
+          .admin-system__footer {
+            color: var(--text-secondary);
+          }
+
+          .admin-hero__title-gradient {
+            background: linear-gradient(100deg, #172033 0%, #b4235c 36%, #3159d9 82%, #172033 100%);
+            background-size: 220% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+          }
+
+          .admin-eyebrow__icon {
+            color: #3156b4;
+          }
+
+          .admin-detail-pill--online,
+          .admin-panel__badge,
+          .admin-system__center {
+            color: #217443;
           }
 
           .admin-command-overlay {
@@ -2377,6 +2419,12 @@ export default function AdminHome() {
             color: var(--text-muted);
             border-color: var(--border);
             background: #f7f8fb;
+          }
+
+          .admin-toast__icon {
+            color: #217443;
+            border-color: rgba(33, 116, 67, 0.18);
+            background: rgba(33, 116, 67, 0.08);
           }
 
           .admin-mobile-nav {

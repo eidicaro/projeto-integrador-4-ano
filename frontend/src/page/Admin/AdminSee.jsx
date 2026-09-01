@@ -1483,7 +1483,7 @@ export default function AdminSee() {
   return (
     <>
       <style>{`
-        :root { color-scheme: dark; }
+        :root { color-scheme: light; }
         * { box-sizing: border-box; }
         html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
         body { background: #050609; }
@@ -1955,7 +1955,8 @@ export default function AdminSee() {
           --border-hover: rgba(82,125,255,.28);
           --text: #172033;
           --secondary: #536079;
-          --muted: #7a8498;
+          --muted: #667085;
+          color-scheme: light;
           background: radial-gradient(circle at 10% 5%,rgba(255,77,141,.08),transparent 29%), radial-gradient(circle at 90% 8%,rgba(82,125,255,.1),transparent 28%), radial-gradient(circle at 65% 100%,rgba(139,92,246,.055),transparent 32%), var(--bg);
         }
 
@@ -1998,7 +1999,18 @@ export default function AdminSee() {
         }
 
         .see-top-button--primary,
-        .see-action-btn--primary { color: #fff; }
+        .see-action-btn--primary {
+          color: #fff;
+          border-color: rgba(82,125,255,.3);
+          background: linear-gradient(135deg,var(--blue),var(--purple));
+        }
+
+        .see-top-button--primary:hover,
+        .see-action-btn--primary:hover {
+          color: #fff;
+          border-color: rgba(82,125,255,.38);
+          background: linear-gradient(135deg,var(--blue),var(--purple));
+        }
 
         .see-sidebar__insight,
         .see-hero,
@@ -2060,12 +2072,133 @@ export default function AdminSee() {
         .see-detail-tabs button.active { color: #2854c7; background: #fff; box-shadow: 0 2px 8px rgba(45,55,80,.08); }
 
         .see-checkbox { border-color: var(--border); background: #fff; }
+        .see-checkbox--active {
+          color: #fff;
+          border-color: transparent;
+          background: linear-gradient(135deg,var(--blue),var(--purple));
+        }
         .see-job-card__meta span,
         .see-job-card__metrics > div,
         .see-detail-info,
         .see-candidate-card,
         .see-profile__panel { background: #f8f9fc; }
         .see-job-card__quality-track { background: #e4e8f1; }
+
+        .see-brand__name,
+        .see-eyebrow,
+        .see-job-card__company,
+        .see-modal__subtitle,
+        .see-stage-column__title,
+        .see-field label { color: var(--text); }
+
+        .see-sidebar__label,
+        .see-breadcrumb,
+        .see-breadcrumb span:last-child,
+        .see-health__copy span,
+        .see-health__copy small,
+        .see-stat__label,
+        .see-search__icon,
+        .see-filter-panel label,
+        .see-section-head p,
+        .see-section-head__count,
+        .see-job-card__description,
+        .see-job-card__metric-label,
+        .see-job-card__quality-head,
+        .see-job-card__date,
+        .see-empty p,
+        .see-detail-copy,
+        .see-detail-info span,
+        .see-candidate-card__identity span,
+        .see-candidate-card__details span,
+        .see-profile__sidebar p,
+        .see-profile__contact span,
+        .see-profile__panel p,
+        .see-resume__heading span,
+        .see-resume__items span,
+        .see-confirm p,
+        .see-command__search svg,
+        .see-command__label,
+        .see-command__item-copy span,
+        .see-toast__description { color: var(--secondary); }
+
+        .see-hero__gradient {
+          background: linear-gradient(100deg,#b4235c,#3159d9 48%,#6842bd 85%,#b4235c);
+          background-size: 220% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .see-eyebrow__icon,
+        .see-stat__icon,
+        .see-modal__icon,
+        .see-detail-info__icon,
+        .see-candidate-search svg { color: #3156b4; }
+
+        .see-health__copy strong,
+        .see-stat__trend,
+        .see-status--green { color: #217443; background: rgba(33,116,67,.08); }
+        .see-status--orange { color: #8a5b00; background: rgba(138,91,0,.08); }
+        .see-status--muted { color: #5f6879; background: #eef1f7; }
+        .see-filter-badge { border-color: #fff; }
+        .see-view-toggle button { color: var(--muted); }
+        .see-view-toggle button:hover { color: #2854c7; }
+        .see-bulk__label { color: #3156b4; }
+
+        .see-job-card__meta span,
+        .see-detail-info strong { color: var(--secondary); }
+
+        .see-job-card__tags span,
+        .see-detail-tags span,
+        .see-candidate-card__skills span,
+        .see-profile__skills span {
+          color: #3156b4;
+          border-color: rgba(82,125,255,.2);
+          background: #edf2ff;
+        }
+
+        .see-resume__heading,
+        .see-resume__section h5,
+        .see-resume__links a { color: #3156b4; }
+
+        .see-job-card__actions .see-job-card__primary,
+        .see-job-card__actions .see-job-card__primary:hover {
+          color: #2854c7;
+          border-color: rgba(82,125,255,.24);
+          background: rgba(82,125,255,.1);
+        }
+
+        .see-action-btn--danger:hover,
+        .see-bulk button.danger:hover {
+          color: #a8213c;
+          border-color: rgba(190,24,57,.24);
+          background: rgba(190,24,57,.07);
+        }
+
+        .see-candidate-stage--blue { color: #2854c7; background: rgba(40,84,199,.08); }
+        .see-candidate-stage--purple { color: #6842bd; background: rgba(104,66,189,.08); }
+        .see-candidate-stage--orange { color: #8a5b00; background: rgba(138,91,0,.08); }
+        .see-candidate-stage--pink { color: #a9275d; background: rgba(169,39,93,.08); }
+        .see-candidate-stage--green { color: #217443; background: rgba(33,116,67,.08); }
+        .see-candidate-stage--muted { color: #5f6879; background: #eef1f7; }
+        .see-rating__star { color: #aab1c0; }
+        .see-rating__star--active { color: #b87900; }
+        .see-field__error { color: #b42345; }
+
+        .see-toast--success .see-toast__icon {
+          color: #217443;
+          border-color: rgba(33,116,67,.18);
+          background: rgba(33,116,67,.08);
+        }
+        .see-toast--error .see-toast__icon {
+          color: #b42345;
+          border-color: rgba(180,35,69,.18);
+          background: rgba(180,35,69,.08);
+        }
+        .see-toast--info .see-toast__icon {
+          color: #3156b4;
+          border-color: rgba(49,86,180,.18);
+          background: rgba(49,86,180,.08);
+        }
 
         .see-overlay { background: rgba(35,43,62,.3); }
         .see-modal,

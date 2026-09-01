@@ -219,7 +219,7 @@ export default function AdminLogin() {
     <>
       <style>{`
         :root {
-          color-scheme: dark;
+          color-scheme: light;
         }
 
         * {
@@ -1297,6 +1297,7 @@ export default function AdminLogin() {
           --border: rgba(23, 32, 51, 0.11);
           --text: #172033;
           --text-muted: #687286;
+          color-scheme: light;
           background:
             radial-gradient(circle at 15% 10%, rgba(255, 79, 145, 0.12), transparent 32%),
             radial-gradient(circle at 88% 82%, rgba(137, 24, 80, 0.08), transparent 35%),
@@ -1638,7 +1639,7 @@ export default function AdminLogin() {
                       role="alert"
                       style={{
                         margin: 0,
-                        color: "#ff91b9",
+                        color: "#a51f55",
                       }}
                     >
                       {authError}
