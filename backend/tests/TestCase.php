@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Enums\CandidaturaStatus;
+use App\Enums\FormacaoTipo;
 use App\Enums\VagaStatus;
 use App\Models\Candidatura;
 use App\Models\Curriculo;
@@ -108,6 +109,7 @@ abstract class TestCase extends BaseTestCase
                 'descricao' => 'Desenvolvimento e manutenção de aplicações web.',
             ]],
             'formacoes' => [[
+                'tipo' => FormacaoTipo::Technologist->value,
                 'curso' => 'Análise e Desenvolvimento de Sistemas',
                 'instituicao' => 'Fatec',
                 'periodo' => '2022 - 2025',

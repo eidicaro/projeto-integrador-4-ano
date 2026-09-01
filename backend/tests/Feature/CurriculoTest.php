@@ -28,6 +28,7 @@ class CurriculoTest extends TestCase
             ->assertJsonPath('data.nome_completo', $payload['nome_completo'])
             ->assertJsonCount(1, 'data.experiencias')
             ->assertJsonCount(1, 'data.formacoes')
+            ->assertJsonPath('data.formacoes.0.tipo', $payload['formacoes'][0]['tipo'])
             ->assertJsonCount(1, 'data.cursos')
             ->assertJsonCount(2, 'data.habilidades')
             ->assertJsonCount(1, 'data.idiomas');
@@ -39,7 +40,11 @@ class CurriculoTest extends TestCase
             'nome_completo' => $payload['nome_completo'],
         ]);
         $this->assertDatabaseHas('experiencias', ['curriculo_id' => $resumeId, 'cargo' => 'Desenvolvedora']);
-        $this->assertDatabaseHas('formacoes', ['curriculo_id' => $resumeId, 'instituicao' => 'Fatec']);
+        $this->assertDatabaseHas('formacoes', [
+            'curriculo_id' => $resumeId,
+            'tipo' => $payload['formacoes'][0]['tipo'],
+            'instituicao' => 'Fatec',
+        ]);
         $this->assertDatabaseHas('cursos', ['curriculo_id' => $resumeId, 'nome' => 'Laravel Avançado']);
         $this->assertDatabaseHas('habilidades', ['curriculo_id' => $resumeId, 'nome' => 'Laravel']);
         $this->assertDatabaseHas('idiomas', ['curriculo_id' => $resumeId, 'idioma' => 'Inglês']);
@@ -83,6 +88,22 @@ class CurriculoTest extends TestCase
 
         $this->assertDatabaseCount('curriculos', 1);
         $this->assertSame(1, $candidate->curriculo()->count());
+    }
+
+    public function test_formation_type_must_be_supported(): void
+    {
+        $candidate = $this->candidate();
+        Sanctum::actingAs($candidate, ['candidate']);
+
+        $payload = $this->curriculoPayload();
+        $payload['formacoes'][0]['tipo'] = 'tipo-inexistente';
+
+        $this->postJson('/api/curriculos', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('formacoes.0.tipo');
+
+        $this->assertDatabaseCount('curriculos', 0);
+        $this->assertDatabaseCount('formacoes', 0);
     }
 
     public function test_candidate_cannot_read_or_update_another_candidates_resume(): void

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FormacaoTipo;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCurriculoRequest extends FormRequest
 {
@@ -64,6 +66,7 @@ class StoreCurriculoRequest extends FormRequest
             'experiencias.*.periodo' => ['required', 'string', 'max:100'],
             'experiencias.*.descricao' => ['nullable', 'string', 'max:3000'],
             'formacoes' => ['sometimes', 'array', 'max:20'],
+            'formacoes.*.tipo' => ['required', Rule::enum(FormacaoTipo::class)],
             'formacoes.*.curso' => ['required', 'string', 'max:150'],
             'formacoes.*.instituicao' => ['required', 'string', 'max:150'],
             'formacoes.*.periodo' => ['required', 'string', 'max:100'],

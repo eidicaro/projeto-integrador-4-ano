@@ -45,6 +45,22 @@ const BENEFIT_LABELS = {
   "seguro-vida": "Seguro de vida",
 };
 
+const FORMATION_TYPE_LABELS = {
+  "ensino-fundamental": "Ensino fundamental",
+  "ensino-medio": "Ensino médio",
+  tecnico: "Curso técnico",
+  graduacao: "Graduação",
+  tecnologo: "Tecnólogo",
+  bacharelado: "Bacharelado",
+  licenciatura: "Licenciatura",
+  "pos-graduacao": "Pós-graduação",
+  mba: "MBA",
+  mestrado: "Mestrado",
+  doutorado: "Doutorado",
+  "pos-doutorado": "Pós-doutorado",
+  outro: "Outro",
+};
+
 const emptyCandidateForm = {
   name: "",
   email: "",
@@ -467,7 +483,7 @@ function CandidateResume({ candidate, loading, onOpenFile }) {
 
   const sections = [
     ["Experiência profissional", resume.experiencias, (item) => item.cargo, (item) => [item.empresa, item.periodo].filter(Boolean).join(" · ")],
-    ["Formação", resume.formacoes, (item) => item.curso, (item) => [item.instituicao, item.periodo].filter(Boolean).join(" · ")],
+    ["Formação", resume.formacoes, (item) => item.curso, (item) => [FORMATION_TYPE_LABELS[item.tipo] || item.tipo, item.instituicao, item.periodo].filter(Boolean).join(" · ")],
     ["Cursos", resume.cursos, (item) => item.nome, (item) => [item.instituicao, item.periodo].filter(Boolean).join(" · ")],
     ["Idiomas", resume.idiomas, (item) => item.idioma, (item) => item.nivel],
   ];

@@ -50,8 +50,8 @@ function toApiPayload(data) {
     resumo: data.resumo.trim() || null,
     experiencias: onlyComplete(data.experiencias, ["cargo", "empresa", "inicio"])
       .map((item) => ({ cargo: item.cargo, empresa: item.empresa, periodo: periodo(item), descricao: item.descricao || null })),
-    formacoes: onlyComplete(data.formacoes, ["curso", "instituicao", "inicio"])
-      .map((item) => ({ curso: item.curso, instituicao: item.instituicao, periodo: periodo(item) })),
+    formacoes: onlyComplete(data.formacoes, ["tipo", "curso", "instituicao", "inicio"])
+      .map((item) => ({ tipo: item.tipo, curso: item.curso, instituicao: item.instituicao, periodo: periodo(item) })),
     cursos: onlyComplete(data.cursos, ["nome", "instituicao", "ano"])
       .map((item) => ({ nome: item.nome, instituicao: item.instituicao, periodo: [item.ano, item.carga].filter(Boolean).join(" · ") })),
     habilidades: data.habilidades.map((nome) => ({ nome })),
@@ -63,7 +63,7 @@ function toApiPayload(data) {
 function fromApiResume(resume) {
   const links = Array.isArray(resume.links) ? resume.links : [];
   const experiencias = (resume.experiencias || []).map((item) => ({ ...item, id: criarId(), inicio: item.periodo || "", fim: "", atual: false }));
-  const formacoes = (resume.formacoes || []).map((item) => ({ ...item, id: criarId(), inicio: item.periodo || "", fim: "" }));
+  const formacoes = (resume.formacoes || []).map((item) => ({ ...item, tipo: item.tipo || "outro", id: criarId(), inicio: item.periodo || "", fim: "" }));
   const cursos = (resume.cursos || []).map((item) => ({ ...item, id: criarId(), ano: item.periodo || "", carga: "" }));
   const idiomas = (resume.idiomas || []).map((item) => ({ ...item, id: criarId() }));
 
@@ -94,6 +94,26 @@ const NIVEL_IDIOMA = [
   "Fluente",
   "Nativo",
 ];
+
+const TIPOS_FORMACAO = [
+  { value: "ensino-fundamental", label: "Ensino fundamental" },
+  { value: "ensino-medio", label: "Ensino médio" },
+  { value: "tecnico", label: "Curso técnico" },
+  { value: "graduacao", label: "Graduação" },
+  { value: "tecnologo", label: "Tecnólogo" },
+  { value: "bacharelado", label: "Bacharelado" },
+  { value: "licenciatura", label: "Licenciatura" },
+  { value: "pos-graduacao", label: "Pós-graduação" },
+  { value: "mba", label: "MBA" },
+  { value: "mestrado", label: "Mestrado" },
+  { value: "doutorado", label: "Doutorado" },
+  { value: "pos-doutorado", label: "Pós-doutorado" },
+  { value: "outro", label: "Outro" },
+];
+
+function formatFormationType(value) {
+  return TIPOS_FORMACAO.find((option) => option.value === value)?.label || "Outro";
+}
 
 function criarId() {
   return `${Date.now()}-${Math.random()
@@ -130,6 +150,7 @@ const INITIAL_DATA = {
   formacoes: [
     {
       id: criarId(),
+      tipo: "",
       curso: "",
       instituicao: "",
       inicio: "",
@@ -1943,6 +1964,33 @@ export default function CreateResume() {
                         }
                       >
                         <div className="two-column-grid">
+                          <Field label="Tipo de formação">
+                            <div className="select-shell">
+                              <select
+                                value={formacao.tipo}
+                                onChange={(event) =>
+                                  updateArrayItem(
+                                    "formacoes",
+                                    formacao.id,
+                                    "tipo",
+                                    event.target.value,
+                                  )
+                                }
+                              >
+                                <option value="" disabled>
+                                  Selecione o tipo
+                                </option>
+                                {TIPOS_FORMACAO.map((tipo) => (
+                                  <option key={tipo.value} value={tipo.value}>
+                                    {tipo.label}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <ChevronDownIcon />
+                            </div>
+                          </Field>
+
                           <Field label="Curso">
                             <TextInput
                               value={
@@ -1964,29 +2012,24 @@ export default function CreateResume() {
                             />
                           </Field>
 
+                        </div>
+
+                        <div className="three-column-grid">
                           <Field label="Instituição">
                             <TextInput
-                              value={
-                                formacao.instituicao
-                              }
+                              value={formacao.instituicao}
                               placeholder="Ex: Fatec"
-                              onChange={(
-                                event,
-                              ) =>
+                              onChange={(event) =>
                                 updateArrayItem(
                                   "formacoes",
                                   formacao.id,
                                   "instituicao",
-                                  event
-                                    .target
-                                    .value,
+                                  event.target.value,
                                 )
                               }
                             />
                           </Field>
-                        </div>
 
-                        <div className="two-column-grid">
                           <Field label="Início">
                             <TextInput
                               type="month"
@@ -2041,6 +2084,7 @@ export default function CreateResume() {
                   addArrayItem(
                     "formacoes",
                     {
+                      tipo: "",
                       curso: "",
                       instituicao:
                         "",
@@ -3296,9 +3340,9 @@ function ResumePreview({
                       </strong>
 
                       <span>
-                        {
-                          item.instituicao
-                        }
+                        {[formatFormationType(item.tipo), item.instituicao]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </span>
                     </div>
 
@@ -3509,6 +3553,7 @@ function calcularProgresso(data) {
   if (
     data.formacoes.some(
       (item) =>
+        item.tipo &&
         item.curso &&
         item.instituicao,
     )
@@ -3737,10 +3782,10 @@ function gerarCurriculoTexto(
       (item) => {
         lines.push(
           `${item.curso} - ${item.instituicao}`,
-          formatPeriod(
+          `${formatFormationType(item.tipo)} · ${formatPeriod(
             item.inicio,
             item.fim,
-          ),
+          )}`,
           "",
         );
       },
