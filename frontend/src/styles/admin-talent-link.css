@@ -1,0 +1,21 @@
+.admin-talent-shortcut {
+  display: none;
+}
+@media (max-width: 1200px) {
+  .admin-talent-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    margin: 0 0 20px;
+    border: 1px solid #dce0e8;
+    border-radius: 12px;
+    color: #3159d9;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .admin-talent-shortcut > span:first-child {
+    display: inline-flex;
+  }
+}

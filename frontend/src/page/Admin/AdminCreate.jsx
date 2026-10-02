@@ -8,6 +8,7 @@ import React, {
 import { useLocation, useNavigate } from "react-router-dom";
 
 import api, { getApiErrorMessage } from "../../lib/api";
+import AdminTalentLink from "../../components/AdminTalentLink";
 import {
   getLaravelValidationErrors,
   unwrapApiData,
@@ -4544,6 +4545,7 @@ Candidaturas: ${
                     Ver vagas
                   </span>
                 </button>
+                <AdminTalentLink prefix="create" />
               </nav>
             </div>
 
@@ -4573,6 +4575,7 @@ Candidaturas: ${
           </aside>
 
           <main className="create-main">
+            <AdminTalentLink prefix="create" mobile />
             <header className="create-topbar">
               <button
                 type="button"

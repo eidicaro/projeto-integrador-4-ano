@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 
 import api, { getApiErrorMessage } from "../../lib/api";
+import AdminTalentLink from "../../components/AdminTalentLink";
 import {
   getApplicationJobId,
   getLaravelValidationErrors,
@@ -2271,6 +2272,7 @@ export default function AdminSee() {
                   <span className="see-nav__icon"><Icon name="briefcase" size={18} /></span>
                   <span className="see-nav__text">Ver vagas</span>
                 </button>
+                <AdminTalentLink prefix="see" />
               </nav>
             </div>
 
@@ -2282,6 +2284,7 @@ export default function AdminSee() {
           </aside>
 
           <main className="see-main">
+            <AdminTalentLink prefix="see" mobile />
             <header className="see-topbar">
               <div className="see-breadcrumb">
                 <span>Área administrativa</span><span>/</span><span>Gestão de vagas</span>

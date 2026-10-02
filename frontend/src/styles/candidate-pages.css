@@ -680,6 +680,12 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@media (max-width: 1280px) {
+  .candidate-header { flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; }
+  .candidate-header nav { order: 3; width: 100%; overflow-x: auto; padding: 3px; }
+  .candidate-header nav a { flex-shrink: 0; white-space: nowrap; }
+}
+
 @media (max-width: 850px) {
   .candidate-header { position: static; flex-wrap: wrap; padding: 16px 20px; }
   .candidate-header nav { order: 3; width: 100%; overflow-x: auto; padding-bottom: 3px; }

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
+import AdminTalentLink from "../../components/AdminTalentLink";
 import api, { getApiErrorMessage } from "../../lib/api";
 import { unwrapApiData } from "../../lib/candidate";
 
@@ -28,6 +29,7 @@ const shortcuts = [
     accent: "blue",
     shortcut: "V",
   },
+  { id: "talent-pool", title: "Banco de Talentos", description: "Explore perfis e interesses para futuras oportunidades.", path: "/admin/banco-de-talentos", category: "Relacionamento", icon: "layers", accent: "blue", shortcut: "T" },
 ];
 
 const EMPTY_DASHBOARD = {
@@ -1160,7 +1162,7 @@ export default function AdminHome() {
 
           .admin-action-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 18px;
           }
 
@@ -2051,6 +2053,7 @@ export default function AdminHome() {
           }
 
           @media (max-width: 1180px) {
+            .admin-action-grid { grid-template-columns: 1fr; }
             .admin-info-grid {
               grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -2516,6 +2519,7 @@ export default function AdminHome() {
                     <Icon name="chevron" size={14} />
                   </span>
                 </button>
+                <AdminTalentLink prefix="admin" />
               </nav>
             </div>
 
@@ -2537,6 +2541,7 @@ export default function AdminHome() {
           </aside>
 
           <main className="admin-main">
+            <AdminTalentLink prefix="admin" mobile />
             <header className="admin-topbar">
               <div className="admin-breadcrumb">
                 <span className="admin-breadcrumb__root">

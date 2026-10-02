@@ -27,6 +27,8 @@ const MyApplications = lazy(() =>
 );
 const Profile = lazy(() => import("./page/Profile"));
 const SavedJobs = lazy(() => import("./page/SavedJobs"));
+const TalentPool = lazy(() => import("./page/TalentPool"));
+const AdminTalentPool = lazy(() => import("./page/Admin/AdminTalentPool"));
 
 const AdminLogin = lazy(() =>
   import("./page/Admin/AdminLogin"),
@@ -148,6 +150,7 @@ function App() {
         <Route path="/empresas" element={<InfoPage type="empresas" />} />
         <Route path="/sobre" element={<InfoPage type="sobre" />} />
         <Route path="/contato" element={<InfoPage type="contato" />} />
+        <Route path="/banco-de-talentos" element={<TalentPool />} />
         <Route path="/privacidade" element={<InfoPage type="privacidade" />} />
         <Route path="/termos" element={<InfoPage type="termos" />} />
 
@@ -222,6 +225,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/admin/banco-de-talentos" element={<ProtectedRoute roles={["recrutador"]}><AdminTalentPool /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<InfoPage type="notFound" />} />

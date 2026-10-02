@@ -1,10 +1,12 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import useActiveNavScroll from "../hooks/useActiveNavScroll";
 
 export default function CandidateHeader() {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const navRef = useActiveNavScroll();
 
   async function handleLogout() {
     try {
@@ -23,12 +25,13 @@ export default function CandidateHeader() {
         <span className="candidate-header__context">Área do candidato</span>
       </div>
 
-      <nav aria-label="Área do candidato">
+      <nav ref={navRef} aria-label="Área do candidato">
         <NavLink to="/homeUser" end><i>01</i> Radar</NavLink>
         <NavLink to="/createResume"><i>02</i> Currículo</NavLink>
         <NavLink to="/candidaturas"><i>03</i> Candidaturas</NavLink>
         <NavLink to="/vagas-salvas"><i>04</i> Salvas</NavLink>
         <NavLink to="/perfil"><i>05</i> Perfil</NavLink>
+        <NavLink to="/banco-de-talentos"><i>06</i> Banco de Talentos</NavLink>
       </nav>
 
       <div className="candidate-account">

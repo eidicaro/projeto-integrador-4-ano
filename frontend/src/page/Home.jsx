@@ -392,6 +392,7 @@ const SHORTCUTS = [
 ];
 
 const COMMANDS = [
+  { id: "talents", label: "Banco de Talentos", description: "Registrar interesses em futuras oportunidades", keywords: "banco talentos interesses futuras oportunidades", icon: "user" },
   {
     id: "home",
     label: "Ir para o início",
@@ -1221,6 +1222,10 @@ export default function Home() {
         navigate("/login");
         break;
 
+      case "talents":
+        navigate("/banco-de-talentos");
+        break;
+
       default:
         break;
     }
@@ -1358,6 +1363,8 @@ export default function Home() {
             >
               Currículo
             </button>
+            <button type="button" onClick={viewSavedJobs}>Salvas</button>
+            <button type="button" onClick={() => navigate("/banco-de-talentos")}>Banco de Talentos</button>
           </nav>
 
           <div className="header-actions">
@@ -2522,6 +2529,7 @@ export default function Home() {
             <UserIcon />
             <span>Perfil</span>
           </button>
+          <button type="button" className="mobile-nav-item" onClick={() => navigate("/banco-de-talentos")} aria-label="Banco de Talentos"><UserIcon /><span>Talentos</span></button>
         </nav>
 
         <AnimatePresence>
@@ -3223,6 +3231,7 @@ function MobileMenu({
               {savedCount}
             </i>
           </button>
+          <button type="button" onClick={() => onNavigate("/banco-de-talentos")}><span>05</span>Banco de Talentos<ArrowUpRightIcon /></button>
         </nav>
 
         <div className="mobile-menu-actions">
@@ -3692,10 +3701,7 @@ const homeStyles = `
     z-index: 500;
     top: 0;
     display: grid;
-    grid-template-columns:
-      minmax(9rem, 1fr)
-      auto
-      minmax(9rem, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 2rem;
     width: 100%;
@@ -3759,6 +3765,7 @@ const homeStyles = `
   }
 
   .desktop-navigation {
+    justify-self: center;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3771,6 +3778,7 @@ const homeStyles = `
   }
 
   .desktop-navigation button {
+    white-space: nowrap;
     min-height: 2.45rem;
     padding: 0.55rem 0.95rem;
     border: 0;
@@ -7317,6 +7325,9 @@ const homeStyles = `
       justify-self: center;
     }
 
+    .desktop-navigation button { padding-right: 0.7rem; padding-left: 0.7rem; }
+    .header-actions .command-trigger { display: none; }
+
     .command-trigger-label,
     .command-shortcut {
       display: none;
@@ -7696,7 +7707,7 @@ const homeStyles = `
       right: 0.75rem;
       bottom: max(0.75rem, env(safe-area-inset-bottom));
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       min-height: 4rem;
       padding: 0.35rem;
       border: 2px solid var(--ink);
