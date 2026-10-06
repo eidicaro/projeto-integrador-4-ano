@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -12,12 +12,11 @@ import TalentDialog from "../../features/talent-pool/TalentDialog";
 import TalentFilters from "../../features/talent-pool/TalentFilters";
 import TalentProfileSummary from "../../features/talent-pool/TalentProfileSummary";
 import TalentReferral from "../../features/talent-pool/TalentReferral";
-import { getDemoTalents } from "../../features/talent-pool/demoTalents";
+import talentPoolApi from "../../features/talent-pool/talentPoolApi";
+import { getApiErrorMessage } from "../../lib/api";
 import {
-  filterTalents,
   formatTalentDate,
   initials,
-  uniqueInterests,
 } from "../../features/talent-pool/talentPool";
 import "../../styles/talent-pool.css";
 
@@ -26,65 +25,83 @@ const PAGE_SIZE = 12;
 
 export default function AdminTalentPool() {
   const [talents, setTalents] = useState([]);
-  const [referenceTime, setReferenceTime] = useState(() => Date.now());
+  const [summary, setSummary] = useState({ total: 0, newLast30Days: 0, areas: 0 });
+  const [facets, setFacets] = useState({ areas: [], locations: [] });
+  const [pagination, setPagination] = useState({ total: 0, currentPage: 1, lastPage: 1 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
+  const [detail, setDetail] = useState({ talent: null, error: "" });
+  const [detailReload, setDetailReload] = useState(0);
   const [filterOpen, setFilterOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
-  const [referrals, setReferrals] = useState({});
   const [feedback, setFeedback] = useState("");
   useEffect(() => {
+    const controller = new AbortController();
     let active = true;
-    // Demo adapter is intentionally isolated from real candidate APIs.
-    Promise.resolve().then(() => {
-      if (active) {
-        const now = Date.now();
-        setReferenceTime(now);
-        setTalents(getDemoTalents(now));
-        setLoading(false);
+    Promise.resolve().then(async () => {
+      if (!active) return;
+      setLoading(true);
+      setError("");
+      try {
+        const response = await talentPoolApi.list({
+          q: search || undefined,
+          area: filters.area || undefined,
+          location: filters.location || undefined,
+          period: filters.period || undefined,
+          sort: filters.sort,
+          page,
+          per_page: PAGE_SIZE,
+        }, controller.signal);
+        if (!active) return;
+        setTalents(response.items);
+        setSummary(response.summary);
+        setFacets(response.facets);
+        setPagination(response);
+      } catch (requestError) {
+        if (active && requestError.code !== "ERR_CANCELED") {
+          setTalents([]);
+          setError(getApiErrorMessage(requestError, "Não foi possível carregar os talentos. Tente novamente."));
+        }
+      } finally {
+        if (active) setLoading(false);
       }
     });
-    return () => {
-      active = false;
-    };
-  }, [reload]);
+    return () => { active = false; controller.abort(); };
+  }, [reload, search, filters, page]);
   useEffect(() => {
-    const timeout = window.setTimeout(() => setSearch(query), 200);
+    const timeout = window.setTimeout(() => {
+      setSearch(query);
+      setPage(1);
+    }, 200);
     return () => window.clearTimeout(timeout);
   }, [query]);
-  const areas = useMemo(
-    () =>
-      uniqueInterests(talents.flatMap((talent) => talent.interests)).sort(
-        (a, b) => a.localeCompare(b, "pt-BR"),
-      ),
-    [talents],
-  );
-  const locations = useMemo(
-    () =>
-      [
-        ...new Set(talents.map((talent) => talent.location).filter(Boolean)),
-      ].sort(),
-    [talents],
-  );
-  const results = useMemo(
-    () => filterTalents(talents, { ...filters, query: search }, referenceTime),
-    [talents, filters, search, referenceTime],
-  );
-  const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const visible = results.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-  const recent = talents.filter(
-    (talent) =>
-      referenceTime - new Date(talent.joinedAt).getTime() <= 30 * 86400000,
-  ).length;
+  useEffect(() => {
+    if (!selected) return undefined;
+    const controller = new AbortController();
+    let active = true;
+    talentPoolApi.detail(selected.id, controller.signal)
+      .then((talent) => {
+        if (active) setDetail({ talent, error: "" });
+      })
+      .catch((requestError) => {
+        if (active && requestError.code !== "ERR_CANCELED") {
+          setDetail({ talent: null, error: getApiErrorMessage(requestError, "Não foi possível carregar o perfil.") });
+        }
+      });
+    return () => { active = false; controller.abort(); };
+  }, [selected, detailReload]);
+  const areas = facets.areas;
+  const locations = facets.locations;
+  const totalPages = pagination.lastPage;
+  const currentPage = pagination.currentPage;
+  const visible = talents;
+  const resultCount = pagination.total;
   const hasFilters = Boolean(
     query || filters.area || filters.location || filters.period,
   );
@@ -126,30 +143,23 @@ export default function AdminTalentPool() {
           <RefreshCw size={16} aria-hidden="true" /> Atualizar
         </button>
       </header>
-      <div className="talent-notice talent-admin-demo">
-        <strong>Ambiente de demonstração</strong>
-        <p>
-          Todos os perfis abaixo são fictícios. A consulta a participantes reais
-          depende da futura API de adesão. Interesses locais de candidatos não
-          aparecem nesta lista.
-        </p>
-      </div>
+
       <section
         className="talent-admin-stats"
-        aria-label="Indicadores da demonstração"
+        aria-label="Indicadores do Banco de Talentos"
       >
         <div>
           <Users size={20} aria-hidden="true" />
-          <span>Perfis de exemplo</span>
-          <strong>{loading ? "—" : talents.length}</strong>
+          <span>Participantes ativos</span>
+          <strong>{loading || error ? "—" : summary.total}</strong>
         </div>
         <div>
           <span>Entradas nos últimos 30 dias</span>
-          <strong>{loading ? "—" : recent}</strong>
+          <strong>{loading || error ? "—" : summary.newLast30Days}</strong>
         </div>
         <div>
           <span>Áreas representadas</span>
-          <strong>{loading ? "—" : areas.length}</strong>
+          <strong>{loading || error ? "—" : summary.areas}</strong>
         </div>
       </section>
       {feedback && (
@@ -207,11 +217,11 @@ export default function AdminTalentPool() {
           />
         </div>
         <div className="talent-results-heading">
-          <h2>Talentos disponíveis na demonstração</h2>
+          <h2>Talentos disponíveis</h2>
           <span role="status" aria-live="polite">
             {loading
               ? "Carregando…"
-              : `${results.length} resultado${results.length === 1 ? "" : "s"}`}
+              : `${resultCount} resultado${resultCount === 1 ? "" : "s"}`}
           </span>
         </div>
         {loading ? (
@@ -224,7 +234,12 @@ export default function AdminTalentPool() {
             <span />
             <span />
           </div>
-        ) : !results.length ? (
+        ) : error ? (
+          <div role="alert" className="talent-admin-alert">
+            {error}
+            <button type="button" onClick={() => setReload((value) => value + 1)}>Tentar novamente</button>
+          </div>
+        ) : !resultCount ? (
           <div className="talent-admin-empty">
             <Search size={32} aria-hidden="true" />
             <h3>
@@ -265,7 +280,7 @@ export default function AdminTalentPool() {
                     <div>
                       <h3>{talent.name}</h3>
                       <p>{talent.location || "Localização não informada"}</p>
-                      <small>Perfil fictício</small>
+
                     </div>
                   </div>
                   <div className="talent-list-skills">
@@ -284,6 +299,7 @@ export default function AdminTalentPool() {
                     type="button"
                     className="talent-admin-button talent-admin-button--secondary"
                     onClick={() => {
+                      setDetail({ talent: null, error: "" });
                       setSelected(talent);
                       setReferralOpen(false);
                     }}
@@ -339,7 +355,7 @@ export default function AdminTalentPool() {
             type="button"
             onClick={() => setFilterOpen(false)}
           >
-            Ver {results.length} resultados
+            Ver {resultCount} resultados
           </button>
         </TalentDialog>
       )}
@@ -349,58 +365,58 @@ export default function AdminTalentPool() {
           variant="talent-admin-dialog talent-drawer"
           onClose={closeDetail}
         >
-          <span className="talent-status">Perfil fictício · demonstração</span>
-          <TalentProfileSummary resume={selected.resume} detailed />
-          <section className="talent-detail-section">
-            <h3>Interesses profissionais</h3>
-            <div className="talent-tags">
-              {selected.interests.map((area) => (
-                <span key={area}>{area}</span>
-              ))}
+          {!detail.talent && !detail.error ? (
+            <div className="talent-skeleton" role="status">
+              <p>Carregando perfil…</p><span /><span />
             </div>
-            <dl className="talent-facts">
-              <div>
-                <dt>Entrada na demonstração</dt>
-                <dd>{formatTalentDate(selected.joinedAt)}</dd>
-              </div>
-              <div>
-                <dt>Última atualização</dt>
-                <dd>{formatTalentDate(selected.updatedAt)}</dd>
-              </div>
-            </dl>
-          </section>
-          {referrals[selected.id] && (
-            <p
-              className="talent-admin-alert talent-admin-alert--success"
-              role="status"
-            >
-              Indicação simulada para {referrals[selected.id]}. Nenhuma
-              candidatura foi criada.
-            </p>
-          )}
-          {referralOpen ? (
-            <TalentReferral
-              talent={selected}
-              onComplete={(job) => {
-                setReferrals((current) => ({
-                  ...current,
-                  [selected.id]: job.title,
-                }));
-                setReferralOpen(false);
-                setFeedback(
-                  `Indicação de ${selected.name} para ${job.title} simulada. Nenhuma candidatura foi criada.`,
-                );
-              }}
-            />
+          ) : detail.error ? (
+            <div className="talent-admin-alert" role="alert">
+              {detail.error}
+              <button type="button" onClick={() => {
+                setDetail({ talent: null, error: "" });
+                setDetailReload((value) => value + 1);
+              }}>Tentar novamente</button>
+            </div>
           ) : (
-            <button
-              type="button"
-              className="talent-admin-button"
-              onClick={() => setReferralOpen(true)}
-            >
-              Indicar para vaga · simulação{" "}
-              <ArrowUpRight size={16} aria-hidden="true" />
-            </button>
+            <>
+              <TalentProfileSummary
+                resume={detail.talent.resume}
+                user={{ name: detail.talent.name, email: detail.talent.email, telefone: detail.talent.phone }}
+                detailed
+              />
+              <section className="talent-detail-section">
+                <h3>Interesses profissionais</h3>
+                <div className="talent-tags">
+                  {detail.talent.interests.map((area) => <span key={area}>{area}</span>)}
+                </div>
+                <dl className="talent-facts">
+                  <div><dt>Entrada no banco</dt><dd>{formatTalentDate(detail.talent.joinedAt)}</dd></div>
+                  <div><dt>Última atualização dos interesses</dt><dd>{formatTalentDate(detail.talent.updatedAt)}</dd></div>
+                </dl>
+              </section>
+              {!detail.talent.resume && (
+                <p className="talent-notice">O participante ainda não criou um currículo. Ele precisa de um currículo para ser indicado a uma vaga.</p>
+              )}
+              {referralOpen ? (
+                <TalentReferral
+                  key={detail.talent.id}
+                  talent={detail.talent}
+                  onComplete={(job) => {
+                    setReferralOpen(false);
+                    setFeedback("Indicação de " + detail.talent.name + " para " + job.title + " confirmada. O participante pode acompanhar o processo em suas candidaturas.");
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="talent-admin-button"
+                  disabled={!detail.talent.resume}
+                  onClick={() => setReferralOpen(true)}
+                >
+                  Indicar para vaga <ArrowUpRight size={16} aria-hidden="true" />
+                </button>
+              )}
+            </>
           )}
         </TalentDialog>
       )}

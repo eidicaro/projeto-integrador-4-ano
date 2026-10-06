@@ -15,10 +15,8 @@ import TalentDialog from "../features/talent-pool/TalentDialog";
 import TalentInterestForm from "../features/talent-pool/TalentInterestForm";
 import TalentProfileSummary from "../features/talent-pool/TalentProfileSummary";
 import useTalentProfile from "../features/talent-pool/useTalentProfile";
-import {
-  getDemoRepository,
-  notifyMembershipChange,
-} from "../features/talent-pool/demoRepository";
+import talentPoolApi from "../features/talent-pool/talentPoolApi";
+import { getApiErrorMessage } from "../lib/api";
 import {
   formatTalentDate,
   interestOptions,
@@ -34,36 +32,35 @@ function CandidateParticipation({ user }) {
     membership,
     profileError,
     jobsError,
-    storageError,
+    membershipError,
     retry,
+    setMembership,
   } = useTalentProfile(user.id);
   const [editing, setEditing] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [leavingBusy, setLeavingBusy] = useState(false);
   async function save(interests) {
-    getDemoRepository().save(user.id, interests);
-    notifyMembershipChange();
+    const updated = await talentPoolApi.saveMembership(interests, !membership);
+    setMembership(updated);
     setEditing(false);
-    setFeedback(
-      membership
-        ? "Seus interesses locais foram atualizados."
-        : "Interesse registrado nesta demonstração. Nenhum dado foi enviado à empresa.",
-    );
+    setFeedback(membership ? "Seus interesses foram atualizados." : "Você entrou no Banco de Talentos.");
   }
-  function leave() {
+  async function leave() {
+    if (leavingBusy) return;
+    setLeavingBusy(true);
+    setError("");
     try {
-      getDemoRepository().leave(user.id);
-      notifyMembershipChange();
+      await talentPoolApi.leaveMembership();
+      setMembership(null);
       setLeaving(false);
       setEditing(false);
-      setFeedback(
-        "Participação local removida. Seu perfil e suas candidaturas continuam disponíveis.",
-      );
-    } catch {
-      setError(
-        "Não foi possível remover a participação local. Tente novamente.",
-      );
+      setFeedback("Você saiu do Banco de Talentos. Seu perfil e suas candidaturas continuam disponíveis.");
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, "Não foi possível sair do Banco de Talentos. Tente novamente."));
+    } finally {
+      setLeavingBusy(false);
     }
   }
   if (loading)
@@ -91,23 +88,13 @@ function CandidateParticipation({ user }) {
           {feedback}
         </div>
       )}
-      {(profileError || storageError) && (
+      {(profileError || membershipError) && (
         <div className="candidate-alert" role="alert">
-          {profileError || storageError}{" "}
+          {[membershipError, profileError].filter(Boolean).join(" ")}{" "}
           <button type="button" onClick={retry}>
             Tentar novamente
           </button>
-          {storageError && (
-            <button
-              type="button"
-              onClick={() => {
-                setError("");
-                setLeaving(true);
-              }}
-            >
-              Limpar preferências locais
-            </button>
-          )}
+
         </div>
       )}
       {jobsError && (
@@ -127,17 +114,17 @@ function CandidateParticipation({ user }) {
           </span>
           <h2 id="talent-participation-title">
             {membership
-              ? "Você faz parte da demonstração do Banco de Talentos."
+              ? "Você faz parte do Banco de Talentos."
               : "Deixe seus interesses com a gente."}
           </h2>
           {membership && !editing ? (
             <div className="talent-member-state">
               <span className="talent-status">
-                <Check size={16} aria-hidden="true" /> Participação local ativa
+                <Check size={16} aria-hidden="true" /> Participação ativa
               </span>
               <dl className="talent-facts">
                 <div>
-                  <dt>Entrada na demonstração</dt>
+                  <dt>Entrada no banco</dt>
                   <dd>{formatTalentDate(membership.joinedAt)}</dd>
                 </div>
                 <div>
@@ -152,9 +139,7 @@ function CandidateParticipation({ user }) {
                 ))}
               </div>
               <p>
-                Seu interesse está salvo neste navegador. A participação oficial
-                e a consulta pela equipe estarão disponíveis quando o serviço
-                for conectado.
+                Seus interesses e seu perfil estão disponíveis para a equipe de recrutamento considerar oportunidades compatíveis.
               </p>
               <div className="talent-actions">
                 <button
@@ -175,11 +160,11 @@ function CandidateParticipation({ user }) {
                     setLeaving(true);
                   }}
                 >
-                  Sair da demonstração
+                  Sair do Banco de Talentos
                 </button>
               </div>
             </div>
-          ) : profileError || storageError ? (
+          ) : membershipError ? (
             <p className="talent-muted">
               Carregue seu perfil e suas preferências para continuar com
               segurança.
@@ -233,12 +218,11 @@ function CandidateParticipation({ user }) {
       </div>
       {leaving && (
         <TalentDialog
-          title="Sair da demonstração?"
-          onClose={() => setLeaving(false)}
+          title="Sair do Banco de Talentos?"
+          onClose={() => { if (!leavingBusy) setLeaving(false); }}
         >
           <p>
-            Apenas os interesses salvos neste navegador serão removidos. Você
-            poderá participar novamente quando quiser.
+            Seu perfil deixará de aparecer no Banco de Talentos. Sua conta, currículo e candidaturas serão preservados. Você poderá aderir novamente quando quiser.
           </p>
           {error && (
             <p role="alert" className="candidate-alert">
@@ -249,6 +233,7 @@ function CandidateParticipation({ user }) {
             <button
               className="candidate-button-secondary"
               type="button"
+              disabled={leavingBusy}
               onClick={() => setLeaving(false)}
             >
               Continuar participando
@@ -256,9 +241,10 @@ function CandidateParticipation({ user }) {
             <button
               className="candidate-danger-button"
               type="button"
+              disabled={leavingBusy}
               onClick={leave}
             >
-              Remover participação local
+              {leavingBusy ? "Saindo…" : "Confirmar saída"}
             </button>
           </div>
         </TalentDialog>
@@ -360,14 +346,7 @@ export default function TalentPool() {
             </p>
           </aside>
         </Motion.section>
-        <div className="talent-notice talent-demo-notice">
-          <strong>Demonstração local</strong>
-          <p>
-            O Banco de Talentos ainda não recebe inscrições oficiais. Seus
-            interesses ficam somente neste navegador; a empresa não recebe seu
-            perfil por esta página.
-          </p>
-        </div>
+
         <ol className="talent-steps">
           <li>
             <span>01</span>
@@ -386,8 +365,7 @@ export default function TalentPool() {
             <span>03</span>
             <h2>Mantenha tudo atualizado</h2>
             <p>
-              Quando a participação oficial estiver disponível, seu perfil
-              poderá ser considerado em oportunidades compatíveis. Isso não
+              Seu perfil poderá ser considerado em oportunidades compatíveis. Isso não
               garante uma contratação.
             </p>
           </li>
@@ -413,7 +391,7 @@ export default function TalentPool() {
             <p>
               {user
                 ? "A gestão do Banco de Talentos fica no seu painel de recrutamento."
-                : "Entre na sua conta de candidato para reutilizar seu currículo e experimentar o registro de interesses."}
+                : "Entre na sua conta de candidato para reutilizar seu currículo e participar do Banco de Talentos."}
             </p>
             <div className="talent-actions">
               <Link

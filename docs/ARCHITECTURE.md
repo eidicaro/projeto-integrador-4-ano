@@ -47,3 +47,12 @@ Recursos usam a chave `data`. Coleções paginadas também retornam `links` e `m
 ```
 
 Datas são ISO 8601; datas sem horário usam `YYYY-MM-DD`. Valores monetários são números decimais em reais.
+
+
+## Participação no Banco de Talentos
+
+TalentPoolMembership mantém vínculo único com User e apenas interesses, ciclo ativo e consentimento; perfil e currículo não são duplicados. A policy permite leitura de participantes disponíveis por recrutadores ativos da empresa única. Processos seletivos continuam restritos ao proprietário da vaga.
+
+Adesão/saída/indicação bloqueiam conta e depois participação em transação. Indicação também bloqueia a vaga, usa ResumeSnapshot e grava movimentação com autor. Saída revoga consultas do banco e preserva processos anteriores.
+
+A consulta administrativa usa eager loading e normalização em memória para os mesmos filtros em SQLite/MySQL; revisar desempenho antes de grandes volumes. O frontend usa os contratos oficiais de docs/API.md, com consultas canceláveis, indicadores gerais do servidor e confirmação de escritas antes de atualizar a tela.

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Curriculo;
+use App\Models\TalentPoolMembership;
 use App\Models\User;
 
 class CurriculoPolicy
@@ -15,6 +16,10 @@ class CurriculoPolicy
 
         if (! $user->isRecruiter()) {
             return false;
+        }
+
+        if ($user->ativo && TalentPoolMembership::available()->where('user_id', $curriculo->user_id)->exists()) {
+            return true;
         }
 
         return $curriculo->candidaturas()

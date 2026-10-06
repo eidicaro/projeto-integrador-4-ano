@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Check, Plus } from "lucide-react";
+import { getApiErrorMessage, getApiFieldError } from "../../lib/api";
 import { uniqueInterests, validateInterests } from "./talentPool";
 
 export default function TalentInterestForm({
@@ -46,7 +47,7 @@ export default function TalentInterestForm({
     if (message || !consent) {
       setError(
         message ||
-          "Confirme que deseja salvar seus interesses nesta demonstração.",
+          "Confirme sua adesão ao Banco de Talentos.",
       );
       return;
     }
@@ -54,10 +55,8 @@ export default function TalentInterestForm({
     setError("");
     try {
       await onSave(selected);
-    } catch {
-      setError(
-        "Não foi possível salvar. Verifique se o armazenamento local está disponível e tente novamente.",
-      );
+    } catch (requestError) {
+      setError(getApiFieldError(requestError, "interests", "consentAccepted", "consentVersion") || getApiErrorMessage(requestError, "Não foi possível salvar seus interesses. Tente novamente."));
     } finally {
       setSaving(false);
     }
@@ -124,18 +123,21 @@ export default function TalentInterestForm({
             <Plus size={16} aria-hidden="true" /> Adicionar
           </button>
         </div>
-        <label className="talent-consent">
-          <input
-            type="checkbox"
-            checked={consent}
-            onChange={(event) => setConsent(event.target.checked)}
-          />
-          <span>
-            Quero registrar meu interesse nesta demonstração. Entendo que ele
-            será salvo apenas neste navegador e não será enviado à equipe de
-            recrutamento.
-          </span>
-        </label>
+        {!editing && (
+          <label className="talent-consent">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(event) => setConsent(event.target.checked)}
+            />
+            <span>
+              Quero participar do Banco de Talentos e autorizo a equipe de
+              recrutamento da Point a consultar meu perfil, currículo e
+              interesses e a me indicar para processos seletivos compatíveis.
+              Posso sair do banco quando quiser.
+            </span>
+          </label>
+        )}
       </fieldset>
       {error && (
         <p className="candidate-alert" role="alert">
@@ -148,7 +150,7 @@ export default function TalentInterestForm({
             ? "Salvando…"
             : editing
               ? "Salvar interesses"
-              : "Registrar interesse · demonstração"}
+              : "Entrar no Banco de Talentos"}
         </button>
         {editing && (
           <button

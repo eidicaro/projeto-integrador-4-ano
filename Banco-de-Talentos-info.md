@@ -1,10 +1,12 @@
 # Banco de Talentos — informações para implementação do backend
 
+> **Atualização — 06/10/2026:** o backend deste guia foi implementado. Os seis endpoints, persistência, consentimento, policy, consultas e indicações oficiais estão em [docs/API.md](docs/API.md). As referências abaixo a APIs propostas ou a criar são a especificação histórica; não descrevem mais a disponibilidade do servidor. A integração frontend da seção 10 também foi concluída: as telas usam a API real, com consentimento oficial e sem avisos de demonstração. Veja o [diagnóstico](docs/DIAGNOSTICO.md).
+
 Este documento descreve o frontend implementado, as limitações atuais e uma proposta de contratos para integrar o Banco de Talentos ao Laravel. Serve como referência para o responsável pelo backend.
 
-**Situação atual:** as telas estão implementadas, mas a participação oficial ainda não existe no servidor. A adesão é uma demonstração local; a lista administrativa usa pessoas fictícias; a indicação para vaga é uma simulação. Os avisos estão visíveis na interface.
+**Situação na entrega anterior do frontend:** as telas estão implementadas, mas a participação oficial ainda não existe no servidor. A adesão é uma demonstração local; a lista administrativa usa pessoas fictícias; a indicação para vaga é uma simulação. Os avisos estão visíveis na interface.
 
-**Nenhum arquivo de backend, migration, tabela ou endpoint foi alterado na implementação anterior.** Os endpoints novos descritos abaixo são propostas para desenvolvimento, não APIs já disponíveis nem chamadas que o frontend esteja fazendo.
+**Na implementação anterior do frontend, nenhum arquivo de backend, migration, tabela ou endpoint foi alterado.** Os endpoints novos descritos abaixo são propostas para desenvolvimento, não APIs já disponíveis nem chamadas que o frontend esteja fazendo.
 
 ## 1. O que foi implementado no frontend
 

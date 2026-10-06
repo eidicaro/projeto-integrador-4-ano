@@ -1,6 +1,11 @@
 # Estado do projeto — Point Media Talentos
 
-**Atualizado em:** 15/08/2026
+> **Estado verificado em 06/10/2026:** API e frontend do Banco de Talentos integrados, com participação e indicação oficiais. PHPUnit: 83 testes / 598 asserções; Pint, lint, 11 testes frontend, build e auditorias aprovados. Vulnerabilidades dos locks corrigidas e testes frontend incluídos no CI. Ensaio HTTP em navegador com Laravel e banco SQLite isolado aprovado; MySQL 8.4 e concorrência real não foram executados localmente. Veja o [diagnóstico atual](docs/DIAGNOSTICO.md) e os [contratos](docs/API.md).
+>
+> O relatório abaixo é o registro histórico de agosto, com métricas e verificações daquela entrega; não deve ser tratado como verificação atual nem estendido ao módulo demonstrativo de Banco de Talentos.
+
+
+**Registro histórico:** 15/08/2026
 
 **Branch analisada:** `ele-carrega-a-champions-nas-costas`
 
@@ -8,7 +13,7 @@
 
 O projeto deixou de ser um protótipo desconectado e agora funciona como uma aplicação full-stack. A interface React usa a API Laravel e o banco de dados para autenticação, currículo, vagas, favoritos, candidaturas, dashboard e pipeline de recrutamento.
 
-Não há mais login administrativo simulado, vagas/candidatos mockados como fonte de dados ou PII persistida no `localStorage`. Todas as rotas sensíveis têm autenticação, papel e ownership no servidor; as proteções do frontend servem como experiência de navegação, não como barreira de segurança.
+Na entrega de agosto, os fluxos então integrados deixaram de usar login administrativo simulado e vagas/candidatos mockados. Essa afirmação não se aplica ao módulo demonstrativo de Banco de Talentos adicionado posteriormente. Naqueles fluxos não havia PII persistida no `localStorage`. Todas as rotas sensíveis têm autenticação, papel e ownership no servidor; as proteções do frontend servem como experiência de navegação, não como barreira de segurança.
 
 ## Implementação atual
 

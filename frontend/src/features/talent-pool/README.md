@@ -1,25 +1,28 @@
 # Banco de Talentos
 
-Rotas: `/banco-de-talentos` (apresentação pública e participação para candidato autenticado) e `/admin/banco-de-talentos` (recrutador).
+Rotas oficiais: /banco-de-talentos (apresentação pública e participação do candidato) e /admin/banco-de-talentos (recrutador).
 
-## Fronteira de integração
+## Integração com a API
 
-A API atual **não possui adesão, saída, interesses nem listagem de participantes**. Por isso, o módulo opera em demonstração explicitamente identificada nas duas experiências.
+Os fluxos usam o cliente Axios compartilhado, sessão Sanctum e CSRF existentes:
 
-- `demoRepository.js`: adapter de adesão local por conta, com `get`, `save` e `leave`. Persiste somente ID, interesses e datas. Não armazena nome, contato, foto ou currículo. Dados permanecem após recarregar, apenas no mesmo navegador/origem; não são sincronizados com outros dispositivos ou Admin.
-- `demoTalents.js`: perfis administrativos inteiramente fictícios. Não usa currículos de candidatos reais como se houvesse consentimento de adesão.
-- `talentPool.js`: contrato JSDoc, validação, pesquisa, filtros, ordenação, opções e completude. Os mesmos contratos devem ser usados pelo futuro adapter de API.
-- `useTalentProfile.js`: reutiliza `GET /curriculos/me` e todas as páginas de `GET /vagas`. Dados de conta vêm do `AuthContext` existente.
-- `TalentReferral.jsx`: consulta todas as páginas de `GET /admin/vagas`, usando apenas vagas publicadas do recrutador. A indicação é uma simulação em memória e não cria candidaturas. Não persiste ao recarregar.
+- apiRepository.js define os contratos de leitura, adesão/atualização, saída, consulta administrativa, detalhe e indicação. talentPoolApi.js conecta o adapter ao cliente da aplicação.
+- useTalentProfile.js consulta participação oficial, currículo e vagas em paralelo, com cancelamento de leituras e tratamento independente de falhas. Uma falha de participação impede nova adesão até consulta bem-sucedida.
+- TalentInterestForm exige confirmação explícita na adesão/reentrada, informando compartilhamento de perfil e indicação pela equipe. Interesses ativos podem ser atualizados sem renovar o aceite. Datas e IDs vêm do servidor.
+- AdminTalentPool envia busca, filtros, ordenação e paginação à API. Não filtra só a página recebida. Indicadores e opções vêm de summary/facets; detalhes são consultados ao abrir o drawer, com cancelamento e nova tentativa.
+- TalentReferral lista apenas vagas publicadas e abertas do recrutador. POST oficial cria o processo; sucesso aparece somente após resposta. Falhas de duplicidade, currículo e vaga são exibidas sem simular conclusão.
+- MyApplications identifica a origem banco_de_talentos como indicação da equipe, preservando a retirada e demais etapas.
 
-O endpoint real `POST /admin/vagas/{vaga}/candidaturas/manual` cria um contato manual, **sem associar o usuário e o currículo**. Portanto, ele não resolve a indicação de um participante real e não deve receber os perfis de demonstração. Nenhum endpoint novo foi inventado, e nenhuma escrita no servidor foi adicionada.
+Dados demonstrativos anteriores não são importados do localStorage. demoRepository.js e demoTalents.js permanecem somente para testes históricos do domínio e não são importados pelas telas/adapters oficiais.
 
-Para habilitar a operação oficial, o servidor precisará fornecer adesão/saída e interesses por candidato, uma coleção paginada autorizada para recrutadores, detalhes autorizados e associação à vaga que preserve usuário/currículo e trate duplicidade. Substituir os adapters locais, remover avisos de demonstração apenas quando a integração estiver implementada, e manter mocks fora do fluxo real.
+Contratos: [docs/API.md](../../../../docs/API.md).
 
-## Validação
+## Validação em 06/10/2026
 
-`npm run lint`, `npm test`, `npm run build`. O projeto usa JavaScript; não existe script de TypeScript/typecheck. Os testes de domínio cobrem isolamento por conta, persistência, atualização/saída, armazenamento corrompido/indisponível, validação, sugestões derivadas, busca, filtros e ordenação.
+- ESLint, 11 testes Node (sete de domínio e quatro do adapter oficial) e build aprovados.
+- Ensaio em Chrome headless com frontend Vite e Laravel real em banco SQLite isolado: adesão confirmada, persistência após reload, atualização, saída/reentrada, 14 participantes com paginação 12+2, busca de múltiplos termos sem acentos, indicadores gerais, detalhe, indicação real, duplicidade 409, origem visível ao candidato, remoção do Admin após saída e retry de falha na leitura da participação.
+- Sem erros de runtime no ensaio; telas conferidas em 375 px.
+- Ferramentas, banco e contas do ensaio foram criados em pasta ignorada pelo Git, sem escrever no MySQL do usuário.
+- Não foi refeita auditoria axe nem teste completo de concorrência/MySQL 8.4.
 
-As interfaces usam os estilos existentes, Lucide e Framer Motion já instalados. Diálogos reutilizam `useDialogFocus`, bloqueiam o fundo com `inert`, restauram foco e respeitam movimento reduzido. As páginas são carregadas por `React.lazy`.
-
-A validação em Chromium headless usou respostas controladas das APIs existentes, sem autenticar contas reais nem escrever no servidor. Passaram nove grupos de cenários: Home/navegação, adesão/atualização/saída, falhas de perfil/vagas/armazenamento, busca/filtros/detalhes/indicação, ausência de vagas, layouts entre 320 e 1920 px, acessos pelo Admin existente, proteção por papel e ausência de chamadas fictícias/escritas/erros de runtime. Auditorias axe nas telas pública, candidato, Admin e diálogos avaliados não apontaram violações WCAG A/AA. Relatórios e capturas locais ficam em `frontend/validation-artifacts` (ignorados pelo Git). As ferramentas temporárias de validação não entram nas dependências ou no bundle do produto.
+Comandos: npm run lint, npm test, npm run build. Em PowerShell com npm.ps1 bloqueado, usar npm.cmd. O projeto usa JavaScript e não tem typecheck.

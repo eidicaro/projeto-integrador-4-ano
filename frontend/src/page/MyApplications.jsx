@@ -210,13 +210,13 @@ export default function MyApplications() {
                       </p>
                     </div>
                     <span className="stage-pill">
-                      {STAGE_LABELS[stage] || stage}
+                      {stage === "novo" && application.source === "banco_de_talentos" ? "Indicação recebida" : STAGE_LABELS[stage] || stage}
                     </span>
                   </div>
 
                   <div className="application-card__footer">
                     <time dateTime={application.appliedAt || undefined}>
-                      Enviada em {formatDate(application.appliedAt)}
+                      {application.source === "banco_de_talentos" ? "Indicada pela equipe em " : "Enviada em "}{formatDate(application.appliedAt)}
                     </time>
                     <div className="application-card__actions">
                       {job.id && (

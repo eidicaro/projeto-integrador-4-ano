@@ -44,6 +44,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function talentPoolMembership(): HasOne
+    {
+        return $this->hasOne(TalentPoolMembership::class);
+    }
+
     public function curriculo(): HasOne
     {
         return $this->hasOne(Curriculo::class);

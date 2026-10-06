@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CandidaturaController;
 use App\Http\Controllers\CurriculoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\VagaController;
 use App\Http\Controllers\VagaSalvaController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,9 @@ Route::middleware('throttle:api')->group(function (): void {
             Route::get('/candidaturas/{candidatura}/curriculo-arquivo', [CandidaturaController::class, 'resumeFile']);
 
             Route::middleware('role:candidato')->group(function (): void {
+                Route::get('/banco-de-talentos/me', [TalentPoolController::class, 'me']);
+                Route::put('/banco-de-talentos/me', [TalentPoolController::class, 'save']);
+                Route::delete('/banco-de-talentos/me', [TalentPoolController::class, 'leave']);
                 Route::get('/vagas-salvas', [VagaSalvaController::class, 'index']);
                 Route::put('/vagas/{vaga}/salvar', [VagaSalvaController::class, 'store']);
                 Route::delete('/vagas/{vaga}/salvar', [VagaSalvaController::class, 'destroy']);
@@ -53,6 +57,9 @@ Route::middleware('throttle:api')->group(function (): void {
             });
 
             Route::prefix('admin')->middleware('role:recrutador')->group(function (): void {
+                Route::get('/banco-de-talentos', [TalentPoolController::class, 'index']);
+                Route::get('/banco-de-talentos/{talent}', [TalentPoolController::class, 'show']);
+                Route::post('/banco-de-talentos/{talent}/indicacoes', [TalentPoolController::class, 'refer']);
                 Route::get('/dashboard', AdminDashboardController::class);
                 Route::get('/vagas', [VagaController::class, 'adminIndex']);
                 Route::post('/vagas', [VagaController::class, 'store']);

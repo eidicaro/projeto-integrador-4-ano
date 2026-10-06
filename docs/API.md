@@ -31,7 +31,7 @@ Na SPA, omita `issue_token`: a autenticação usa a sessão Sanctum/CSRF. Client
 | `GET` | `/curriculos` | Lista o currículo próprio ou currículos enviados a vagas do recrutador autenticado. |
 | `GET` | `/curriculos/me` | Currículo do candidato ou `data: null`. |
 | `POST` | `/curriculos` | Cria currículo e seções em uma transação. |
-| `GET` | `/curriculos/{id}` | Exibe quando o candidato é dono ou o currículo foi enviado a uma vaga do recrutador. |
+| `GET` | `/curriculos/{id}` | Exibe ao dono, ao recrutador com candidatura autorizada ou ao recrutador com participação disponível no Banco de Talentos. |
 | `PUT/PATCH` | `/curriculos/{id}` | Sincroniza currículo próprio e seções. |
 | `DELETE` | `/curriculos/{id}` | Exclui currículo sem candidaturas vinculadas. |
 | `GET` | `/curriculos/{id}/foto` | Entrega a foto privada após validar acesso ao currículo. |
@@ -110,3 +110,61 @@ Estes aliases autenticados de recrutador continuam registrados temporariamente; 
   "benefits": ["vale-refeicao", "plano-saude"]
 }
 ```
+
+
+## Banco de Talentos (implementado em 06/10/2026)
+
+Sanctum, conta ativa e papel obrigatório. Escritas da SPA exigem CSRF. O frontend está integrado aos endpoints oficiais; preferências demonstrativas locais não são importadas.
+
+| Método | Caminho | Papel e comportamento |
+|---|---|---|
+| GET | /banco-de-talentos/me | Candidato: participação ativa ou data: null. |
+| PUT | /banco-de-talentos/me | Candidato: adesão, atualização ou reentrada; 200. |
+| DELETE | /banco-de-talentos/me | Candidato: saída idempotente; 204. |
+| GET | /admin/banco-de-talentos | Recrutador: participantes autorizados paginados. |
+| GET | /admin/banco-de-talentos/{talent} | Recrutador: detalhe e currículo atual. |
+| POST | /admin/banco-de-talentos/{talent}/indicacoes | Recrutador: indicação real para sua vaga; 201. |
+
+### Adesão e interesses
+
+Exemplo de PUT:
+
+~~~json
+{"interests":["Tecnologia","Produto"],"consentAccepted":true,"consentVersion":"v1"}
+~~~
+
+Interesses: lista com 1–8 strings de 2–120 caracteres após trim. Duplicatas por caixa/acentos são rejeitadas. Áreas livres. Proprietário e datas são definidos pelo servidor. Currículo não é obrigatório para aderir.
+
+Primeira adesão e reentrada exigem consentAccepted aceito e consentVersion v1, definida em TalentPoolMembership::CONSENT_VERSION. O frontend apresenta e confirma explicitamente a adesão oficial, compartilhamento do perfil com a equipe e possibilidade de indicação ao processo. O aceite demonstrativo anterior não autoriza migração automática.
+
+Atualização ativa pode enviar somente interests. Preserva joinedAt e consentimento; repetir os mesmos interesses preserva updatedAt. Saída preserva conta, currículo e candidaturas. Reentrada reutiliza ID e reinicia joinedAt e consentimento. Ciclos antigos não são mantidos em tabela histórica nesta versão.
+
+~~~json
+{"data":{"id":42,"userId":7,"interests":["Tecnologia"],"joinedAt":"2026-10-06T12:00:00.000000Z","updatedAt":"2026-10-06T12:00:00.000000Z"}}
+~~~
+
+updatedAt é a atualização dos interesses; resume.updatedAt continua sendo a atualização do currículo.
+
+### Consulta administrativa
+
+Escopo explícito de empresa única: recrutadores ativos consultam participantes ativos de contas candidatas ativas. Multiempresa exigirá vínculo organizacional e revisão da policy antes de uso.
+
+Parâmetros: q (até 200 caracteres), area (até 120), location (até 255), period (7/30/90), sort (recent/oldest/name/complete), page (>=1), per_page (1–100, padrão 12).
+
+Busca ignora caixa/acentos e exige todos os termos no conjunto de nome, área do currículo, localização, interesses, habilidades e cargos. area e location têm correspondência exata. Datas são calculadas no servidor. Nome é ordenado pela representação normalizada sem acentos. Filtros e ordenação precedem paginação, com desempate por ID; complete também desempata por nome.
+
+Envelope: data, meta, links, summary e facets. summary tem total, newLast30Days e areas, considerando todo o banco autorizado sem filtros. facets tem areas e locations desse escopo. meta.total considera filtros.
+
+Itens: id da participação, userId, name/email/phone (currículo com fallback da conta), location, interests, skills, joinedAt, updatedAt, profileCompleteness e resume. O currículo usa CurriculoResource com as cinco coleções; pode ser null. Completude dá peso igual às oito verificações do guia, incluindo fallback de contato, com arredondamento.
+
+A primeira versão faz eager loading e normaliza/filtra em PHP para consistência entre SQLite e MySQL. O custo de memória cresce com os participantes e suas seções. Para volumes maiores, usar busca indexada e agregações no banco, preservando semântica e indicadores.
+
+### Indicações e currículo
+
+Enviar {"vaga_id":15}. Exige currículo, participação/conta ativas, ownership da vaga e isOpenForApplications(). Cria candidatura vinculada ao participante e currículo, snapshot compartilhado com o fluxo existente, contatos, habilidades, estágio novo, origem banco_de_talentos, recrutador em atualizada_por e movimentação inicial. Aparece em /minhas-candidaturas, com retirada conforme as regras existentes.
+
+Adesão, saída e indicação bloqueiam conta e participação na mesma ordem; indicação revalida esses estados em transação e bloqueia a vaga. Duplicatas por usuário/vaga ou vaga/e-mail, incluindo soft delete, retornam 409. Violações concorrentes dos índices únicos também retornam 409, sem reativação.
+
+GET /curriculos/{id} e /curriculos/{id}/foto permitem leitura ao recrutador enquanto houver participação disponível. Após saída, permanece somente acesso autorizado por candidaturas anteriores. GET /curriculos mantém a listagem antiga por candidaturas; participantes sem candidatura são consultados pelo endpoint específico do banco.
+
+Erros: 401 sem sessão; 403 por papel/ownership; 404 para recurso inexistente ou participante indisponível; 409 para vaga fechada/duplicidade; 422 com errors por campo para interesses, consentimento e currículo ausente.

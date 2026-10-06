@@ -9,6 +9,10 @@ Aplicação full-stack para divulgação de vagas, cadastro de candidatos, cria�
 - Banco: MySQL em desenvolvimento/produção e SQLite em memória nos testes.
 - Autenticação web: sessão segura do Laravel/Sanctum, cookie HttpOnly e proteção CSRF. Tokens pessoais opcionais continuam disponíveis para clientes não web.
 
+## Estado do Banco de Talentos
+
+O Banco de Talentos está conectado à API oficial: adesão com consentimento, interesses e saída persistidos, consulta administrativa paginada e indicação real para vagas. Preferências demonstrativas antigas não são importadas. Consulte [API](docs/API.md) e [diagnóstico](docs/DIAGNOSTICO.md).
+
 ## Funcionalidades
 
 ### Candidato
@@ -108,6 +112,7 @@ Frontend:
 ```powershell
 cd frontend
 npm run lint
+npm test
 npm run build
 npm audit
 ```

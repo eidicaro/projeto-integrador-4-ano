@@ -16,5 +16,10 @@
     },
     "dependencies": {
         "styled-components": "^6.4.0"
+    },
+    "overrides": {
+        "concurrently": {
+            "shell-quote": "1.12.0"
+        }
     }
 }

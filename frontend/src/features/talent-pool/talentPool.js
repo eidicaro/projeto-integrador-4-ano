@@ -1,8 +1,8 @@
 /** Frontend contract. Membership is independent from applications and resumes.
  * @typedef {{userId: string, interests: string[], joinedAt: string, updatedAt: string}} TalentMembership
  * @typedef {{id: string, name: string, email: string, phone: string, location: string,
- * interests: string[], skills: string[], resume: object, joinedAt: string, updatedAt: string,
- * source: 'demo'}} Talent
+ * interests: string[], skills: string[], resume: object | null, joinedAt: string, updatedAt: string,
+ * source: 'api' | 'demo'}} Talent
  */
 
 export function normalizeSearch(value) {

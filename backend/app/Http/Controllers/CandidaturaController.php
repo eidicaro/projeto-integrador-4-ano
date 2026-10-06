@@ -10,6 +10,7 @@ use App\Http\Resources\CandidaturaMovimentacaoResource;
 use App\Http\Resources\CandidaturaResource;
 use App\Models\Candidatura;
 use App\Models\Vaga;
+use App\Services\ResumeSnapshot;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
@@ -64,7 +65,7 @@ class CandidaturaController extends Controller
                     'user_id' => $request->user()->id,
                     'vaga_id' => $vaga->id,
                     'curriculo_id' => $source === 'online' ? $curriculo?->id : null,
-                    'curriculo_snapshot' => $source === 'online' ? $this->resumeSnapshot($curriculo) : null,
+                    'curriculo_snapshot' => $source === 'online' ? (new ResumeSnapshot)->make($curriculo) : null,
                     'curriculo_arquivo' => $resumePath,
                     'curriculo_origem' => $source,
                     'nome_candidato' => $curriculo?->nome_completo ?: $request->user()->name,
@@ -330,24 +331,6 @@ class CandidaturaController extends Controller
         return CandidaturaMovimentacaoResource::collection(
             $candidatura->movimentacoes()->with('user')->paginate(50),
         );
-    }
-
-    private function resumeSnapshot($curriculo): array
-    {
-        return [
-            'nome_completo' => $curriculo->nome_completo,
-            'area_atuacao' => $curriculo->area_atuacao,
-            'telefone' => $curriculo->telefone,
-            'email' => $curriculo->email,
-            'cidade_estado' => $curriculo->cidade_estado,
-            'links' => $curriculo->links ?? [],
-            'resumo' => $curriculo->resumo,
-            'experiencias' => $curriculo->experiencias->toArray(),
-            'formacoes' => $curriculo->formacoes->toArray(),
-            'cursos' => $curriculo->cursos->toArray(),
-            'habilidades' => $curriculo->habilidades->toArray(),
-            'idiomas' => $curriculo->idiomas->toArray(),
-        ];
     }
 
     private function recordMovement(
