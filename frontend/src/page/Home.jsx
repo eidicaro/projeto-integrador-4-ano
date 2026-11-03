@@ -3052,7 +3052,7 @@ function CommandPalette({
               onQueryChange(event.target.value)
             }
             placeholder="Para onde você quer ir?"
-            aria-label="Buscar ação rápida"
+            arial-label="Buscar ação rápida"
             aria-controls="command-results"
             aria-activedescendant={
               highlightedCommand
